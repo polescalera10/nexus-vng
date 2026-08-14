@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SupportPage } from "@/components/layout/SupportPage";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { WaLink } from "@/components/ui/WaLink";
 import { JsonLd, faqLd } from "@/components/seo/JsonLd";
 import { faqGrupos, faqTodas } from "@/content/faq-completa";
@@ -26,6 +27,14 @@ export default function FaqPage() {
       title="Preguntas frecuentes"
       intro={`Las ${faqTodas.length} dudas que más nos llegan por WhatsApp, agrupadas por tema. Si te queda alguna, escríbenos y te la resolvemos en el momento.`}
     >
+      <div className="mb-8">
+        <Breadcrumbs
+          items={[
+            { name: "Inicio", path: "/" },
+            { name: "Preguntas frecuentes", path: "/faq" },
+          ]}
+        />
+      </div>
       <div className="mx-auto max-w-[780px] space-y-[clamp(40px,6vw,64px)]">
         {/* Índice: en una página larga, poder saltar al tema ahorra scroll. */}
         <nav aria-label="Temas de las preguntas frecuentes">

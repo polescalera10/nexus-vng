@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { Evento } from "@/types/database";
 
 const hasSupabaseEnv = () =>
@@ -63,7 +63,7 @@ export async function getEventos(): Promise<Evento[]> {
   if (!hasSupabaseEnv()) return eventosFallback;
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("eventos")
       .select("*")
@@ -87,7 +87,7 @@ export async function getEventoBySlug(slug: string): Promise<Evento | null> {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("eventos")
       .select("*")
@@ -110,4 +110,17 @@ export async function getEventoBySlug(slug: string): Promise<Evento | null> {
 export async function getEventoSlugs(): Promise<string[]> {
   const list = await getEventos();
   return list.map((e) => e.slug).filter((slug): slug is string => !!slug);
+}
+
+/**
+ * Slug + fecha real de última edición, para el `lastmod` del sitemap.
+ * Ver el porqué en `getModalidadesSitemap()`.
+ */
+export async function getEventosSitemap(): Promise<
+  Array<{ slug: string; updatedAt?: string }>
+> {
+  const list = await getEventos();
+  return list
+    .filter((e): e is Evento & { slug: string } => !!e.slug)
+    .map((e) => ({ slug: e.slug, updatedAt: e.updated_at ?? undefined }));
 }

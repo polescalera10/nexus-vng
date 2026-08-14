@@ -14,7 +14,7 @@ export function Header() {
   return (
     <header className="absolute inset-x-0 top-0 z-40">
       <div className="container-nexus flex items-center justify-between py-4 md:py-6">
-        <Logo />
+        <Logo priority />
         <nav className="hidden items-center gap-6 md:flex">
           {NAV_LANDING.map((item) => (
             <Link

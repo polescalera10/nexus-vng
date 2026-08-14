@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SupportPage } from "@/components/layout/SupportPage";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { LeadForm } from "@/components/forms/LeadForm";
 import { WaLink } from "@/components/ui/WaLink";
-import { JsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, ORG_ID } from "@/components/seo/JsonLd";
 import { diasSemana, horarioRegular, sesionesRegulares } from "@/content/horario-regular";
 import { site, WHATSAPP_NUMBER } from "@/lib/site";
 
@@ -50,6 +51,9 @@ const contactoLd = {
   inLanguage: "es-ES",
   mainEntity: {
     "@type": "DanceSchool",
+    // Mismo @id que el bloque global del layout: así esta ficha de contacto
+    // enriquece la entidad existente en vez de declarar una segunda escuela.
+    "@id": ORG_ID,
     name: site.name,
     url: site.url,
     telephone: site.nap.telephoneDisplay,
@@ -96,6 +100,14 @@ export default function ContactoPage() {
       title="Contacto"
       intro="La vía más rápida es WhatsApp: nos cuentas qué quieres bailar y qué días puedes, y te decimos qué grupo encaja. Si lo prefieres, déjanos tus datos y te escribimos nosotros."
     >
+      <div className="mb-8">
+        <Breadcrumbs
+          items={[
+            { name: "Inicio", path: "/" },
+            { name: "Contacto", path: "/contacto" },
+          ]}
+        />
+      </div>
       <div className="grid gap-10 lg:grid-cols-[1fr_1fr]">
         <div className="space-y-8">
           <div>

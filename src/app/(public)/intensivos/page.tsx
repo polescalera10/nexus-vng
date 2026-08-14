@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
 import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
-import { JsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, orgRef } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { site } from "@/lib/site";
 import { intensivos, intensivosGrupos } from "@/content/intensivos";
@@ -98,9 +98,13 @@ function intensivosLd() {
             eventStatus: "https://schema.org/EventScheduled",
             eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
             inLanguage: "es-ES",
-            url: `${site.url}/intensivos`,
+            // URL propia por sesión (ancla a su tarjeta). Las ocho compartían
+            // la del listado, y Google pide una URL distinta por evento para
+            // plantearse siquiera el resultado enriquecido.
+            url: `${site.url}/intensivos#${s.value}`,
+            image: `${site.url}/opengraph-image`,
             location: lugar,
-            organizer: { "@type": "DanceSchool", name: site.name, url: site.url },
+            organizer: orgRef(),
           },
         ];
       }),
@@ -229,8 +233,12 @@ export default function IntensivosPage() {
                   {semana.sesiones.map((s, idx) => (
                     <Reveal
                       key={s.value}
+                      /* El id es el destino del `url` de cada Event en el
+                         JSON-LD: sin ancla propia, las ocho sesiones apuntaban
+                         a la misma URL. */
+                      id={s.value}
                       delay={idx * 0.05}
-                      className="flex gap-4 rounded-lg border border-white/8 bg-bg-base p-5 shadow-soft transition-colors hover:border-neon/30"
+                      className="flex scroll-mt-24 gap-4 rounded-lg border border-white/8 bg-bg-base p-5 shadow-soft transition-colors hover:border-neon/30"
                     >
                       <div className="flex w-14 shrink-0 flex-col items-center rounded-sm bg-bg-elevated px-2 py-2 text-center">
                         <span className="font-body text-[11px] font-bold uppercase tracking-wide text-neon-mint">

@@ -32,15 +32,19 @@ export function Hero() {
       {/* dvh (no vh): en móvil el 100vh cuenta la barra del navegador que se
           repliega, y el CTA quedaba empujado fuera de la pantalla al cargar. */}
       <div className="container-nexus relative z-[2] flex min-h-dvh flex-col justify-end pb-[clamp(56px,9vh,110px)] pt-[110px] md:pt-[140px]">
-        <Reveal className="mb-[22px] inline-flex items-center gap-[9px]">
-          <span className="h-2 w-2 rounded-full bg-neon shadow-neon motion-safe:animate-[dotpulse_1.8s_ease-in-out_infinite]" />
-          <span className="font-body text-xs font-bold uppercase tracking-[0.18em] text-neon-mint">
-            {hero.kicker}
-          </span>
-        </Reveal>
+        {/* El kicker vive DENTRO del h1, no encima.
+            Visualmente no cambia nada, pero el encabezado principal de la home
+            pasa a decir qué es esto y dónde está: el claim solo ("No vienes a
+            una clase...") es buen copy y cero señal para una búsqueda. */}
+        <h1 className="max-w-[16ch] text-balance font-display text-[clamp(48px,8.5vw,108px)] leading-[0.92] tracking-[0.005em] text-white">
+          <Reveal as="span" className="mb-[22px] flex items-center gap-[9px] leading-normal">
+            <span className="h-2 w-2 flex-none rounded-full bg-neon shadow-neon motion-safe:animate-[dotpulse_1.8s_ease-in-out_infinite]" />
+            <span className="font-body text-xs font-bold uppercase tracking-[0.18em] text-neon-mint">
+              {hero.kicker}
+            </span>
+          </Reveal>
 
-        <Reveal as="div" delay={0.08}>
-          <h1 className="max-w-[16ch] text-balance font-display text-[clamp(48px,8.5vw,108px)] leading-[0.92] tracking-[0.005em] text-white">
+          <Reveal as="span" delay={0.08} className="block">
             {lead}
             {highlight && (
               <>
@@ -48,8 +52,8 @@ export function Hero() {
                 <span className="text-gradient-nexus">{highlight}</span>
               </>
             )}
-          </h1>
-        </Reveal>
+          </Reveal>
+        </h1>
 
         <Reveal delay={0.16}>
           <p className="mt-[22px] max-w-[48ch] font-body text-[clamp(16px,1.5vw,20px)] leading-relaxed text-white/85">

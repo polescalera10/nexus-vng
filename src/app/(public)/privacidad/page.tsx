@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Política de privacidad",
-  description: "Política de privacidad de NEXUS VNG.",
+  description: "Qué datos recoge NEXUS VNG cuando escribes o rellenas un formulario, para qué se usan, cuánto se guardan y cómo ejercer tus derechos.",
   alternates: { canonical: "/privacidad" },
 };
 

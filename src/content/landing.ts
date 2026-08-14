@@ -14,7 +14,11 @@
 
 /** Hero — primer impacto + CTA principal a WhatsApp. */
 export const hero = {
-  kicker: "Salsa cubana · Bachata · Vilanova i la Geltrú",
+  // El kicker va DENTRO del <h1> (ver components/landing/Hero.tsx): es la única
+  // forma de que el encabezado principal de la home diga qué es esto y dónde
+  // está sin renunciar al claim de marca, que por sí solo no contiene ninguna
+  // palabra por la que nadie busque.
+  kicker: "Escuela de baile en Vilanova i la Geltrú",
   title: "No vienes a una clase. Entras a una comunidad.",
   subtitle:
     "Empieces donde empieces —de cero absoluto o ya con tablas— aquí encuentras tu grupo, tu ritmo y tu gente.",

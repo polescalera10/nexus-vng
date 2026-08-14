@@ -13,7 +13,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/6 bg-ink/95 backdrop-blur">
       <div className="container-nexus flex items-center justify-between py-3 md:py-4">
-        <Logo size={34} />
+        <Logo size={34} priority />
         <nav className="hidden items-center gap-6 md:flex">
           {NAV_SITE.map((item) => (
             <Link

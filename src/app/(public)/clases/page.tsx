@@ -6,6 +6,8 @@ import { WaLink } from "@/components/ui/WaLink";
 import { HorarioSemanal } from "@/components/landing/HorarioSemanal";
 import { Precios } from "@/components/landing/Precios";
 import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
+import { JsonLd, courseListLd } from "@/components/seo/JsonLd";
 import { cursoRegularGrupos } from "@/content/horario-regular";
 import { getModalidades } from "@/lib/queries/modalidades";
 
@@ -86,6 +88,19 @@ export default async function ClasesPage() {
           </div>
         </section>
 
+        {/* Migas: declaran la jerarquía Inicio → Clases → disciplina, que hasta
+            ahora solo existía en las fichas hijas. */}
+        <div className="bg-bg-base pt-7">
+          <div className="container-nexus">
+            <Breadcrumbs
+              items={[
+                { name: "Inicio", path: "/" },
+                { name: "Clases", path: "/clases" },
+              ]}
+            />
+          </div>
+        </div>
+
         {/* Por qué apuntarse */}
         <section className="bg-bg-base py-[clamp(48px,8vw,88px)]">
           <div className="container-nexus">
@@ -138,11 +153,13 @@ export default async function ClasesPage() {
                       {m.descripcion}
                     </p>
                   </div>
+                  {/* Anchor descriptivo, no "Ver más": el texto del enlace es
+                      de lo poco que le dice a Google de qué va el destino. */}
                   <Link
                     href={`/clases/${m.slug}`}
                     className="font-body text-neon mt-auto inline-flex items-center text-sm font-bold no-underline hover:underline"
                   >
-                    Ver {m.nombre} &rarr;
+                    Clases de {m.nombre.toLowerCase()} &rarr;
                   </Link>
                 </Reveal>
               ))}
@@ -223,6 +240,7 @@ export default async function ClasesPage() {
           </div>
         </section>
       </main>
+      <JsonLd data={courseListLd(modalidades)} />
     </>
   );
 }

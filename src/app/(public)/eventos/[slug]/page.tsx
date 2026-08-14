@@ -7,7 +7,8 @@ import { SetWaPageContext } from "@/components/ui/WaPageContext";
 import { waContextEvento } from "@/lib/wa-page-context";
 import { getEventoBySlug, getEventoSlugs } from "@/lib/queries/eventos";
 import { JsonLd, eventLd } from "@/components/seo/JsonLd";
-import { ogImages } from "@/lib/seo";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
+import { ogImages, metaDescripcion, primeraImagenMarkdown } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -22,12 +23,22 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const e = await getEventoBySlug(slug);
   if (!e) return { title: "Evento no encontrado" };
-  const descSnippet = e.descripcion ? e.descripcion.slice(0, 150).replace(/[#*_[\]]/g, "") + "..." : "";
+
+  const description = metaDescripcion(e.descripcion);
+  // El template del layout raíz ya añade "· NEXUS VNG": poner aquí "Eventos
+  // NEXUS VNG" dejaba la marca dos veces en el mismo title.
+  const title = `${e.titulo} · Eventos`;
+  const imagen = primeraImagenMarkdown(e.descripcion);
+
   return {
-    title: `${e.titulo} · Eventos NEXUS VNG`,
-    description: descSnippet || undefined,
+    title,
+    description: description || undefined,
     alternates: { canonical: `/eventos/${e.slug}` },
-    openGraph: { title: e.titulo, description: descSnippet || undefined, images: ogImages },
+    openGraph: {
+      title: e.titulo,
+      description: description || undefined,
+      images: imagen ? [{ url: imagen }] : ogImages,
+    },
   };
 }
 
@@ -59,6 +70,15 @@ export default async function EventoDetailPage({ params }: Params) {
     >
       {/* Los CTA globales escriben sobre ESTE evento. */}
       <SetWaPageContext {...waContextEvento(e.slug ?? slug, e.titulo)} />
+      <div className="mb-8">
+        <Breadcrumbs
+          items={[
+            { name: "Inicio", path: "/" },
+            { name: "Eventos", path: "/eventos" },
+            { name: e.titulo, path: `/eventos/${e.slug ?? slug}` },
+          ]}
+        />
+      </div>
       <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         {/* Contenido en Markdown */}
         <article className="bg-bg-panel rounded-lg border border-white/8 p-8 shadow-soft">
@@ -92,7 +112,15 @@ export default async function EventoDetailPage({ params }: Params) {
           </div>
         </aside>
       </div>
-      <JsonLd data={eventLd({ titulo: e.titulo, descripcion: e.descripcion, fecha: e.fecha })} />
+      <JsonLd
+        data={eventLd({
+          titulo: e.titulo,
+          descripcion: metaDescripcion(e.descripcion, 300),
+          fecha: e.fecha,
+          slug: e.slug ?? slug,
+          imagen: primeraImagenMarkdown(e.descripcion),
+        })}
+      />
     </SupportPage>
   );
 }

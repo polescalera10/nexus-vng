@@ -16,6 +16,7 @@ import { precios } from "@/content/precios";
 import { profesoresDe } from "@/content/profesores";
 import { ogImages } from "@/lib/seo";
 import { founding } from "@/content/landing";
+import { site } from "@/lib/site";
 
 export const revalidate = 3600;
 
@@ -71,8 +72,12 @@ export default async function ModalidadPage({ params }: Params) {
 
   return (
     <SupportPage
-      eyebrow="Modalidad"
-      title={m.nombre}
+      /* El h1 lleva la consulta completa ("Clases de bachata en Vilanova i la
+         Geltrú"), no solo el nombre del estilo: title, h1 y URL apuntando a lo
+         mismo es la señal on-page más básica y aquí el h1 se la estaba
+         saltando. El nombre corto se mantiene como kicker. */
+      eyebrow={m.nombre}
+      title={`Clases de ${m.nombre.toLowerCase()} en ${site.locality}`}
       intro={contenido?.lead ?? m.descripcion ?? undefined}
     >
       {/* Los CTA globales (sticky, cabecera, footer) escriben sobre ESTA disciplina. */}
@@ -347,6 +352,7 @@ export default async function ModalidadPage({ params }: Params) {
             hora: s.hora,
             nivel: s.nivel ?? (contenido && contenido.estilos.length > 1 ? s.estilo : undefined),
           })),
+          contenido?.aprenderas ?? [],
         )}
       />
     </SupportPage>

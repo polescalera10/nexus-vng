@@ -6,7 +6,8 @@ import { Accordion } from "@/components/ui/Accordion";
 import { Countdown } from "@/components/ui/Countdown";
 import { WaLink } from "@/components/ui/WaLink";
 import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
-import { JsonLd, faqLd } from "@/components/seo/JsonLd";
+import { JsonLd, faqLd, orgRef } from "@/components/seo/JsonLd";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ogImages } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { founding } from "@/content/landing";
@@ -56,7 +57,8 @@ function ofertaFundadoraLd() {
     availability: plazas.left > 0 ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
     inventoryLevel: { "@type": "QuantitativeValue", value: plazas.left, maxValue: plazas.total },
     areaServed: { "@type": "City", name: site.locality },
-    offeredBy: { "@type": "DanceSchool", name: site.name, url: site.url },
+    // Referencia al nodo de la escuela del layout raíz: una entidad, no dos.
+    offeredBy: orgRef(),
   };
 }
 
@@ -68,7 +70,15 @@ export default function SocioFundadorPage() {
         {/* ── Hero de venta: promesa + tarjeta de precio ─────────────── */}
         <section className="bg-bg-panel relative overflow-hidden border-b border-white/6 pt-[clamp(40px,7vw,76px)] pb-[clamp(48px,8vw,88px)]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_90%_at_20%_0%,rgba(113,233,201,.16),transparent_70%)]" />
-          <div className="container-nexus relative z-[1] grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]">
+          <div className="container-nexus relative z-[1]">
+            <Breadcrumbs
+              items={[
+                { name: "Inicio", path: "/" },
+                { name: "Socio fundador", path: "/socio-fundador" },
+              ]}
+            />
+          </div>
+          <div className="container-nexus relative z-[1] mt-6 grid items-center gap-10 lg:grid-cols-[1.15fr_1fr]">
             <div>
               <Reveal
                 as="span"

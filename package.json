@@ -51,6 +51,15 @@
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^3.2.7"
   },
+  "//browserslist": "Next genera un bundle de polyfills (39 KB comprimidos, medidos en producción el 14-08-2026) para navegadores que ya no usa nadie del público de la escuela. Acotando el target, ese chunk casi desaparece. Tailwind v4 ya pide de por sí Safari 16.4+ / Chrome 111+, así que no se pierde compatibilidad real.",
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "firefox >= 111",
+    "safari >= 16.4",
+    "ios_saf >= 16.4",
+    "not dead"
+  ],
   "packageManager": "pnpm@10.33.0",
   "pnpm": {
     "overrides": {

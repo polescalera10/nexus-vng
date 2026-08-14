@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Política de cookies",
-  description: "Política de cookies de NEXUS VNG.",
+  description: "Qué cookies usa nexusvng.es, para qué sirven, cuánto duran y cómo aceptarlas, rechazarlas o cambiar tu decisión cuando quieras.",
   alternates: { canonical: "/cookies" },
 };
 

@@ -69,7 +69,25 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        /**
+         * Área privada fuera del índice por cabecera, no por robots.txt.
+         *
+         * Con `Disallow` Google no rastrea la ruta, pero puede indexar la URL
+         * a pelo si alguien la enlaza (sale en el SERP sin snippet, "no hay
+         * información disponible"). Con `noindex` la lee y la descarta de
+         * verdad. Por eso robots.ts ya no la bloquea.
+         */
+        source: "/area-privada",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/area-privada/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
   },
 };
 

@@ -17,10 +17,21 @@ const inter = Inter({
   display: "swap",
 });
 
+/**
+ * Title de la home: la palabra clave PRIMERO, la marca al final.
+ *
+ * Antes empezaba por "NEXUS VNG —": las nueve primeras posiciones del title,
+ * que es donde más peso tiene, se las llevaba una marca que todavía no tiene
+ * volumen de búsqueda propio. Con "Clases de baile en Vilanova i la Geltrú"
+ * delante se ataca la consulta que sí lo tiene, y la marca sigue visible al
+ * cierre (50 caracteres: no se trunca en el SERP).
+ */
+const homeTitle = `Clases de baile en ${site.locality} · ${site.name}`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — Escuela de baile en Vilanova i la Geltrú`,
+    default: homeTitle,
     template: `%s · ${site.name}`,
   },
   description: site.description,
@@ -28,7 +39,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: site.locale,
     siteName: site.name,
-    title: `${site.name} — Escuela de baile en Vilanova i la Geltrú`,
+    title: homeTitle,
     description: site.description,
     url: site.url,
   },

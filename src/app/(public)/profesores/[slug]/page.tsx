@@ -7,7 +7,7 @@ import { WaLink } from "@/components/ui/WaLink";
 import { SetWaPageContext } from "@/components/ui/WaPageContext";
 import { waContextProfesor } from "@/lib/wa-page-context";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
-import { JsonLd } from "@/components/seo/JsonLd";
+import { JsonLd, orgRef } from "@/components/seo/JsonLd";
 import {
   clasesDe,
   companerosDe,
@@ -46,21 +46,14 @@ function personLd(profe: Profesor) {
     name: profe.nombre,
     url: `${site.url}/profesores/${profe.slug}`,
     image: `${site.url}${profe.foto}`,
-    jobTitle: "Profesor de baile",
+    // Neutro a propósito: el equipo es mixto y la plantilla ponía "Profesor de
+    // baile" también en las fichas de ellas.
+    jobTitle: "Profesor/a de baile",
+    description: profe.claim,
     knowsAbout: modalidadesDe(profe.nombre).map((m) => m.nombre),
-    worksFor: {
-      "@type": "DanceSchool",
-      name: site.name,
-      url: site.url,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: site.nap.streetAddress,
-        addressLocality: site.nap.addressLocality,
-        postalCode: site.nap.postalCode,
-        addressRegion: site.nap.addressRegion,
-        addressCountry: site.nap.addressCountry,
-      },
-    },
+    // Referencia al nodo de la escuela (layout raíz) en vez de repetir la
+    // organización entera: así Google ve una sola entidad, no seis.
+    worksFor: orgRef(),
   };
 }
 
@@ -69,13 +62,26 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const profe = getProfesor(slug);
   if (!profe) return { title: "Página no encontrada" };
 
-  const disciplinas = modalidadesDe(profe.nombre)
-    .map((m) => m.nombre.toLowerCase())
-    .join(", ");
+  const nombres = modalidadesDe(profe.nombre).map((m) => m.nombre.toLowerCase());
+
+  /*
+    Dos arreglos en una: el title deja de decir "Profesor de baile" (la
+    plantilla lo ponía también en las fichas de ellas) y pasa a llevar las
+    disciplinas, que además es lo que alguien busca. Y la descripción se
+    acorta: listar cinco disciplinas se comía los 155 caracteres útiles y el
+    SERP la cortaba (la ficha de Ana Aylén iba a 172).
+  */
+  const cardinal = ["cero", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho"];
+  const disciplinas =
+    nombres.length > 2
+      ? `${cardinal[nombres.length] ?? nombres.length} disciplinas`
+      : nombres.join(" y ") || "clases de baile";
+  const disciplinasTitle =
+    nombres.length > 2 ? "Clases de baile" : `Clases de ${nombres.join(" y ")}`;
 
   return {
-    title: `${profe.nombre} · Profesor de baile`,
-    description: `${profe.nombre} imparte ${disciplinas || "clases de baile"} en NEXUS VNG, ${site.locality}. Sus clases, días y niveles, y cómo reservar una clase de prueba.`,
+    title: `${profe.nombre} · ${nombres.length > 0 ? disciplinasTitle : "Equipo"}`,
+    description: `${profe.nombre} imparte ${disciplinas} en NEXUS VNG, ${site.locality}. Sus clases, días y niveles, y cómo reservar tu clase de prueba.`,
     alternates: { canonical: `/profesores/${profe.slug}` },
     openGraph: {
       title: `${profe.nombre} · NEXUS VNG`,
@@ -95,7 +101,7 @@ export default async function ProfesorPage({ params }: Params) {
   const otros = profesores.filter((p) => p.slug !== profe.slug);
 
   return (
-    <SupportPage eyebrow="Profesor" title={profe.nombre} intro={profe.claim}>
+    <SupportPage eyebrow="Equipo NEXUS VNG" title={profe.nombre} intro={profe.claim}>
       {/* Los CTA globales escriben sobre ESTE profe. */}
       <SetWaPageContext {...waContextProfesor(profe.slug, profe.nombre)} />
       <div className="space-y-[clamp(48px,7vw,80px)]">

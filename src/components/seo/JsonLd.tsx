@@ -52,11 +52,27 @@ export function JsonLd({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+/**
+ * Identificador único de la escuela como entidad.
+ *
+ * El bloque `DanceSchool` se repite en las 56 páginas (va en el layout raíz).
+ * Sin `@id`, cada página declara una organización distinta y Google no las
+ * consolida en una sola entidad. Con `@id`, el resto de bloques de la misma
+ * página (`provider` del curso, `organizer` del evento, `worksFor` del
+ * profesor, `offeredBy` de la oferta) se limitan a apuntar aquí en vez de
+ * repetir el objeto entero.
+ */
+export const ORG_ID = `${site.url}/#organization`;
+
+/** Referencia al nodo de la escuela. Solo resuelve si `localBusinessLd()` está en la misma página — lo está, vía layout raíz. */
+export const orgRef = () => ({ "@id": ORG_ID });
+
 /** Schema.org LocalBusiness — global (footer / home). */
 export function localBusinessLd() {
   return {
     "@context": "https://schema.org",
     "@type": "DanceSchool",
+    "@id": ORG_ID,
     name: site.name,
     description: site.description,
     url: site.url,
@@ -73,9 +89,11 @@ export function localBusinessLd() {
     // Foto real del equipo: Google la usa en el panel de conocimiento y en el
     // resultado local. Absoluta, como exige schema.org.
     image: `${site.url}/images/equipo-nexus.png`,
+    logo: `${site.url}/images/nexus-logo.png`,
     sameAs: [site.social.instagram, site.social.tiktok].filter(Boolean),
-    // Rango de precio derivado del modelo real (35–100 €/mes), no inventado.
-    priceRange: `${precios.base}–${precios.flat} €/${precios.periodo}`,
+    // Rango de precio derivado del modelo real (35-100 €/mes), no inventado.
+    // Guion simple, no raya tipográfica: algunos validadores no la digieren.
+    priceRange: `${precios.base}-${precios.flat} €/${precios.periodo}`,
     currenciesAccepted: "EUR",
     areaServed: [
       { "@type": "City", name: "Vilanova i la Geltrú" },
@@ -115,17 +133,27 @@ export function courseLd(
   descripcion: string,
   slug: string,
   sesiones: Array<{ dia: string; hora: string; nivel?: string }> = [],
+  /** Contenidos reales de la clase ("En clase aprenderás"), para `teaches`. */
+  aprenderas: string[] = [],
 ) {
-  const provider = { "@type": "DanceSchool", name: site.name, sameAs: site.url };
+  // Niveles que existen de verdad en el cartel de esta disciplina.
+  const niveles = [...new Set(sesiones.map((s) => s.nivel).filter(Boolean))] as string[];
 
   return {
     "@context": "https://schema.org",
     "@type": "Course",
-    name: nombre,
+    "@id": `${site.url}/clases/${slug}#course`,
+    name: `Clases de ${nombre.toLowerCase()} en ${site.locality}`,
     description: descripcion,
     url: `${site.url}/clases/${slug}`,
     inLanguage: "es-ES",
-    provider,
+    about: nombre,
+    image: `${site.url}/opengraph-image`,
+    // Lo que se aprende, tal cual está escrito en la página: nada nuevo que
+    // mantener sincronizado a mano.
+    teaches: aprenderas.length > 0 ? aprenderas : undefined,
+    educationalLevel: niveles.length > 0 ? niveles : undefined,
+    provider: orgRef(),
     offers: {
       "@type": "Offer",
       category: "Subscription",
@@ -161,12 +189,29 @@ export function courseLd(
   };
 }
 
-/** Schema.org Event — /eventos. */
+/**
+ * Schema.org Event — /eventos/[slug].
+ *
+ * `url` apunta a la ficha del evento, no al listado: Google pide una URL
+ * propia por evento para plantearse el resultado enriquecido. `image` sale de
+ * la primera imagen del propio Markdown de la ficha (si la hay), así que no
+ * hay que mantener una lista aparte.
+ */
 export function eventLd(e: {
   titulo: string;
   descripcion?: string | null;
   fecha: string;
+  slug?: string | null;
+  /** Imagen destacada del evento (ruta absoluta o relativa al dominio). */
+  imagen?: string | null;
 }) {
+  const url = e.slug ? `${site.url}/eventos/${e.slug}` : `${site.url}/eventos`;
+  const imagen = e.imagen
+    ? e.imagen.startsWith("http")
+      ? e.imagen
+      : `${site.url}${e.imagen}`
+    : `${site.url}/opengraph-image`;
+
   return {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -174,16 +219,44 @@ export function eventLd(e: {
     description: e.descripcion ?? undefined,
     startDate: e.fecha,
     eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    inLanguage: "es-ES",
+    url,
+    image: imagen,
     location: {
       "@type": "Place",
-      name: site.name,
+      name: `${site.name} · ${site.nap.venue}`,
       address: {
         "@type": "PostalAddress",
+        streetAddress: site.nap.streetAddress || undefined,
         addressLocality: site.nap.addressLocality,
+        addressRegion: site.nap.addressRegion,
+        postalCode: site.nap.postalCode,
         addressCountry: site.nap.addressCountry,
       },
     },
-    organizer: { "@type": "Organization", name: site.name, url: site.url },
+    organizer: orgRef(),
+  };
+}
+
+/**
+ * Schema.org ItemList de los cursos — /clases.
+ *
+ * Es lo que declara que esa página es el catálogo (y la vía para el carrusel
+ * de cursos en el SERP). Cada elemento apunta por `@id` a la ficha, que es
+ * donde vive el `Course` completo.
+ */
+export function courseListLd(modalidades: Array<{ slug: string; nombre: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `Clases de baile en ${site.locality}`,
+    itemListElement: modalidades.map((m, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${site.url}/clases/${m.slug}`,
+      name: `Clases de ${m.nombre.toLowerCase()} en ${site.locality}`,
+    })),
   };
 }
 

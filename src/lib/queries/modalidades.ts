@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { modalidadesFallback } from "@/content/landing";
 import type { Modalidad } from "@/types/database";
 
@@ -15,7 +15,7 @@ export async function getModalidades(): Promise<ModalidadCard[]> {
   if (!hasSupabaseEnv()) return modalidadesFallback;
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("modalidades")
       .select("slug, nombre, descripcion")
@@ -35,7 +35,7 @@ export async function getModalidadBySlug(slug: string): Promise<ModalidadCard | 
     return modalidadesFallback.find((m) => m.slug === slug) ?? null;
   }
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("modalidades")
       .select("slug, nombre, descripcion")
@@ -52,4 +52,34 @@ export async function getModalidadBySlug(slug: string): Promise<ModalidadCard | 
 export async function getModalidadSlugs(): Promise<string[]> {
   const list = await getModalidades();
   return list.map((m) => m.slug);
+}
+
+/**
+ * Slug + fecha real de última edición, para el `lastmod` del sitemap.
+ *
+ * Google solo hace caso de `lastmod` si le parece fiable; si todas las URLs
+ * llevan la fecha del build, deja de usarlo. Cuando no hay BD (o la fila no
+ * trae fecha) se devuelve `undefined` y el sitemap cae a la fecha declarada a
+ * mano para esa sección.
+ */
+export async function getModalidadesSitemap(): Promise<
+  Array<{ slug: string; updatedAt?: string }>
+> {
+  if (!hasSupabaseEnv()) return modalidadesFallback.map((m) => ({ slug: m.slug }));
+
+  try {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("modalidades")
+      .select("slug, updated_at")
+      .eq("activo", true)
+      .order("orden", { ascending: true });
+
+    if (error || !data || data.length === 0) {
+      return modalidadesFallback.map((m) => ({ slug: m.slug }));
+    }
+    return data.map((m) => ({ slug: m.slug, updatedAt: m.updated_at ?? undefined }));
+  } catch {
+    return modalidadesFallback.map((m) => ({ slug: m.slug }));
+  }
 }

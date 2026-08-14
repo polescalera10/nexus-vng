@@ -286,7 +286,7 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
 
   "lady-style": {
     lead:
-      "Técnica, presencia y estilo propio. Lady Style es la clase donde puedes trabajar tu forma de bailar — brazos, caderas, giros y esa seguridad que se ve desde lejos.",
+      "Técnica, presencia y estilo propio. Lady Style es la clase para trabajar tu forma de bailar: brazos, caderas, giros y seguridad que se ve desde lejos.",
     queEsTitle: "¿Qué es Lady Style?",
     queEs: [
       "Lady Style es una clase de técnica y estilo individual: se trabaja sin pareja, frente al espejo, puliendo todo lo que hace que un baile se vea bonito — la postura, las líneas de brazos, el movimiento de cadera, los giros y la actitud.",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SupportPage } from "@/components/layout/SupportPage";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { WaLink } from "@/components/ui/WaLink";
 import {
   diasSemana,
@@ -14,7 +15,7 @@ import { precios } from "@/content/precios";
 export const metadata: Metadata = {
   title: "Sobre nosotros",
   description:
-    "NEXUS VNG es la escuela de baile del gimnasio Aranha en Vilanova i la Geltrú: ocho disciplinas, grupos por nivel real y una comunidad que sigue fuera de clase.",
+    "La escuela de baile del gimnasio Aranha en Vilanova i la Geltrú: ocho disciplinas, grupos por nivel real y una comunidad que sigue fuera de clase.",
   alternates: { canonical: "/sobre-nosotros" },
 };
 
@@ -32,6 +33,14 @@ export default function SobreNosotrosPage() {
       title="Más que una escuela, una comunidad"
       intro="Dentro del gimnasio Aranha de Vilanova i la Geltrú, con marca propia y un público distinto: calidez, pertenencia y baile."
     >
+      <div className="mb-8">
+        <Breadcrumbs
+          items={[
+            { name: "Inicio", path: "/" },
+            { name: "Sobre nosotros", path: "/sobre-nosotros" },
+          ]}
+        />
+      </div>
       <div className="max-w-[68ch] space-y-[clamp(36px,5vw,52px)]">
         <section className="space-y-4">
           <h2 className="font-display text-text-strong text-[clamp(26px,3.6vw,38px)]">

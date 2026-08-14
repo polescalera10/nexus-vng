@@ -16,7 +16,7 @@ export default function CampanasLayout({ children }: { children: React.ReactNode
   return (
     <div className="bg-ink">
       <header className="container-nexus flex items-center py-5">
-        <Logo size={28} />
+        <Logo size={28} priority />
       </header>
       {children}
       <CampanaFooter />

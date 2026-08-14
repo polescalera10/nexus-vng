@@ -10,7 +10,7 @@ import type { Evento } from "@/types/database";
 
 export const metadata: Metadata = {
   title: "Eventos de Baile",
-  description: "Fiestas, masterclasses y socials de NEXUS VNG en Vilanova i la Geltrú.",
+  description: "Fiestas, masterclasses y socials de NEXUS VNG en Vilanova i la Geltrú: las citas donde se practica lo de clase y se conoce al resto de la comunidad.",
   alternates: { canonical: "/eventos" },
 };
 

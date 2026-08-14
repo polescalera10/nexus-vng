@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Aviso legal",
-  description: "Aviso legal de NEXUS VNG.",
+  description: "Titularidad del sitio, condiciones de uso y responsabilidad de NEXUS VNG, escuela de baile en Vilanova i la Geltrú.",
   alternates: { canonical: "/aviso-legal" },
 };
 

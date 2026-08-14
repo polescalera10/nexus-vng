@@ -1,13 +1,31 @@
 import type { MetadataRoute } from "next";
 import { site } from "@/lib/site";
-import { listCampanaParams } from "@/content/campanas";
+import { ultimaActualizacion } from "@/content/actualizaciones";
 import { listProfesorSlugs } from "@/content/profesores";
-import { getModalidadSlugs } from "@/lib/queries/modalidades";
-import { getEventoSlugs } from "@/lib/queries/eventos";
+import { getModalidadesSitemap } from "@/lib/queries/modalidades";
+import { getEventosSitemap } from "@/lib/queries/eventos";
 
+/**
+ * Sitemap: SOLO URLs canónicas e indexables.
+ *
+ * Dos decisiones que conviene no revertir sin pensarlo:
+ *
+ * 1. Las 30 landings de campaña (/l/[icp]/[dolor]) NO están aquí. Se abrieron
+ *    a orgánico el 01-08-2026 y la auditoría SEO del 14-08-2026 mostró el
+ *    resultado: 94 % de similitud de texto entre ellas, misma plantilla, 0
+ *    enlaces internos y más de la mitad de las URLs indexables del dominio.
+ *    Es el patrón de contenido escalado / doorway que el sistema de contenido
+ *    útil penaliza a nivel de SITIO, no de página. Vuelven a `noindex` (ver
+ *    (campanas)/l/[icp]/[dolor]/page.tsx) y salen del sitemap: incluir una URL
+ *    con `noindex` es mandar dos señales contradictorias.
+ *
+ * 2. Sin `changefreq` ni `priority`: Google los ignora desde hace años. El
+ *    `lastmod` sí lo usa, pero solo si es creíble — por eso sale de fechas
+ *    reales (`content/actualizaciones.ts` y `updated_at` de Supabase) y no de
+ *    la fecha del build.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = site.url;
-  const now = new Date();
 
   const staticPaths = [
     "",
@@ -25,44 +43,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/cookies",
   ];
 
-  const modalidades = await getModalidadSlugs();
+  const modalidades = await getModalidadesSitemap();
   // Fichas de evento: misma fuente que /eventos y /eventos/[slug]
   // (Supabase con fallback estático), así el sitemap nunca se desincroniza.
-  const eventos = await getEventoSlugs();
+  const eventos = await getEventosSitemap();
 
   return [
     ...staticPaths.map((path) => ({
       url: `${base}${path}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: path === "" ? 1 : 0.7,
+      lastModified: ultimaActualizacion(path),
     })),
-    ...modalidades.map((slug) => ({
+    ...modalidades.map(({ slug, updatedAt }) => ({
       url: `${base}/clases/${slug}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
+      lastModified: updatedAt ? new Date(updatedAt) : ultimaActualizacion("/clases"),
     })),
     ...listProfesorSlugs().map((slug) => ({
       url: `${base}/profesores/${slug}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
+      lastModified: ultimaActualizacion("/profesores"),
     })),
-    ...eventos.map((slug) => ({
+    ...eventos.map(({ slug, updatedAt }) => ({
       url: `${base}/eventos/${slug}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    })),
-    // Landings de campaña por dolor de ICP. Nacieron para tráfico de pago y
-    // estaban en noindex; se abren a orgánico por decisión de Pol (01-08-2026).
-    // Prioridad por debajo de las páginas del sitio: son long tail.
-    ...listCampanaParams().map(({ icp, dolor }) => ({
-      url: `${base}/l/${icp}/${dolor}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
+      lastModified: updatedAt ? new Date(updatedAt) : ultimaActualizacion("/eventos"),
     })),
   ];
 }

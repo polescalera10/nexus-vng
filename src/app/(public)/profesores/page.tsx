@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { SupportPage } from "@/components/layout/SupportPage";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
 import { clasesDe, modalidadesDe, profesores } from "@/content/profesores";
@@ -67,6 +68,14 @@ export default function ProfesoresPage() {
       title="Los profesores con los que vas a bailar"
       intro="Cinco personas, ocho disciplinas y grupos por nivel real. Mira quién da qué, qué día lo da, y escribe directamente a quien te encaje."
     >
+      <div className="mb-8">
+        <Breadcrumbs
+          items={[
+            { name: "Inicio", path: "/" },
+            { name: "Profesores", path: "/profesores" },
+          ]}
+        />
+      </div>
       <div className="space-y-[clamp(64px,10vw,120px)]">
         {/* Bandas alternas, una por profesor: la foto manda y al lado va lo que
             el alumno necesita para decidir — qué baila, cuándo y cómo escribirle. */}

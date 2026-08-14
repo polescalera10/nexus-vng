@@ -1,4 +1,7 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "//": "regions: París. El público es de Vilanova; con el origen por defecto (iad1, Washington) cada petición no cacheada cruzaba el Atlántico — TTFB de ~600 ms medido el 14-08-2026. Con ISR la mayoría de visitas ni tocan la función, pero los formularios y la primera petición tras cada revalidación sí.",
+  "regions": ["cdg1"],
   "crons": [
     {
       "path": "/api/cron/keep-alive",

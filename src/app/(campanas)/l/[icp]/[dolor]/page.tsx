@@ -33,8 +33,29 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: c.metaTitle,
     description: c.metaDescription,
     // Canónica propia OBLIGATORIA: sin ella heredan la del layout raíz ("/") y
-    // Google descartaría las 30 landings en favor de la home.
+    // Google descartaría las 30 landings en favor de la home. Se mantiene
+    // autorreferencial aun con `noindex`: canonicalizarlas a /clases mandaría
+    // dos señales contradictorias.
     alternates: { canonical: `/l/${icp}/${dolor}` },
+    /**
+     * FUERA DEL ÍNDICE, dentro de las campañas.
+     *
+     * Estas 30 páginas nacieron para tráfico de pago; en agosto de 2026 se
+     * abrieron a orgánico y la auditoría del 14-08-2026 midió el resultado:
+     * 0,94 de similitud media de texto entre ellas (misma plantilla, mismos 4
+     * H2, mismo bloque de FAQ), 0 enlaces internos entrantes y el 54 % de las
+     * URLs indexables del dominio. Es contenido escalado de bajo valor, y ese
+     * castigo lo aplica Google al sitio entero: arrastraba a las páginas que
+     * sí valen (/clases/*).
+     *
+     * `follow` a propósito: siguen repartiendo su autoridad hacia el sitio.
+     * NO bloquearlas en robots.txt — si no se pueden rastrear, no se puede
+     * leer este `noindex` y se quedarían indexadas sin remedio.
+     *
+     * Para volver a orgánico hay que hacerlas únicas de verdad (consolidar en
+     * 5-6 páginas con contenido propio), no quitar esta línea.
+     */
+    robots: { index: false, follow: true },
     openGraph: { title: c.metaTitle, description: c.metaDescription, images: ogImages },
   };
 }
