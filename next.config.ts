@@ -53,6 +53,14 @@ const securityHeaders = [
   { key: "Content-Security-Policy-Report-Only", value: csp },
 ];
 
+/**
+ * Nota sobre `vercel.json`: lleva `regions: ["cdg1"]` (París). El origen por
+ * defecto era `iad1` (Washington) y el público es de Vilanova: cada petición
+ * no cacheada cruzaba el Atlántico — TTFB de ~600 ms medido el 14-08-2026.
+ * La explicación va aquí porque `vercel.json` es JSON estricto: Vercel valida
+ * el fichero contra su esquema y rechaza cualquier clave que no conozca, así
+ * que no admite ni siquiera un "//" a modo de comentario.
+ */
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // No anunciar el framework a los escáneres automáticos (cabecera X-Powered-By).
