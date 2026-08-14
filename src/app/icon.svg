@@ -1,0 +1,28 @@
+<!--
+  Icono de marca NEXUS: la "N" del logo sobre el negro de marca.
+
+  Esta es la FUENTE vectorial del set de iconos: favicon.ico, apple-icon.png y
+  public/icons/*.png se generan a partir de esta misma geometria. Si cambia el
+  glifo, cambiarlo aqui primero.
+
+  Colores: espejo de los tokens de color de globals.css (ink, neon-lime,
+  neon-mint, neon); aqui no hay hoja de estilos que resolver. Degradado
+  vertical lime (arriba) a cian (abajo), igual que el logo.
+
+  Ojo: en un comentario XML no puede aparecer un guion doble, por eso los
+  tokens se citan por nombre y no con su prefijo de variable CSS.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="nexus" x1="0" y1="8.32" x2="0" y2="55.68" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b5f6af" />
+      <stop offset="0.55" stop-color="#71e9c9" />
+      <stop offset="1" stop-color="#30e4ec" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="11.52" ry="11.52" fill="#0a0a0a" />
+  <path
+    fill="url(#nexus)"
+    d="M20.16 8.32 H30.816 L34.368 31.384 V8.32 H43.84 V55.68 H34.368 V52.128 L29.632 30.011 V55.68 H20.16 Z"
+  />
+</svg>
