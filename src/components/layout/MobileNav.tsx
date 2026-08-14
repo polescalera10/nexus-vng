@@ -140,7 +140,7 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
             </nav>
 
             <div className="container-nexus mt-auto pt-10">
-              <WaLink origin="nav" variant="red" className="w-full px-6 py-4 text-base">
+              <WaLink origin="nav" contextual variant="red" className="w-full px-6 py-4 text-base">
                 Reserva tu clase de prueba
               </WaLink>
             </div>

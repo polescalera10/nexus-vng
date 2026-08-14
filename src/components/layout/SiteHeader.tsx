@@ -27,6 +27,7 @@ export function SiteHeader() {
         </nav>
         <WaLink
           origin="nav"
+          contextual
           variant="outline"
           showGlyph={false}
           className="hidden min-h-11 px-[18px] py-[9px] text-[13px] font-semibold md:inline-flex"

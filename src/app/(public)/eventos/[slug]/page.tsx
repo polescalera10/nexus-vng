@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { SupportPage } from "@/components/layout/SupportPage";
 import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
 import { WaLink } from "@/components/ui/WaLink";
+import { SetWaPageContext } from "@/components/ui/WaPageContext";
+import { waContextEvento } from "@/lib/wa-page-context";
 import { getEventoBySlug, getEventoSlugs } from "@/lib/queries/eventos";
 import { JsonLd, eventLd } from "@/components/seo/JsonLd";
 import { ogImages } from "@/lib/seo";
@@ -55,6 +57,8 @@ export default async function EventoDetailPage({ params }: Params) {
       title={e.titulo}
       intro={fullDateTimeString}
     >
+      {/* Los CTA globales escriben sobre ESTE evento. */}
+      <SetWaPageContext {...waContextEvento(e.slug ?? slug, e.titulo)} />
       <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         {/* Contenido en Markdown */}
         <article className="bg-bg-panel rounded-lg border border-white/8 p-8 shadow-soft">
@@ -69,8 +73,8 @@ export default async function EventoDetailPage({ params }: Params) {
               Reserva tu plaza o consúltanos cualquier duda sobre este evento directamente por WhatsApp. Te responderemos encantados de inmediato.
             </p>
             <WaLink
-              origin="evento"
-              extra={`"${e.titulo}"`}
+              origin="pagina"
+              contextual
               variant="red"
               className="mt-6 w-full py-[15px] text-sm"
             >

@@ -283,7 +283,7 @@ export default function IntensivosPage() {
               <Reveal delay={0.12}>
                 <p className="font-body text-sm text-text-muted">
                   ¿Prefieres preguntar antes?{" "}
-                  <WaLink origin="nav" variant="outline" showGlyph={false} className="px-4 py-2 text-sm">
+                  <WaLink origin="pagina" contextual variant="outline" showGlyph={false} className="px-4 py-2 text-sm">
                     Escríbenos por WhatsApp
                   </WaLink>
                 </p>

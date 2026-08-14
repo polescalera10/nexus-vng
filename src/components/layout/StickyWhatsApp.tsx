@@ -2,15 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { trackWhatsAppClick } from "@/lib/analytics";
-import { buildWaLink } from "@/lib/whatsapp";
+import { buildWaLinkFromText } from "@/lib/whatsapp";
+import { useWaPageContext } from "@/components/ui/WaPageContext";
 import { WaGlyph } from "@/components/ui/WaGlyph";
 
 /**
  * Botón WhatsApp sticky, siempre accesible en móvil.
  * Aparece tras pasar el hero (>560px de scroll) deslizándose desde abajo.
+ *
+ * Está en el layout de toda la web pública, así que es el CTA que más se
+ * pulsa desde páginas distintas: el mensaje sale del contexto de la página
+ * (intensivos, una modalidad concreta, un evento…), no de un texto fijo.
  */
 export function StickyWhatsApp() {
   const [shown, setShown] = useState(false);
+  const page = useWaPageContext();
 
   useEffect(() => {
     const onScroll = () => setShown((window.scrollY || window.pageYOffset || 0) > 560);
@@ -25,10 +31,10 @@ export function StickyWhatsApp() {
       style={{ transform: shown ? "translateY(0)" : "translateY(140%)" }}
     >
       <a
-        href={buildWaLink("sticky")}
+        href={buildWaLinkFromText(page.message)}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => trackWhatsAppClick("sticky")}
+        onClick={() => trackWhatsAppClick("sticky", page.label)}
         className="pointer-events-auto relative flex max-w-full items-center justify-center gap-[11px] rounded-full bg-neon px-6 py-4 text-center font-body text-sm font-bold text-ink no-underline shadow-neon sm:px-7 sm:text-[15px]"
       >
         <span

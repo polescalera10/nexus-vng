@@ -196,7 +196,8 @@ export default async function ClasesPage() {
                 <p className="font-body text-text-muted text-sm">
                   ¿Prefieres preguntar antes?{" "}
                   <WaLink
-                    origin="nav"
+                    origin="pagina"
+                    contextual
                     variant="outline"
                     showGlyph={false}
                     className="px-4 py-2 text-sm"

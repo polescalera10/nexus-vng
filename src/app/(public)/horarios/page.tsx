@@ -90,7 +90,7 @@ export default function HorariosPage() {
               Dinos qué días puedes y qué te apetece bailar, y te decimos qué grupos de la parrilla
               encajan con tu agenda.
             </p>
-            <WaLink origin="nav" variant="red" className="mt-4 w-full py-[15px]">
+            <WaLink origin="pagina" contextual variant="red" className="mt-4 w-full py-[15px]">
               Consultar horarios
             </WaLink>
             <p className="font-body text-text-faint mt-3 text-[13px]">

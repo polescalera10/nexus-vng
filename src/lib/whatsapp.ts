@@ -15,7 +15,9 @@ export type WaOrigin =
   | "profesor"
   | "contacto"
   | "evento"
-  | "campana";
+  | "campana"
+  /** CTA de sección dentro de una página; el mensaje lo pone el contexto de ruta. */
+  | "pagina";
 
 const MESSAGES: Record<WaOrigin, string> = {
   hero: "¡Hola! Me gustaría info de la clase de prueba de baile 🙂",
@@ -32,6 +34,9 @@ const MESSAGES: Record<WaOrigin, string> = {
   // Sin base: las landings de campaña (src/content/campanas/) pasan su mensaje
   // completo propio por dolor vía `extra` — ver buildWaLink más abajo.
   campana: "",
+  // Fallback: los CTA con `contextual` no leen de aquí, su texto sale de
+  // `wa-page-context.ts` según la página que se esté mirando.
+  pagina: "¡Hola! Me gustaría más información sobre las clases de NEXUS VNG 🙂",
 };
 
 /**
@@ -69,5 +74,14 @@ export function buildLeadWaLink(phone: string, nombre?: string): string | null {
 export function buildWaLink(origin: WaOrigin, extra?: string): string {
   const base = MESSAGES[origin];
   const text = extra ? (base ? `${base} ${extra} 💃` : extra) : base;
+  return buildWaLinkFromText(text);
+}
+
+/**
+ * Enlace a WhatsApp con un mensaje ya redactado entero. Lo usan los CTA
+ * contextuales, cuyo texto depende de la página (ver `lib/wa-page-context.ts`)
+ * y no del origen del bloque.
+ */
+export function buildWaLinkFromText(text: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }

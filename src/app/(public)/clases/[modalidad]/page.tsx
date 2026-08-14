@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { SupportPage } from "@/components/layout/SupportPage";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
+import { SetWaPageContext } from "@/components/ui/WaPageContext";
+import { waContextModalidad } from "@/lib/wa-page-context";
 import { JsonLd, courseLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { getModalidades, getModalidadBySlug, getModalidadSlugs } from "@/lib/queries/modalidades";
@@ -73,6 +75,8 @@ export default async function ModalidadPage({ params }: Params) {
       title={m.nombre}
       intro={contenido?.lead ?? m.descripcion ?? undefined}
     >
+      {/* Los CTA globales (sticky, cabecera, footer) escriben sobre ESTA disciplina. */}
+      <SetWaPageContext {...waContextModalidad(m.slug, m.nombre)} />
       <Breadcrumbs
         items={[
           { name: "Inicio", path: "/" },
@@ -211,7 +215,7 @@ export default async function ModalidadPage({ params }: Params) {
                 <p className="relative mt-3 max-w-[65ch] font-body text-[15px] leading-relaxed text-white/85">
                   {contenido.paraTi}
                 </p>
-                <WaLink origin="modalidad" extra={`de ${m.nombre}`} variant="red" className="relative mt-6 min-h-12 px-7 py-[15px]">
+                <WaLink origin="pagina" contextual variant="red" className="relative mt-6 min-h-12 px-7 py-[15px]">
                   Probar una clase de {m.nombre}
                 </WaLink>
               </Reveal>
@@ -298,7 +302,7 @@ export default async function ModalidadPage({ params }: Params) {
               Reserva tu primera clase de prueba. Escríbenos y te asignamos el grupo ideal para tu
               nivel.
             </p>
-            <WaLink origin="modalidad" extra={`de ${m.nombre}`} variant="red" className="mt-4 min-h-12 w-full py-[15px]">
+            <WaLink origin="pagina" contextual variant="red" className="mt-4 min-h-12 w-full py-[15px]">
               Probar {m.nombre}
             </WaLink>
             <p className="mt-4 border-t border-white/8 pt-4 font-body text-[13px] leading-relaxed text-text-muted">

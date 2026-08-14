@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SupportPage } from "@/components/layout/SupportPage";
 import { WaLink } from "@/components/ui/WaLink";
+import { SetWaPageContext } from "@/components/ui/WaPageContext";
+import { waContextProfesor } from "@/lib/wa-page-context";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -94,6 +96,8 @@ export default async function ProfesorPage({ params }: Params) {
 
   return (
     <SupportPage eyebrow="Profesor" title={profe.nombre} intro={profe.claim}>
+      {/* Los CTA globales escriben sobre ESTE profe. */}
+      <SetWaPageContext {...waContextProfesor(profe.slug, profe.nombre)} />
       <div className="space-y-[clamp(48px,7vw,80px)]">
         <Breadcrumbs
           items={[
@@ -205,7 +209,7 @@ export default async function ProfesorPage({ params }: Params) {
                 Escríbenos y te decimos en qué grupo de {profe.nombre} encajas mejor según tu nivel
                 y tu disponibilidad.
               </p>
-              <WaLink origin="contacto" variant="red" className="mt-4 w-full py-[15px]">
+              <WaLink origin="pagina" contextual variant="red" className="mt-4 w-full py-[15px]">
                 Reservar clase de prueba
               </WaLink>
             </div>

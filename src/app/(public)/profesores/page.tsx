@@ -244,7 +244,7 @@ export default function ProfesoresPage() {
               proponemos el grupo y el profe que mejor te encajan.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <WaLink origin="nav" variant="red" className="min-h-12 px-7 py-[15px]">
+              <WaLink origin="pagina" contextual variant="red" className="min-h-12 px-7 py-[15px]">
                 Que nos encarguemos nosotros
               </WaLink>
               <Link

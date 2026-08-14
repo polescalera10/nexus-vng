@@ -98,7 +98,7 @@ export function Footer() {
                 TikTok
               </a>
             )}
-            <WaTrackedLink origin="footer" className={PILL}>
+            <WaTrackedLink origin="footer" contextual className={PILL}>
               WhatsApp
             </WaTrackedLink>
           </div>

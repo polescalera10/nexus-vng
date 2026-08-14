@@ -145,7 +145,7 @@ export default function SobreNosotrosPage() {
             Si quieres comprobar todo lo de arriba, no hace falta que nos creas: ven a probar y velo
             por ti mismo.
           </p>
-          <WaLink origin="contacto" variant="red" className="mt-2 px-7 py-[15px]">
+          <WaLink origin="pagina" contextual variant="red" className="mt-2 px-7 py-[15px]">
             Reservar clase de prueba
           </WaLink>
         </section>

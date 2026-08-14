@@ -84,7 +84,7 @@ export default function FaqPage() {
         ))}
 
         <div className="flex flex-col items-center gap-3">
-          <WaLink origin="contacto" variant="red" className="px-7 py-[15px]">
+          <WaLink origin="pagina" contextual variant="red" className="px-7 py-[15px]">
             Tengo otra duda
           </WaLink>
           <p className="font-body text-text-faint text-center text-[13px]">
