@@ -80,6 +80,19 @@
     opacity: 0;
   }
 }
+/* Entrada de `RevealEager`: mismos valores que el Reveal de Framer Motion
+   (fade + 30px de subida, 0.8s, misma curva) pero en CSS puro, para que el
+   contenido above-the-fold se pinte sin esperar a la hidratación. */
+@keyframes revealin {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 @keyframes dotpulse {
   0%,
   100% {
@@ -146,6 +159,13 @@
   max-width: var(--container-nexus);
   margin-inline: auto;
   padding-inline: clamp(20px, 5vw, 56px);
+}
+
+/* Entrada sin JS para el contenido visible al cargar (ver `RevealEager`).
+   Con prefers-reduced-motion la regla global de @layer base la deja en
+   0.001ms, así que el elemento aparece directamente en su estado final. */
+@utility reveal-in {
+  animation: revealin 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 /* Texto con el degradado del logo (titulares destacados, cifras). */

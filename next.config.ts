@@ -26,7 +26,12 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  "upgrade-insecure-requests",
+  // OJO: `upgrade-insecure-requests` va aquí SOLO cuando la cabecera deje de
+  // ser Report-Only. En report-only el navegador lo ignora y además escupe un
+  // error en consola ("...is ignored when delivered in a report-only policy"),
+  // que Lighthouse cuenta como error de navegador (Prácticas recomendadas 96,
+  // 15-08-2026). Mientras tanto no se pierde nada: HSTS con preload ya fuerza
+  // https en todo el dominio.
 ].join("; ");
 
 /**
@@ -75,6 +80,17 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "1mb",
     },
+    /**
+     * Mete el CSS en un <style> del HTML en vez de servirlo como <link>.
+     *
+     * El bundle entero son 14,8 KiB y era la única petición que bloqueaba el
+     * render: PageSpeed móvil lo cifraba en 110 ms de la ruta crítica
+     * (15-08-2026). Al ir dentro del HTML desaparece esa ida y vuelta.
+     *
+     * Contrapartida: el CSS deja de cachearse por separado entre páginas. Con
+     * 14,8 KiB compensa; si el CSS creciera mucho, reevaluar.
+     */
+    inlineCss: true,
   },
   async headers() {
     return [

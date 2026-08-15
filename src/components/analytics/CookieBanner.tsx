@@ -40,7 +40,14 @@ export function CookieBanner() {
         <p className="font-body text-text-body flex-1 text-[13px] leading-relaxed sm:text-sm">
           Usamos cookies de análisis (Google Analytics) para entender qué partes de la web
           funcionan y mejorarlas. Solo se activan si las aceptas.{" "}
-          <Link href="/cookies" className="text-neon font-semibold underline underline-offset-2">
+          {/* aria-label: "Más información" a secas no dice a dónde lleva —
+              Lighthouse lo marca como enlace sin texto descriptivo (SEO 92,
+              15-08-2026). El texto visible no cambia. */}
+          <Link
+            href="/cookies"
+            aria-label="Más información sobre la política de cookies"
+            className="text-neon font-semibold underline underline-offset-2"
+          >
             Más información
           </Link>
           .

@@ -1,5 +1,5 @@
 import { Header } from "@/components/layout/Header";
-import { Reveal } from "@/components/ui/Reveal";
+import { RevealEager } from "@/components/ui/RevealEager";
 import { WaLink } from "@/components/ui/WaLink";
 import { hero } from "@/content/landing";
 
@@ -36,15 +36,17 @@ export function Hero() {
             Visualmente no cambia nada, pero el encabezado principal de la home
             pasa a decir qué es esto y dónde está: el claim solo ("No vienes a
             una clase...") es buen copy y cero señal para una búsqueda. */}
+        {/* RevealEager (CSS) y no Reveal (Framer Motion): esto es el bloque LCP
+            y con motion no se pintaba hasta hidratar. Misma animación exacta. */}
         <h1 className="max-w-[16ch] text-balance font-display text-[clamp(48px,8.5vw,108px)] leading-[0.92] tracking-[0.005em] text-white">
-          <Reveal as="span" className="mb-[22px] flex items-center gap-[9px] leading-normal">
+          <RevealEager as="span" className="mb-[22px] flex items-center gap-[9px] leading-normal">
             <span className="h-2 w-2 flex-none rounded-full bg-neon shadow-neon motion-safe:animate-[dotpulse_1.8s_ease-in-out_infinite]" />
             <span className="font-body text-xs font-bold uppercase tracking-[0.18em] text-neon-mint">
               {hero.kicker}
             </span>
-          </Reveal>
+          </RevealEager>
 
-          <Reveal as="span" delay={0.08} className="block">
+          <RevealEager as="span" delay={0.08} className="block">
             {lead}
             {highlight && (
               <>
@@ -52,21 +54,24 @@ export function Hero() {
                 <span className="text-gradient-nexus">{highlight}</span>
               </>
             )}
-          </Reveal>
+          </RevealEager>
         </h1>
 
-        <Reveal delay={0.16}>
+        <RevealEager delay={0.16}>
           <p className="mt-[22px] max-w-[48ch] font-body text-[clamp(16px,1.5vw,20px)] leading-relaxed text-white/85">
             {hero.subtitle}
           </p>
-        </Reveal>
+        </RevealEager>
 
-        <Reveal delay={0.24} className="mt-[30px] flex flex-wrap items-center gap-x-[22px] gap-y-4">
+        <RevealEager
+          delay={0.24}
+          className="mt-[30px] flex flex-wrap items-center gap-x-[22px] gap-y-4"
+        >
           <WaLink origin="hero" variant="red" className="px-7 py-[18px] text-base">
             {hero.cta}
           </WaLink>
           <span className="font-body text-sm text-white/70">{hero.ctaNote}</span>
-        </Reveal>
+        </RevealEager>
       </div>
     </section>
   );

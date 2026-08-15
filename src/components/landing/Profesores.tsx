@@ -12,12 +12,16 @@ export function Profesores() {
             {/* Recorte con fondo transparente: object-contain sobre el panel, no
                 cover — recortarlo cortaría cabezas en móvil. */}
             <div className="bg-bg-elevated relative overflow-hidden rounded-xl">
+              {/* `sizes`: el grid son 2 columnas dentro de container-nexus (máx.
+                  1180px), así que por encima de 1180px la imagen nunca pasa de
+                  ~590px. Con "50vw" a secas el navegador pedía la variante de
+                  750px para pintarla a 507px (PageSpeed, 15-08-2026). */}
               <Image
                 src="/images/equipo-nexus.png"
                 alt="El equipo de profesores de NEXUS VNG"
                 width={921}
                 height={568}
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1180px) 50vw, 590px"
                 className="h-auto w-full object-contain"
               />
             </div>
