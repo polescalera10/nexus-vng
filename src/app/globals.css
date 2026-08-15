@@ -168,6 +168,47 @@
   animation: revealin 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+/* Estado previo de `Reveal`: el bloque espera oculto a entrar en pantalla.
+   Es exactamente el `initial` que ponía Framer Motion. */
+@utility reveal-pending {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+/* Apertura del panel de `MobileNav` (antes el `initial`/`animate` de Framer). */
+@keyframes panelin {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility panel-in {
+  animation: panelin 0.24s ease-out both;
+}
+
+/* Variante SOLO desplazamiento, sin fundido, para el titular del hero.
+   Chrome descarta como candidato a LCP cualquier elemento que se pinte con
+   `opacity: 0`, y no lo vuelve a considerar aunque después se haga visible.
+   Con el fundido puesto, el <h1> (el elemento más grande de la pantalla)
+   quedaba fuera y el LCP se lo llevaba el logo de 72×34 px, que depende de
+   /_next/image y de la hidratación: LCP 4,5 s en móvil. Sin `opacity` el
+   titular cuenta desde el primer pintado. El movimiento es el mismo. */
+@keyframes revealslide {
+  from {
+    transform: translateY(30px);
+  }
+  to {
+    transform: none;
+  }
+}
+@utility reveal-slide {
+  animation: revealslide 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 /* Texto con el degradado del logo (titulares destacados, cifras). */
 @utility text-gradient-nexus {
   background: linear-gradient(

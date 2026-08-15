@@ -46,7 +46,7 @@ export function Hero() {
             </span>
           </RevealEager>
 
-          <RevealEager as="span" delay={0.08} className="block">
+          <RevealEager as="span" delay={0.08} lcp className="block">
             {lead}
             {highlight && (
               <>

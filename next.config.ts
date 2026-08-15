@@ -81,16 +81,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "1mb",
     },
     /**
-     * Mete el CSS en un <style> del HTML en vez de servirlo como <link>.
-     *
-     * El bundle entero son 14,8 KiB y era la única petición que bloqueaba el
-     * render: PageSpeed móvil lo cifraba en 110 ms de la ruta crítica
-     * (15-08-2026). Al ir dentro del HTML desaparece esa ida y vuelta.
-     *
-     * Contrapartida: el CSS deja de cachearse por separado entre páginas. Con
-     * 14,8 KiB compensa; si el CSS creciera mucho, reevaluar.
+     * NO activar. Mete el CSS en un <style> del HTML en vez de servirlo como
+     * <link>, lo que ahorra una petición que bloquea el render (110 ms según
+     * Lighthouse) — pero probado en producción el 15-08-2026 salió mucho peor:
+     * el HTML pasó de 18,7 KiB a 38,9 KiB y el FCP en móvil de 0,9 s a 2,6 s.
+     * El documento es lo primero que se descarga y engordarlo al doble retrasa
+     * el primer pintado más de lo que ahorra la petición que se quita.
      */
-    inlineCss: true,
+    inlineCss: false,
   },
   async headers() {
     return [

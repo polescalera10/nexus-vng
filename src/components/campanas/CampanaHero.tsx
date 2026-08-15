@@ -24,7 +24,7 @@ export function CampanaHero({
       <div className="container-nexus relative z-[1] flex flex-col items-start py-[clamp(56px,13vw,110px)]">
         {/* RevealEager (CSS), no Reveal: el h1 es el LCP de la campaña y con
             Framer Motion no se pinta hasta que hidrata. Misma animación. */}
-        <RevealEager>
+        <RevealEager lcp>
           <h1 className="max-w-[18ch] text-balance font-display text-[clamp(36px,9vw,64px)] leading-[0.96] text-white">
             {headline}
           </h1>

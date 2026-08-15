@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { WaLink } from "@/components/ui/WaLink";
 import type { NavLink } from "@/components/layout/nav-items";
 
@@ -32,7 +31,6 @@ function MenuIcon({ open }: { open: boolean }) {
 export function MobileNav({ items }: { items: readonly NavLink[] }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const reduce = useReducedMotion();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -105,22 +103,20 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
         <MenuIcon open={open} />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key="mobile-nav"
-            id={PANEL_ID}
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menú principal"
-            data-testid="mobile-nav-panel"
-            initial={reduce ? { opacity: 0 } : { opacity: 0, y: -12 }}
-            animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -12 }}
-            transition={{ duration: 0.24, ease: "easeOut" }}
-            className="fixed inset-0 z-[65] flex flex-col overflow-y-auto bg-ink/98 pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] backdrop-blur-lg"
-          >
+      {/* La apertura se anima en CSS (`panel-in`). El cierre es inmediato: con
+          Framer había además un fundido de salida de 240 ms, pero mantener el
+          panel montado para animarlo al cerrar obliga a una máquina de estados
+          que no compensa por 240 ms de fundido. */}
+      {open && (
+        <div
+          id={PANEL_ID}
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menú principal"
+          data-testid="mobile-nav-panel"
+          className="panel-in fixed inset-0 z-[65] flex flex-col overflow-y-auto bg-ink/98 pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] backdrop-blur-lg"
+        >
             <nav className="container-nexus flex flex-col">
               {items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -144,9 +140,8 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
                 Reserva tu clase de prueba
               </WaLink>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

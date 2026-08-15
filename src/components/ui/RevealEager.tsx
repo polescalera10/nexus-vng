@@ -7,6 +7,12 @@ type RevealEagerProps = {
   /** Retardo en segundos (para escalonar hermanos), igual que en `Reveal`. */
   delay?: number;
   as?: Tag;
+  /**
+   * `true` en el elemento LCP (el titular del hero): sube igual pero SIN
+   * fundido, porque Chrome descarta del LCP todo lo que se pinta con
+   * `opacity: 0`. Ver el comentario de `reveal-slide` en globals.css.
+   */
+  lcp?: boolean;
   className?: string;
   style?: CSSProperties;
 };
@@ -31,12 +37,15 @@ export function RevealEager({
   children,
   delay = 0,
   as: Tag = "div",
+  lcp = false,
   className,
   style,
 }: RevealEagerProps) {
+  const base = lcp ? "reveal-slide" : "reveal-in";
+
   return (
     <Tag
-      className={className ? `reveal-in ${className}` : "reveal-in"}
+      className={className ? `${base} ${className}` : base}
       style={delay ? { ...style, animationDelay: `${delay}s` } : style}
     >
       {children}
