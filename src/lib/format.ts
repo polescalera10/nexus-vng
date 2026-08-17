@@ -37,6 +37,30 @@ export function formatDate(iso: string): string {
   });
 }
 
+/** 40 → "40 €" (sin decimales salvo que los haya). */
+export function formatEuros(amount: number): string {
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+  }).format(amount);
+}
+
+/**
+ * Fecha de hoy (YYYY-MM-DD) en la zona horaria de la escuela.
+ * En Vercel el servidor corre en UTC: a partir de las 02:00 de Madrid en
+ * verano, `new Date().toISOString()` ya daría el día anterior/siguiente.
+ */
+export function todayInMadrid(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Madrid",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
 /**
  * Timestamp ISO → tiempo relativo corto ("hace 5 min", "ayer", "hace 3 d").
  * A partir de 7 días cae a fecha absoluta. `now` es inyectable para tests.

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 export type NavIconName =
   | "home"
   | "leads"
+  | "intensivos"
   | "students"
   | "courses"
   | "teachers"
@@ -33,6 +34,7 @@ function NavIcon({ name }: { name: NavIconName }) {
         <path d="M4 13.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4.5M4 13.5 6.5 5h11L20 13.5M4 13.5h5l1 2h4l1-2h5" />
       </>
     ),
+    intensivos: <path d="M13 3 5 13.5h5.5L11 21l8-10.5h-5.5L13 3Z" />,
     students: (
       <>
         <circle cx="9" cy="8" r="3.2" />

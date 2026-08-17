@@ -29,6 +29,9 @@ export type WhatsappEventType =
   | "broadcast";
 export type WhatsappEventStatus = "pendiente" | "enviado" | "error";
 
+// ── Intensivos (migración 0024) ──────────────────────────────────────────────
+export type MetodoPago = "efectivo" | "bizum" | "tarjeta" | "otro";
+
 type Timestamps = { created_at: string; updated_at: string };
 
 export type Modalidad = {
@@ -172,6 +175,28 @@ export type WhatsappEvent = {
 }
 
 /**
+ * Marca de asistencia y cobro de una sesión de intensivo (migración 0024).
+ * `lead_id` nulo = alta en puerta (no venía del formulario de la web).
+ */
+export type IntensivoRegistro = {
+  id: string;
+  /** Slug de la sesión en `src/content/intensivos.ts`. */
+  sesion: string;
+  lead_id: string | null;
+  nombre: string;
+  telefono: string | null;
+  email: string | null;
+  asistio: boolean;
+  pagado: boolean;
+  /** Numeric(6,2): PostgREST lo devuelve como número. */
+  importe: number;
+  metodo_pago: MetodoPago | null;
+  nota: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
  * Forma mínima que esperan los clientes `@supabase/ssr`.
  * Solo se tipan a fondo las tablas que la web pública/scaffold consultan;
  * el resto quedan permisivas hasta generar los tipos contra la BD real.
@@ -249,6 +274,15 @@ export interface Database {
         Row: WhatsappEvent;
         Insert: Omit<WhatsappEvent, "id" | "created_at"> & Partial<WhatsappEvent>;
         Update: Partial<WhatsappEvent>;
+        Relationships: [];
+      };
+      intensivo_registros: {
+        Row: IntensivoRegistro;
+        // Casi todas las columnas tienen default en Postgres (migración 0024):
+        // obligatorias solo `sesion` y `nombre`.
+        Insert: Pick<IntensivoRegistro, "sesion" | "nombre"> &
+          Partial<IntensivoRegistro>;
+        Update: Partial<IntensivoRegistro>;
         Relationships: [];
       };
     };

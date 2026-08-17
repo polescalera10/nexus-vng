@@ -11,6 +11,8 @@ export type IntensivoSesion = {
   value: string;
   dia: string; // "Lun 17"
   fecha: string; // "17 agosto"
+  /** Fecha real de la sesión (YYYY-MM-DD). Ordena el panel de asistencia. */
+  fechaIso: string;
   estilo: string; // "Salsa"
   nivel?: string; // "Nivel 2"
   profes: string; // "Ana y Pol"
@@ -35,6 +37,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-salsa-lun17",
         dia: "Lun 17",
+        fechaIso: "2026-08-17",
         fecha: "17 agosto",
         estilo: "Salsa",
         nivel: "Nivel 2",
@@ -45,6 +48,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-bachata-lady-mar18",
         dia: "Mar 18",
+        fechaIso: "2026-08-18",
         fecha: "18 agosto",
         estilo: "Bachata Lady",
         profes: "Martina",
@@ -54,6 +58,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-reparto-mie19",
         dia: "Mié 19",
+        fechaIso: "2026-08-19",
         fecha: "19 agosto",
         estilo: "Reparto",
         profes: "Ana",
@@ -63,6 +68,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-bachata-jue20",
         dia: "Jue 20",
+        fechaIso: "2026-08-20",
         fecha: "20 agosto",
         estilo: "Bachata",
         nivel: "Nivel 0",
@@ -79,6 +85,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-heels-lun24",
         dia: "Lun 24",
+        fechaIso: "2026-08-24",
         fecha: "24 agosto",
         estilo: "Heels",
         profes: "Yuri",
@@ -88,6 +95,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-salsa-mar25",
         dia: "Mar 25",
+        fechaIso: "2026-08-25",
         fecha: "25 agosto",
         estilo: "Salsa",
         nivel: "Nivel 0",
@@ -98,6 +106,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-lady-salsa-mie26",
         dia: "Mié 26",
+        fechaIso: "2026-08-26",
         fecha: "26 agosto",
         estilo: "Lady Salsa",
         profes: "Ana",
@@ -107,6 +116,7 @@ export const intensivos: IntensivoSemana[] = [
       {
         value: "intensivo-bachata-jue27",
         dia: "Jue 27",
+        fechaIso: "2026-08-27",
         fecha: "27 agosto",
         estilo: "Bachata",
         nivel: "Nivel 2",
@@ -117,6 +127,27 @@ export const intensivos: IntensivoSemana[] = [
     ],
   },
 ];
+
+/** Precio por persona y sesión, en euros. Pago en puerta. */
+export const INTENSIVO_PRECIO = 20;
+
+/**
+ * Las 8 sesiones en una sola lista, ordenadas por fecha.
+ * La usa el panel de asistencia (`/area-privada/admin/intensivos`).
+ */
+export const intensivoSesiones: (IntensivoSesion & { semana: string })[] = intensivos
+  .flatMap((semana) => semana.sesiones.map((s) => ({ ...s, semana: semana.label })))
+  .sort((a, b) => a.fechaIso.localeCompare(b.fechaIso));
+
+/** Sesión por slug, o `undefined` si el slug no existe en el cartel. */
+export function getIntensivoSesion(value: string) {
+  return intensivoSesiones.find((s) => s.value === value);
+}
+
+/** Nombre legible de una sesión: "Salsa (Nivel 2)". */
+export function intensivoTitulo(s: IntensivoSesion): string {
+  return `${s.estilo}${s.nivel ? ` (${s.nivel})` : ""}`;
+}
 
 /** Opciones para el formulario de intereses (agrupadas por semana). */
 export const intensivosGrupos = intensivos.map((semana) => ({
