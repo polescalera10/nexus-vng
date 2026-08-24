@@ -41,6 +41,35 @@ describe("MobileNav", () => {
     }
   });
 
+  it("monta el panel en <body>, fuera de la cabecera", async () => {
+    // El panel es `fixed inset-0`, y `backdrop-filter`/`filter`/`transform` en
+    // un ancestro lo convertirían en bloque contenedor: el menú abriría con la
+    // altura de la cabecera (bug del 24-08-2026: 128 px, ~1/6 de la pantalla).
+    // El portal a <body> es lo que garantiza que `inset-0` sea el viewport.
+    const user = userEvent.setup();
+    const { container } = render(<MobileNav items={NAV_SITE} />);
+
+    await user.click(screen.getByRole("button", { name: "Abrir menú" }));
+
+    const panel = await screen.findByRole("dialog");
+    expect(panel.parentElement).toBe(document.body);
+    expect(container.contains(panel)).toBe(false);
+  });
+
+  it("el panel se declara a pantalla completa y desplazable", async () => {
+    const user = userEvent.setup();
+    render(<MobileNav items={NAV_SITE} />);
+
+    await user.click(screen.getByRole("button", { name: "Abrir menú" }));
+
+    const panel = await screen.findByRole("dialog");
+    // `fixed inset-0` = viewport entero; `overflow-y-auto` = si algún día no
+    // caben todos los enlaces, se llega a ellos desplazando.
+    expect(panel.className).toContain("fixed");
+    expect(panel.className).toContain("inset-0");
+    expect(panel.className).toContain("overflow-y-auto");
+  });
+
   it("incluye el CTA de WhatsApp dentro del panel", async () => {
     const user = userEvent.setup();
     render(<MobileNav items={NAV_SITE} />);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { WaLink } from "@/components/ui/WaLink";
@@ -27,12 +28,28 @@ function MenuIcon({ open }: { open: boolean }) {
  * completa con los enlaces del sitio y el CTA de WhatsApp. Accesible:
  * `aria-expanded`/`aria-controls`, cierre con Escape devolviendo el foco al
  * botón, foco atrapado dentro del panel y bloqueo del scroll de fondo.
+ *
+ * El panel se monta en `document.body` con un portal, no dentro de la
+ * cabecera. Motivo (bug del 24-08-2026): `SiteHeader` lleva `backdrop-blur`,
+ * y `backdrop-filter` convierte al elemento en bloque contenedor de sus
+ * descendientes `position: fixed`. El `inset-0` del panel se resolvía contra
+ * la cabecera en vez de contra el viewport, así que en las páginas de soporte
+ * el menú abría con 128 px de alto (~1/6 de la pantalla) y los enlaces
+ * quedaban recortados. Con el portal el panel cuelga de `<body>` y ningún
+ * `transform`/`filter`/`backdrop-filter` que se añada por encima puede
+ * volver a encogerlo.
  */
 export function MobileNav({ items }: { items: readonly NavLink[] }) {
   const [open, setOpen] = useState(false);
+  // El portal solo existe en cliente: en SSR no hay `document.body`.
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -43,6 +60,19 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  // Al cruzar a escritorio el panel deja de pintarse (md:hidden): si siguiera
+  // "abierto" el bloqueo de scroll del body se quedaría pegado.
+  useEffect(() => {
+    if (!open) return;
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const onChange = () => {
+      if (desktop.matches) setOpen(false);
+    };
+    onChange();
+    desktop.addEventListener("change", onChange);
+    return () => desktop.removeEventListener("change", onChange);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -98,7 +128,7 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
         aria-controls={PANEL_ID}
         aria-label={open ? "Cerrar menú" : "Abrir menú"}
         data-testid="mobile-nav-toggle"
-        className="relative z-[70] -mr-2 flex size-11 items-center justify-center rounded-sm text-white transition-colors hover:text-neon"
+        className="hover:text-neon relative z-[70] -mr-2 flex size-11 items-center justify-center rounded-sm text-white transition-colors"
       >
         <MenuIcon open={open} />
       </button>
@@ -107,16 +137,18 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
           Framer había además un fundido de salida de 240 ms, pero mantener el
           panel montado para animarlo al cerrar obliga a una máquina de estados
           que no compensa por 240 ms de fundido. */}
-      {open && (
-        <div
-          id={PANEL_ID}
-          ref={panelRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menú principal"
-          data-testid="mobile-nav-panel"
-          className="panel-in fixed inset-0 z-[65] flex flex-col overflow-y-auto bg-ink/98 pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] backdrop-blur-lg"
-        >
+      {open &&
+        mounted &&
+        createPortal(
+          <div
+            id={PANEL_ID}
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú principal"
+            data-testid="mobile-nav-panel"
+            className="panel-in bg-ink/98 fixed inset-0 z-[65] flex flex-col overflow-y-auto pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] backdrop-blur-lg md:hidden"
+          >
             <nav className="container-nexus flex flex-col">
               {items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -125,8 +157,8 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
                     key={item.href}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    className={`flex min-h-14 items-center border-b border-white/8 font-display text-2xl uppercase tracking-[0.01em] no-underline transition-colors ${
-                      active ? "text-neon" : "text-white hover:text-neon"
+                    className={`font-display flex min-h-14 items-center border-b border-white/8 text-2xl tracking-[0.01em] uppercase no-underline transition-colors ${
+                      active ? "text-neon" : "hover:text-neon text-white"
                     }`}
                   >
                     {item.label}
@@ -140,8 +172,9 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
                 Reserva tu clase de prueba
               </WaLink>
             </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
