@@ -8,6 +8,8 @@ import {
   intensivoTitulo,
   getIntensivoSesion,
   INTENSIVO_PRECIO,
+  INTENSIVO_ULTIMA_FECHA,
+  intensivoFinalizado,
 } from "@/content/intensivos";
 import { formatEuros, todayInMadrid } from "@/lib/format";
 
@@ -143,6 +145,39 @@ describe("todayInMadrid", () => {
   });
 
   it("devuelve el formato YYYY-MM-DD", () => {
+    expect(todayInMadrid()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe("intensivoFinalizado", () => {
+  it("la última fecha se deriva de las sesiones, no está escrita a mano", () => {
+    const fechas = intensivoSesiones.map((s) => s.fechaIso);
+    expect(INTENSIVO_ULTIMA_FECHA).toBe([...fechas].sort().at(-1));
+  });
+
+  it("no da por terminada la edición el mismo día de la última sesión", () => {
+    // La sesión es de 19:30 a 21:30: ese día todavía se puede reservar.
+    expect(intensivoFinalizado(INTENSIVO_ULTIMA_FECHA)).toBe(false);
+  });
+
+  it("sigue abierta durante la edición", () => {
+    for (const s of intensivoSesiones) {
+      expect(intensivoFinalizado(s.fechaIso)).toBe(false);
+    }
+  });
+
+  it("cierra a partir del día siguiente a la última sesión", () => {
+    const dia = new Date(`${INTENSIVO_ULTIMA_FECHA}T12:00:00Z`);
+    dia.setUTCDate(dia.getUTCDate() + 1);
+    expect(intensivoFinalizado(dia.toISOString().slice(0, 10))).toBe(true);
+  });
+
+  it("compara como fecha, no como texto suelto: un año después sigue cerrada", () => {
+    const [y, m, d] = INTENSIVO_ULTIMA_FECHA.split("-");
+    expect(intensivoFinalizado(`${Number(y) + 1}-${m}-${d}`)).toBe(true);
+  });
+
+  it("todayInMadrid devuelve un ISO comparable con las fechas del cartel", () => {
     expect(todayInMadrid()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

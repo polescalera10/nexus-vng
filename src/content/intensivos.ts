@@ -158,3 +158,25 @@ export const intensivosGrupos = intensivos.map((semana) => ({
     hint: `${s.dia} · ${s.hora}`,
   })),
 }));
+
+/**
+ * Fecha de la última sesión del cartel (YYYY-MM-DD).
+ * Se deriva de las sesiones, así que al cambiar de edición no hay que tocarla.
+ */
+export const INTENSIVO_ULTIMA_FECHA =
+  intensivoSesiones[intensivoSesiones.length - 1]?.fechaIso ?? "";
+
+/**
+ * ¿Ha terminado ya la edición? Se compara en formato ISO (YYYY-MM-DD), que
+ * ordena lexicográficamente, con la fecha de Madrid — no la del servidor, que
+ * en Vercel es UTC.
+ *
+ * La página de intensivos se queda publicada como archivo de lo que se hizo,
+ * pero cuando esto es `true` el formulario de reserva desaparece y en su lugar
+ * se ofrece el curso regular: no se puede seguir recogiendo reservas de unas
+ * sesiones que ya han pasado.
+ */
+export function intensivoFinalizado(hoyIso: string): boolean {
+  if (!INTENSIVO_ULTIMA_FECHA) return false;
+  return hoyIso > INTENSIVO_ULTIMA_FECHA;
+}

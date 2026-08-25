@@ -6,7 +6,16 @@ import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
 import { JsonLd, orgRef } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { site } from "@/lib/site";
-import { intensivos, intensivosGrupos } from "@/content/intensivos";
+import Link from "next/link";
+import { intensivos, intensivosGrupos, intensivoFinalizado } from "@/content/intensivos";
+import { todayInMadrid } from "@/lib/format";
+
+/**
+ * La página se prerenderiza. Sin revalidación, `todayInMadrid()` se quedaría
+ * congelado en el momento del build y el formulario seguiría vivo para siempre
+ * tras la última sesión. Una hora es de sobra para un corte por día.
+ */
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   // ≤60 caracteres contando el sufijo " · NEXUS VNG" de la plantilla del layout.
@@ -134,6 +143,8 @@ const beneficios = [
 ];
 
 export default function IntensivosPage() {
+  const finalizado = intensivoFinalizado(todayInMadrid());
+
   return (
     <>
       <SiteHeader />
@@ -168,15 +179,31 @@ export default function IntensivosPage() {
             </Reveal>
             <Reveal delay={0.18}>
               <div className="mt-7 flex flex-wrap items-center gap-4">
-                <a
-                  href="#reservar"
-                  className="inline-flex items-center justify-center rounded-md bg-neon px-7 py-[15px] font-body text-base font-bold text-ink shadow-neon transition-transform duration-200 hover:-translate-y-0.5 no-underline"
-                >
-                  Reservar mi plaza
-                </a>
-                <span className="font-body text-sm text-white/60">
-                  Plazas limitadas por aforo de sala.
-                </span>
+                {finalizado ? (
+                  <>
+                    <Link
+                      href="/clases"
+                      className="inline-flex items-center justify-center rounded-md bg-neon px-7 py-[15px] font-body text-base font-bold text-ink shadow-neon transition-transform duration-200 hover:-translate-y-0.5 no-underline"
+                    >
+                      Ver el curso regular
+                    </Link>
+                    <span className="font-body text-sm text-white/60">
+                      Esta edición ya ha terminado.
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <a
+                      href="#reservar"
+                      className="inline-flex items-center justify-center rounded-md bg-neon px-7 py-[15px] font-body text-base font-bold text-ink shadow-neon transition-transform duration-200 hover:-translate-y-0.5 no-underline"
+                    >
+                      Reservar mi plaza
+                    </a>
+                    <span className="font-body text-sm text-white/60">
+                      Plazas limitadas por aforo de sala.
+                    </span>
+                  </>
+                )}
               </div>
             </Reveal>
           </div>
@@ -273,6 +300,43 @@ export default function IntensivosPage() {
         </section>
 
         {/* Formulario */}
+        {/*
+          Terminada la edición, la página se queda publicada como archivo de lo
+          que se hizo, pero el formulario desaparece: seguir recogiendo reservas
+          de sesiones pasadas sería vender algo que ya no existe. En su lugar,
+          el curso regular.
+        */}
+        {finalizado ? (
+          <section id="reservar" className="scroll-mt-24 bg-bg-base py-[clamp(48px,8vw,96px)]">
+            <div className="container-nexus max-w-[62ch]">
+              <Reveal>
+                <h2 className="font-display text-[clamp(30px,4.5vw,48px)] leading-tight text-text-strong">
+                  Esta edición ya ha terminado
+                </h2>
+              </Reveal>
+              <Reveal delay={0.06}>
+                <p className="mt-5 font-body text-base leading-relaxed text-text-muted">
+                  Los intensivos de agosto de 2026 ya se han impartido, así que la reserva
+                  está cerrada. Si te has quedado con ganas, el curso regular sigue abierto:
+                  mismos estilos y mismos profes, cada semana.
+                </p>
+              </Reveal>
+              <Reveal delay={0.12}>
+                <div className="mt-7 flex flex-wrap items-center gap-4">
+                  <Link
+                    href="/clases"
+                    className="inline-flex min-h-11 items-center justify-center rounded-md bg-neon px-7 py-[15px] font-body text-base font-bold text-ink shadow-neon transition-transform duration-200 hover:-translate-y-0.5 no-underline"
+                  >
+                    Apuntarme al curso regular
+                  </Link>
+                  <WaLink origin="pagina" contextual variant="outline" showGlyph={false} className="px-4 py-2 text-sm">
+                    Avísame de la próxima edición
+                  </WaLink>
+                </div>
+              </Reveal>
+            </div>
+          </section>
+        ) : (
         <section id="reservar" className="scroll-mt-24 bg-bg-base py-[clamp(48px,8vw,96px)]">
           <div className="container-nexus grid gap-10 lg:grid-cols-[1fr_1.1fr]">
             <div className="space-y-5">
@@ -307,6 +371,7 @@ export default function IntensivosPage() {
             </Reveal>
           </div>
         </section>
+        )}
 
         <JsonLd data={intensivosLd()} />
       </main>
