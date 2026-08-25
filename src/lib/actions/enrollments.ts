@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { formatTime, WEEKDAYS } from "@/lib/format";
+import { isAdminSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { enrollmentSchema } from "@/lib/validation/enrollment";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -30,20 +31,6 @@ const ROLE_LABEL: Record<EnrollmentRole, string> = {
   follower: "followers",
 };
 
-async function isAdmin(): Promise<boolean> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  return profile?.role === "admin";
-}
 
 function revalidateCourse(courseId: string) {
   revalidatePath("/area-privada/admin/cursos");
@@ -75,7 +62,7 @@ export async function enrollStudent(
   _prev: EnrollFormState,
   formData: FormData,
 ): Promise<EnrollFormState> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para matricular alumnos." };
   }
 
@@ -187,7 +174,7 @@ export async function updateEnrollmentStatus(
   enrollmentId: string,
   status: Extract<InscripcionEstado, "activa" | "pausada" | "baja">,
 ): Promise<EnrollmentActionResult> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para editar matrículas." };
   }
 
@@ -220,7 +207,7 @@ export async function updateEnrollmentStatus(
 export async function promoteFromWaitlist(
   enrollmentId: string,
 ): Promise<EnrollmentActionResult> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para editar matrículas." };
   }
 

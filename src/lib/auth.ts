@@ -27,6 +27,19 @@ export async function getSessionRole(): Promise<UserRole | null> {
 }
 
 /**
+ * ¿La sesión actual es de un admin?
+ *
+ * Atajo sobre `getSessionRole` para las Server Actions, que devuelven un
+ * estado en vez de redirigir. Existía copiado a mano en `courses.ts`,
+ * `enrollments.ts` y `whatsapp-events.ts` (tres `isAdmin()` privados idénticos
+ * que releían `profiles` por su cuenta): tres sitios donde tocar el día que
+ * cambie el modelo de permisos, y tres sitios donde olvidarse de uno.
+ */
+export async function isAdminSession(): Promise<boolean> {
+  return (await getSessionRole()) === "admin";
+}
+
+/**
  * Garantiza sesión + rol en una página protegida del área privada.
  * Sin sesión → login. Rol distinto → su propio panel.
  * Devuelve { user, role } cuando el acceso es válido.

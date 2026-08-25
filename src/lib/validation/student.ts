@@ -18,10 +18,26 @@ export const studentSchema = z.object({
     .string()
     .trim()
     .regex(E164_REGEX, "Formato internacional, p. ej. +34600000000"),
+  /**
+   * Obligatorio: es la identidad con la que el alumno entra al área privada
+   * (magic link). La columna sigue admitiendo null en BD para las fichas
+   * históricas dadas de alta antes de que existiera el acceso.
+   */
   email: z
     .string()
     .trim()
+    .toLowerCase()
     .email("Email no válido")
+    .max(254, "Email demasiado largo"),
+  /** ISO `YYYY-MM-DD`. Alimenta la felicitación automática. */
+  birthday: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha no válida")
+    .refine((v) => {
+      const d = new Date(`${v}T00:00:00Z`);
+      return !Number.isNaN(d.getTime()) && d < new Date() && d.getUTCFullYear() > 1900;
+    }, "Fecha no válida")
     .optional()
     .or(z.literal("")),
   dance_role: z.enum(danceRoles, {

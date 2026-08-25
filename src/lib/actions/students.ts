@@ -46,6 +46,7 @@ function readStudentForm(formData: FormData) {
     full_name: formData.get("full_name"),
     phone: formData.get("phone"),
     email: formData.get("email") ?? "",
+    birthday: formData.get("birthday") ?? "",
     dance_role: formData.get("dance_role"),
     nivel_id: formData.get("nivel_id") ?? "",
     partner_id: formData.get("partner_id") ?? "",
@@ -61,7 +62,8 @@ function toRow(data: StudentInput) {
   return {
     full_name: data.full_name,
     phone: data.phone,
-    email: data.email || null,
+    email: data.email,
+    birthday: data.birthday || null,
     dance_role: data.dance_role,
     nivel_id: data.nivel_id || null,
     partner_id: data.partner_id || null,

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { isAdminSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
 
@@ -25,20 +26,6 @@ const WHATSAPP_PATH = "/area-privada/admin/whatsapp";
 const INACTIVOS_PATH = "/area-privada/admin/alumnos/inactivos";
 
 /** true si el usuario logueado es admin (defensa además de la RLS). */
-async function isAdmin(): Promise<boolean> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  return profile?.role === "admin";
-}
 
 /* ── Avisos individuales ───────────────────────────────────────────────────── */
 
@@ -46,7 +33,7 @@ async function isAdmin(): Promise<boolean> {
 export async function sendCuotaPendiente(
   studentId: string,
 ): Promise<WhatsappActionResult> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { ok: false, message: "No tienes permisos para enviar avisos." };
   }
 
@@ -76,7 +63,7 @@ export async function sendCuotaPendiente(
 export async function sendAlumnoInactivo(
   studentId: string,
 ): Promise<WhatsappActionResult> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { ok: false, message: "No tienes permisos para enviar avisos." };
   }
 
@@ -167,7 +154,7 @@ export async function sendBroadcast(
   _prev: BroadcastFormState,
   formData: FormData,
 ): Promise<BroadcastFormState> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para enviar mensajes." };
   }
 

@@ -2,11 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { updateTeacher } from "@/lib/actions/teachers";
-import {
-  getLinkableProfiles,
-  getModalidadOptions,
-  getTeacherById,
-} from "@/lib/queries/teachers";
+import { getModalidadOptions } from "@/lib/queries/catalogo";
+import { getLinkableProfiles, getTeacherById } from "@/lib/queries/teachers";
 import { TeacherForm } from "../../TeacherForm";
 
 export const metadata = { title: "Editar profesor · NEXUS VNG" };

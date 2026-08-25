@@ -96,12 +96,23 @@ export function StudentForm({
       />
 
       <Input
-        label="Email (opcional)"
+        label="Email"
         name="email"
         type="email"
+        required
         defaultValue={student?.email ?? ""}
         placeholder="alumno@email.com"
+        hint="Con este email entrará al área privada."
         error={err("email")}
+      />
+
+      <Input
+        label="Cumpleaños (opcional)"
+        name="birthday"
+        type="date"
+        defaultValue={student?.birthday ?? ""}
+        hint="Se usa para la felicitación automática."
+        error={err("birthday")}
       />
 
       <Select

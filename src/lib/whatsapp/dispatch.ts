@@ -71,3 +71,59 @@ export async function dispatchWhatsappEvent(
     console.error(`[dispatchWhatsappEvent] fallo inesperado (${type}):`, e);
   }
 }
+
+/**
+ * Reenvía a n8n los eventos que quedaron en `pendiente`.
+ *
+ * Hay dos formas de que un evento se quede sin despachar:
+ *   · el POST a n8n falló en su momento (queda en `error`, no se toca aquí);
+ *   · lo creó un TRIGGER de la base de datos, que no puede hablar con n8n.
+ *     Es el caso de `puntos_hito` (migración 0027): la fila aparece cuando un
+ *     alumno cruza un hito, sin que ninguna ruta de la app se entere.
+ *
+ * Por eso la cola necesita a alguien que la vacíe: esta función, llamada desde
+ * el cron diario. Devuelve cuántos ha despachado.
+ */
+export async function flushPendingWhatsappEvents(
+  supabase: Supa,
+  limit = 100,
+): Promise<number> {
+  const { data: pending, error } = await supabase
+    .from("whatsapp_events")
+    .select("id, type, student_id, payload, created_at")
+    .eq("status", "pendiente")
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error("[flushPendingWhatsappEvents] lectura:", error.message);
+    return 0;
+  }
+  if (!pending || pending.length === 0) return 0;
+
+  let sent = 0;
+  for (const event of pending) {
+    try {
+      await postToN8n({
+        event_id: event.id,
+        type: event.type,
+        student_id: event.student_id,
+        payload: event.payload,
+        created_at: event.created_at,
+      });
+      await supabase
+        .from("whatsapp_events")
+        .update({ status: "enviado", sent_at: new Date().toISOString() })
+        .eq("id", event.id);
+      sent += 1;
+    } catch (e) {
+      console.error(`[flushPendingWhatsappEvents] POST (${event.type}) falló:`, e);
+      await supabase
+        .from("whatsapp_events")
+        .update({ status: "error" })
+        .eq("id", event.id);
+    }
+  }
+
+  return sent;
+}

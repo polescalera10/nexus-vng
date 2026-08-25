@@ -52,6 +52,12 @@ export const experience = [
   },
 ];
 
+/**
+ * Espejo estático del catálogo de `modalidades` (migración 0025). Se usa
+ * cuando no hay Supabase configurado o la consulta falla, para que la web
+ * compile y se vea igual. Si se añade una modalidad en la BD, esta lista
+ * puede quedarse corta — es un plan B, no la fuente de verdad.
+ */
 export const modalidadesFallback = [
   {
     slug: "salsa-cubana",
@@ -74,14 +80,36 @@ export const modalidadesFallback = [
     descripcion: "Perreo con técnica y estilo. Suena fuerte, se siente más fuerte.",
   },
   {
-    slug: "lady-style",
-    nombre: "Lady Style",
-    descripcion: "Feminidad, expresión y soltura. Para brillar en cualquier pista.",
+    slug: "lady-style-salsa",
+    nombre: "Lady Style Salsa",
+    descripcion:
+      "Estilo femenino aplicado a la salsa cubana: brazos, cadera y presencia propia.",
+  },
+  {
+    slug: "lady-style-bachata",
+    nombre: "Lady Style Bachata",
+    descripcion:
+      "El lenguaje corporal de la bachata en solitario: ondas, giros y musicalidad.",
+  },
+  {
+    slug: "sexy-style",
+    nombre: "Sexy Style",
+    descripcion: "Sensualidad trabajada con técnica: control, respiración y actitud.",
   },
   {
     slug: "heels",
     nombre: "Heels",
     descripcion: "Potencia, actitud y glamour. Con o sin tacones, la energía es la misma.",
+  },
+  {
+    slug: "cia-salsa",
+    nombre: "Cía Salsa",
+    descripcion: "Grupo de compañía de salsa: coreografía, ensayo continuo y actuaciones.",
+  },
+  {
+    slug: "cia-bachata-lady",
+    nombre: "Cía Bachata Lady",
+    descripcion: "Grupo de compañía de bachata lady: montaje coreográfico y shows.",
   },
 ];
 

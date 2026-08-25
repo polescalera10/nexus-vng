@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getSessionRole } from "@/lib/auth";
+import { getSessionRole, isAdminSession } from "@/lib/auth";
 import { INTENSIVO_PRECIO } from "@/content/intensivos";
 import {
   altaPuertaSchema,
@@ -159,7 +159,7 @@ export async function eliminarRegistroIntensivo(
   registroId: string,
   sesion: string,
 ): Promise<IntensivoResult> {
-  if ((await getSessionRole()) !== "admin") {
+  if (!(await isAdminSession())) {
     return { ok: false, message: "Sin permisos." };
   }
 

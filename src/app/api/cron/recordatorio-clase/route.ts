@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { secretMatches } from "@/lib/cron-auth";
+import { cronRequestIsAuthorized } from "@/lib/cron-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatTime, WEEKDAYS } from "@/lib/format";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       { status: 500 },
     );
   }
-  if (!secretMatches(request.headers.get("x-cron-secret"), secret)) {
+  if (!cronRequestIsAuthorized(request, secret)) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 

@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Toggle } from "@/components/ui/Toggle";
 import { CYCLE_TYPE_LABELS, formatTime, WEEKDAYS } from "@/lib/format";
+import type { ModalidadOption, NivelOption } from "@/lib/queries/catalogo";
 import type { Course } from "@/types/database";
+import { ModalidadQuickAdd } from "../_components/ModalidadQuickAdd";
 
 const initial: CourseFormState = { status: "idle" };
 
@@ -27,17 +29,26 @@ function SubmitButton({ isEdit }: { isEdit: boolean }) {
  */
 export function CourseForm({
   course,
-  modalidades,
+  modalidades: modalidadesIniciales,
   niveles,
   teachers,
 }: {
   course?: Course;
-  modalidades: { id: string; nombre: string }[];
-  niveles: { id: string; nombre: string }[];
+  modalidades: ModalidadOption[];
+  niveles: NivelOption[];
   teachers: { id: string; full_name: string }[];
 }) {
   const [state, formAction] = useActionState(saveCourse, initial);
   const [active, setActive] = useState(course?.active ?? true);
+
+  /**
+   * El catálogo crece desde aquí (ModalidadQuickAdd), así que vive en estado
+   * y el `<select>` pasa a controlado: solo así la modalidad recién creada
+   * queda seleccionada sin recargar y sin perder el resto del formulario.
+   */
+  const [modalidades, setModalidades] = useState(modalidadesIniciales);
+  const [modalidadId, setModalidadId] = useState(course?.modalidad_id ?? "");
+
   const isEdit = Boolean(course);
   const err = (field: string) => state.errors?.[field]?.[0];
 
@@ -57,20 +68,31 @@ export function CourseForm({
         />
       </div>
 
-      <Select
-        label="Modalidad"
-        name="modalidad_id"
-        required
-        defaultValue={course?.modalidad_id ?? ""}
-        error={err("modalidad_id")}
-      >
-        <option value="">Elige una modalidad</option>
-        {modalidades.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.nombre}
-          </option>
-        ))}
-      </Select>
+      <div className="flex flex-col gap-2">
+        <Select
+          label="Modalidad"
+          name="modalidad_id"
+          required
+          value={modalidadId}
+          onChange={(e) => setModalidadId(e.target.value)}
+          error={err("modalidad_id")}
+        >
+          <option value="">Elige una modalidad</option>
+          {modalidades.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.nombre}
+            </option>
+          ))}
+        </Select>
+        <ModalidadQuickAdd
+          onCreated={(m) => {
+            setModalidades((prev) =>
+              prev.some((x) => x.id === m.id) ? prev : [...prev, m],
+            );
+            setModalidadId(m.id);
+          }}
+        />
+      </div>
 
       <Select
         label="Nivel"

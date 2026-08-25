@@ -1,4 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  getModalidadOptions,
+  getNivelOptions,
+  type ModalidadOption,
+  type NivelOption,
+} from "@/lib/queries/catalogo";
 import type {
   ClassSession,
   Course,
@@ -42,22 +48,22 @@ export type CourseDetail = {
 };
 
 export type CourseCatalogs = {
-  modalidades: { id: string; nombre: string }[];
-  niveles: { id: string; nombre: string }[];
+  modalidades: ModalidadOption[];
+  niveles: NivelOption[];
   teachers: { id: string; full_name: string }[];
 };
 
-/** Catálogos para el formulario de curso: modalidades activas, niveles y profes activos. */
+/**
+ * Catálogos para el formulario de curso. Modalidades y niveles salen de
+ * `queries/catalogo.ts` — la misma fuente que usa el formulario de profesor,
+ * para que ampliar el catálogo no haya que hacerlo en dos sitios.
+ */
 export async function getCourseCatalogs(): Promise<CourseCatalogs> {
   const supabase = await createClient();
 
   const [modalidades, niveles, teachers] = await Promise.all([
-    supabase
-      .from("modalidades")
-      .select("id, nombre")
-      .eq("activo", true)
-      .order("orden", { ascending: true }),
-    supabase.from("niveles").select("id, nombre").order("orden", { ascending: true }),
+    getModalidadOptions(),
+    getNivelOptions(),
     supabase
       .from("teachers")
       .select("id, full_name")
@@ -66,8 +72,8 @@ export async function getCourseCatalogs(): Promise<CourseCatalogs> {
   ]);
 
   return {
-    modalidades: modalidades.data ?? [],
-    niveles: niveles.data ?? [],
+    modalidades,
+    niveles,
     teachers: teachers.data ?? [],
   };
 }
@@ -293,4 +299,67 @@ export async function getTeacherCourses(teacherId: string): Promise<CourseListIt
     (a, b) => a.weekday - b.weekday || a.start_time.localeCompare(b.start_time),
   );
   return buildListItems(all);
+}
+
+export type CourseOption = {
+  id: string;
+  name: string;
+  weekday: number;
+  start_time: string;
+  free_leaders: number | null;
+  free_followers: number | null;
+};
+
+/**
+ * Cursos activos con plazas libres por rol, para el desplegable de matrícula
+ * rápida (conversión de lead). `null` en plazas = aforo sin límite declarado
+ * (capacidad 0 en la migración significa "no se controla").
+ */
+export async function getCourseOptions(): Promise<CourseOption[]> {
+  const supabase = await createClient();
+
+  const { data: courses, error } = await supabase
+    .from("courses")
+    .select("id, name, weekday, start_time, capacity_leaders, capacity_followers")
+    .eq("active", true)
+    .order("weekday", { ascending: true })
+    .order("start_time", { ascending: true });
+
+  if (error) {
+    console.error("[getCourseOptions]", error.message);
+    return [];
+  }
+  if (!courses || courses.length === 0) return [];
+
+  const { data: enrollments } = await supabase
+    .from("enrollments")
+    .select("course_id, role_in_course")
+    .in(
+      "course_id",
+      courses.map((c) => c.id),
+    )
+    .eq("status", "activa");
+
+  const taken = new Map<string, { leader: number; follower: number }>();
+  for (const e of enrollments ?? []) {
+    const row = taken.get(e.course_id) ?? { leader: 0, follower: 0 };
+    row[e.role_in_course] += 1;
+    taken.set(e.course_id, row);
+  }
+
+  return courses.map((c) => {
+    const used = taken.get(c.id) ?? { leader: 0, follower: 0 };
+    return {
+      id: c.id,
+      name: c.name,
+      weekday: c.weekday,
+      start_time: c.start_time,
+      free_leaders:
+        c.capacity_leaders > 0 ? Math.max(0, c.capacity_leaders - used.leader) : null,
+      free_followers:
+        c.capacity_followers > 0
+          ? Math.max(0, c.capacity_followers - used.follower)
+          : null,
+    };
+  });
 }

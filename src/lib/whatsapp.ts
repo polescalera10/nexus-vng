@@ -1,4 +1,11 @@
+import { normalizePhone } from "@/lib/phone";
 import { WHATSAPP_NUMBER } from "@/lib/site";
+
+/**
+ * Re-exportado por compatibilidad: la normalización vive en `lib/phone.ts`
+ * desde que `students.phone` (E.164) también la necesita.
+ */
+export { normalizePhone };
 
 /**
  * Origen del clic. Sirve para (a) prerrellenar un mensaje distinto por bloque
@@ -46,19 +53,6 @@ const MESSAGES: Record<WaOrigin, string> = {
  *                mensaje completo de una landing de campaña cuando el origen
  *                no tiene base propia)
  */
-/**
- * Normaliza un teléfono de lead (texto libre) a formato wa.me: solo dígitos,
- * con prefijo de país. Los de 9 dígitos se asumen españoles (+34), que es de
- * donde llegan todos los leads de la escuela; `00` internacional se recorta.
- * Devuelve null si no queda un número usable.
- */
-export function normalizePhone(phone: string): string | null {
-  const digits = phone.replace(/\D/g, "").replace(/^00/, "");
-  if (digits.length === 9) return `34${digits}`;
-  if (digits.length < 8 || digits.length > 15) return null;
-  return digits;
-}
-
 /**
  * Enlace de WhatsApp AL LEAD (no a la escuela): acción rápida del panel para
  * responder a alguien que ha dejado sus datos en la web.

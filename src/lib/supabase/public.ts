@@ -24,3 +24,29 @@ export function createPublicClient() {
     },
   );
 }
+
+/**
+ * Reintento corto para las lecturas públicas.
+ *
+ * `next build` genera decenas de páginas en paralelo y cada una abre su propia
+ * conexión contra Supabase. Un `TypeError: fetch failed` suelto (corte de red,
+ * límite de conexiones del plan Free) no debería traducirse en una página
+ * prerenderizada con la lista vacía durante la próxima hora de revalidación.
+ *
+ * Dos intentos y una espera muy corta: si Supabase está caído de verdad, la
+ * página cae igualmente a su fallback en vez de tumbar el despliegue.
+ */
+export async function withRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}

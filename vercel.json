@@ -1,10 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["cdg1"],
+  "regions": [
+    "cdg1"
+  ],
   "crons": [
     {
       "path": "/api/cron/keep-alive",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/cumpleanos",
+      "schedule": "0 8 * * *"
     }
   ]
 }

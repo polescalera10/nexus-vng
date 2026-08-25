@@ -29,6 +29,13 @@ const NAV: Record<"admin" | "profesor", NavItem[]> = {
       icon: "teachers",
       short: "Profes",
     },
+    { href: "/area-privada/admin/eventos", label: "Eventos", icon: "eventos" },
+    {
+      href: "/area-privada/admin/gamificacion",
+      label: "Gamificación",
+      icon: "puntos",
+      short: "Puntos",
+    },
     { href: "/area-privada/admin/whatsapp", label: "WhatsApp", icon: "whatsapp", short: "WA" },
   ],
   profesor: [

@@ -6,7 +6,8 @@ const UUID = "3f2504e0-4f89-41d3-9a0c-0305e82c3301";
 const validStudent = {
   full_name: "Ana Ruiz",
   phone: "+34600000000",
-  email: "",
+  email: "ana@example.com",
+  birthday: "",
   dance_role: "follower",
   nivel_id: "",
   partner_id: "",
@@ -78,6 +79,32 @@ describe("studentSchema", () => {
       "Ana Ruiz",
     );
     expect(studentSchema.safeParse({ ...validStudent, full_name: " A " }).success).toBe(false);
+  });
+
+  it("exige email: es la identidad con la que entra al área privada", () => {
+    expect(studentSchema.safeParse({ ...validStudent, email: "" }).success).toBe(false);
+    expect(studentSchema.safeParse({ ...validStudent, email: "no-es-email" }).success).toBe(
+      false,
+    );
+    expect(studentSchema.parse({ ...validStudent, email: "  ANA@Example.com " }).email).toBe(
+      "ana@example.com",
+    );
+  });
+
+  it("acepta cumpleaños vacío, pero si viene tiene que ser una fecha pasada", () => {
+    expect(studentSchema.safeParse({ ...validStudent, birthday: "" }).success).toBe(true);
+    expect(studentSchema.safeParse({ ...validStudent, birthday: "1990-05-17" }).success).toBe(
+      true,
+    );
+    expect(studentSchema.safeParse({ ...validStudent, birthday: "17/05/1990" }).success).toBe(
+      false,
+    );
+    expect(studentSchema.safeParse({ ...validStudent, birthday: "2999-01-01" }).success).toBe(
+      false,
+    );
+    expect(studentSchema.safeParse({ ...validStudent, birthday: "1800-01-01" }).success).toBe(
+      false,
+    );
   });
 
   it("limita las notas a 2000 caracteres", () => {

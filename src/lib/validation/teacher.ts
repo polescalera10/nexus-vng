@@ -37,6 +37,17 @@ export const teacherSchema = z.object({
     .trim()
     .min(2, "Dinos el nombre del profesor")
     .max(120, "Nombre demasiado largo"),
+  /**
+   * Identidad de acceso al panel: sin email no hay magic link, así que aquí
+   * es obligatorio aunque la columna admita null (un profe histórico puede
+   * no tenerlo hasta que se edite su ficha).
+   */
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("Email no válido")
+    .max(254, "Email demasiado largo"),
   phone: z
     .string()
     .trim()

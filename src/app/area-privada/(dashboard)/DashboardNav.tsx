@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export type NavIconName =
   | "home"
@@ -11,7 +12,9 @@ export type NavIconName =
   | "courses"
   | "teachers"
   | "whatsapp"
-  | "today";
+  | "today"
+  | "eventos"
+  | "puntos";
 
 export type NavItem = {
   href: string;
@@ -60,6 +63,17 @@ function NavIcon({ name }: { name: NavIconName }) {
       <>
         <rect x="4" y="5" width="16" height="15" rx="2" />
         <path d="M4 9.5h16M8.5 3v4M15.5 3v4M9 14.5l2 2 4-4" />
+      </>
+    ),
+    eventos: (
+      <>
+        <path d="M5 8.5 12 4l7 4.5v7L12 20l-7-4.5v-7Z" />
+        <path d="m9.5 12 1.8 1.8L15 10" />
+      </>
+    ),
+    puntos: (
+      <>
+        <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9L12 3.5Z" />
       </>
     ),
   };
@@ -113,33 +127,119 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
   );
 }
 
-/** Barra de pestañas inferior (móvil) — pensada para usar con el pulgar. */
+/**
+ * Barra de pestañas inferior (móvil) — pensada para usar con el pulgar.
+ *
+ * El panel de admin tiene nueve secciones y nueve pestañas no caben a 320px
+ * sin bajar de los 44px de objetivo táctil que exige el proyecto. Se enseñan
+ * las cuatro primeras y el resto vive detrás de "Más", que despliega una
+ * rejilla por encima de la barra. Con cuatro ítems o menos (el caso del rol
+ * profesor) no aparece nada extra.
+ */
+const MAX_TABS = 4;
+
 export function TabBar({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
+  const [masAbierto, setMasAbierto] = useState(false);
+
+  const caben = items.length <= MAX_TABS + 1;
+  const visibles = caben ? items : items.slice(0, MAX_TABS);
+  const ocultos = caben ? [] : items.slice(MAX_TABS);
+
+  // Al navegar, el menú desplegado tiene que cerrarse solo.
+  useEffect(() => {
+    setMasAbierto(false);
+  }, [pathname]);
+
+  const hayOcultoActivo = ocultos.some((item) => isActive(pathname, item));
+
+  const tabClass = (active: boolean) =>
+    `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-0.5 font-body text-[11px] font-semibold ${
+      active ? "text-accent" : "text-text-muted"
+    }`;
 
   return (
-    <nav
-      aria-label="Navegación del panel"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-text-strong/10 bg-bg-panel pb-[env(safe-area-inset-bottom)] md:hidden"
-    >
-      <div className="flex">
-        {items.map((item) => {
-          const active = isActive(pathname, item);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={`flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-0.5 font-body text-[11px] font-semibold ${
-                active ? "text-accent" : "text-text-muted"
-              }`}
+    <>
+      {masAbierto && (
+        <>
+          {/* Capa para cerrar tocando fuera; el propio menú va por encima. */}
+          <button
+            type="button"
+            aria-label="Cerrar menú"
+            onClick={() => setMasAbierto(false)}
+            className="fixed inset-0 z-40 bg-ink/60 md:hidden"
+          />
+          <div className="fixed inset-x-0 bottom-14 z-40 border-t border-text-strong/10 bg-bg-panel pb-[env(safe-area-inset-bottom)] md:hidden">
+            <ul className="grid grid-cols-3 gap-1 p-2">
+              {ocultos.map((item) => {
+                const active = isActive(pathname, item);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-sm px-1 text-center font-body text-[11px] font-semibold ${
+                        active ? "bg-accent/10 text-accent" : "text-text-body"
+                      }`}
+                    >
+                      <NavIcon name={item.icon} />
+                      <span className="max-w-full truncate">
+                        {item.short ?? item.label}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </>
+      )}
+
+      <nav
+        aria-label="Navegación del panel"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-text-strong/10 bg-bg-panel pb-[env(safe-area-inset-bottom)] md:hidden"
+      >
+        <div className="flex">
+          {visibles.map((item) => {
+            const active = isActive(pathname, item);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={tabClass(active)}
+              >
+                <NavIcon name={item.icon} />
+                <span className="max-w-full truncate">{item.short ?? item.label}</span>
+              </Link>
+            );
+          })}
+
+          {ocultos.length > 0 && (
+            <button
+              type="button"
+              aria-expanded={masAbierto}
+              onClick={() => setMasAbierto((v) => !v)}
+              className={tabClass(masAbierto || hayOcultoActivo)}
             >
-              <NavIcon name={item.icon} />
-              <span className="max-w-full truncate">{item.short ?? item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                className="size-5 flex-none"
+              >
+                <circle cx="5" cy="12" r="1.4" />
+                <circle cx="12" cy="12" r="1.4" />
+                <circle cx="19" cy="12" r="1.4" />
+              </svg>
+              <span>Más</span>
+            </button>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }

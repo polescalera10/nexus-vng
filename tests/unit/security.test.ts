@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { safeImageSrc } from "@/components/ui/MarkdownRenderer";
+import { safeImageSrc } from "@/lib/images";
 import { secretMatches } from "@/lib/cron-auth";
 import { safeNext } from "@/lib/safe-redirect";
 
@@ -35,7 +35,7 @@ describe("safeNext · open redirect (A4)", () => {
   });
 });
 
-describe("safeImageSrc · imágenes del markdown de eventos (B2)", () => {
+describe("safeImageSrc · imágenes públicas: markdown y portadas de evento (B2)", () => {
   it("acepta las rutas propias que ya usan los eventos reales", () => {
     expect(safeImageSrc("/images/bachata_masterclass.png")).toBe(
       "/images/bachata_masterclass.png",

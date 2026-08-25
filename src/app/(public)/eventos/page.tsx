@@ -6,6 +6,8 @@ import { JsonLd, eventLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { site } from "@/lib/site";
 import { getEventos } from "@/lib/queries/eventos";
+import { EVENTO_TIPO_LABELS } from "@/lib/format";
+import { safeImageSrc } from "@/lib/images";
 import type { Evento } from "@/types/database";
 
 export const metadata: Metadata = {
@@ -17,48 +19,18 @@ export const metadata: Metadata = {
 // Revalidar cada hora
 export const revalidate = 3600;
 
-const COVER_IMAGES: Record<string, string> = {
-  "fiesta-social-mensual": "/images/social_dance_event.png",
-  "masterclass-bachata": "/images/bachata_masterclass.png",
-};
-
-/**
- * Duración en horas por tipo de evento, SOLO donde está publicada en la propia
- * ficha ("de 19:00h a 21:00h", "hasta las 01:30h"). Los tipos sin duración
- * documentada no llevan `endDate`: preferimos un schema incompleto a una hora
- * de cierre inventada.
- */
-const DURACION_H: Partial<Record<Evento["tipo"], number>> = {
-  social: 4.5,
-  masterclass: 2,
-};
-
-/**
- * Suma horas a una fecha sin zona ("2026-07-04T21:00:00") y devuelve el mismo
- * formato local. Se parsea y se formatea con los mismos getters locales, así
- * que el resultado no depende de la zona del servidor de build.
- */
-function sumarHoras(fecha: string, horas: number): string | undefined {
-  const d = new Date(fecha);
-  if (Number.isNaN(d.getTime())) return undefined;
-  d.setMinutes(d.getMinutes() + Math.round(horas * 60));
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
-
 /**
  * `Event` completo de una ficha: parte del helper común y le añade lo que este
  * listado sí conoce — imagen real, hora de fin derivada y dirección completa.
  */
 function eventoLdCompleto(e: Evento, cover: string | null) {
-  const horas = DURACION_H[e.tipo];
-  const endDate = horas ? sumarHoras(e.fecha, horas) : undefined;
-
   return {
     ...eventLd({ titulo: e.titulo, descripcion: e.descripcion, fecha: e.fecha }),
-    ...(endDate ? { endDate } : {}),
-    ...(cover ? { image: [`${site.url}${cover}`] } : {}),
-    ...(e.slug ? { url: `${site.url}/eventos/${e.slug}` } : {}),
+    ...(e.fecha_fin ? { endDate: e.fecha_fin } : {}),
+    ...(cover
+      ? { image: [cover.startsWith("http") ? cover : `${site.url}${cover}`] }
+      : {}),
+    url: `${site.url}/eventos/${e.slug}`,
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     inLanguage: "es-ES",
     location: {
@@ -95,8 +67,8 @@ export default async function EventosPage() {
 
       <ul className="mt-8 grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-6 p-0 list-none">
         {eventos.map((e) => {
-          const cover = (e.slug ? COVER_IMAGES[e.slug] : null) ?? null;
-          
+          const cover = safeImageSrc(e.cover_image_url);
+
           return (
             <li key={e.id}>
               <Link
@@ -112,10 +84,14 @@ export default async function EventosPage() {
                       className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                   ) : (
-                    <PhotoPlaceholder label={`[ ${e.tipo} ]`} tint="mix" className="h-full p-3" />
+                    <PhotoPlaceholder
+                      label={`[ ${EVENTO_TIPO_LABELS[e.tipo]} ]`}
+                      tint="mix"
+                      className="h-full p-3"
+                    />
                   )}
                   <span className="absolute top-3 left-3 bg-neon text-ink text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm">
-                    {e.tipo}
+                    {EVENTO_TIPO_LABELS[e.tipo]}
                   </span>
                 </div>
 

@@ -131,8 +131,8 @@ export const expresion: Record<string, CampanaDolorContent> = {
       ],
     },
     clase: {
-      slug: "lady-style",
-      nombre: "Lady Style",
+      slug: "lady-style-salsa",
+      nombre: "Lady Style Salsa",
       titulo: "Lady Style: la clase donde se entrena la soltura",
       descripcion:
         "Lady Style es exactamente esto: técnica y estilo individual, sin pareja, frente al espejo — postura, líneas de brazos, movimiento de cadera, giros y actitud. La clase que trabaja pieza a pieza todo lo que hace que un cuerpo se mueva con seguridad. La elegancia no se trae de casa: se entrena.",
@@ -302,8 +302,8 @@ export const expresion: Record<string, CampanaDolorContent> = {
       ],
     },
     clase: {
-      slug: "lady-style",
-      nombre: "Lady Style",
+      slug: "lady-style-salsa",
+      nombre: "Lady Style Salsa",
       titulo: "Lady Style: una hora para ti, frente al espejo",
       descripcion:
         "Si buscas un rato que sea íntegramente tuyo, Lady Style es la clase: se trabaja sin pareja, frente al espejo, puliendo tu postura, tus líneas, tu movimiento — tu estilo. Un espacio para ganar soltura, presencia y confianza con tu propio cuerpo. Nada que dar a nadie: todo para ti.",

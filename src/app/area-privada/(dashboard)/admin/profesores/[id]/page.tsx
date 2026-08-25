@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
+import { getModalidadOptions } from "@/lib/queries/catalogo";
 import {
-  getModalidadOptions,
   getProfileName,
   getTeacherById,
   getTeacherCourses,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/queries/teachers";
 import { WEEKDAYS, formatTime } from "@/lib/format";
 import { DAY_KEYS, DAY_TO_WEEKDAY } from "@/lib/validation/teacher";
+import { GrantAccessButton } from "../../_components/GrantAccessButton";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -111,6 +112,14 @@ export default async function ProfesorPage({
           <dl className="flex flex-col gap-3 font-body text-sm">
             <div>
               <dt className="text-xs font-bold uppercase tracking-[0.08em] text-text-muted">
+                Email
+              </dt>
+              <dd className="mt-0.5 break-all text-text-body">
+                {teacher.email ?? <span className="text-text-faint">Sin email</span>}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-bold uppercase tracking-[0.08em] text-text-muted">
                 Teléfono
               </dt>
               <dd className="mt-0.5 text-text-body">
@@ -135,10 +144,16 @@ export default async function ProfesorPage({
               <dt className="text-xs font-bold uppercase tracking-[0.08em] text-text-muted">
                 Acceso al panel
               </dt>
-              <dd className="mt-0.5 text-text-body">
-                {teacher.profile_id
-                  ? `Vinculado a ${profileName ?? "un perfil sin nombre"}`
-                  : "Sin acceso (se vincula desde Editar)"}
+              <dd className="mt-1.5 text-text-body">
+                {teacher.profile_id ? (
+                  `Vinculado a ${profileName ?? "un perfil sin nombre"}`
+                ) : (
+                  <GrantAccessButton
+                    kind="teacher"
+                    id={teacher.id}
+                    email={teacher.email}
+                  />
+                )}
               </dd>
             </div>
           </dl>

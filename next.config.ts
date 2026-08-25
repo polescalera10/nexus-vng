@@ -90,6 +90,21 @@ const nextConfig: NextConfig = {
      */
     inlineCss: false,
   },
+  /**
+   * Redirecciones permanentes de URLs retiradas. `/clases/lady-style` existía
+   * desde el lanzamiento y tiene enlaces externos; al partirse la disciplina en
+   * Lady Style Salsa y Lady Style Bachata (migración 0025) su página deja de
+   * generarse, y sin 301 sería un 404 que tira el posicionamiento a la basura.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/clases/lady-style",
+        destination: "/clases/lady-style-salsa",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

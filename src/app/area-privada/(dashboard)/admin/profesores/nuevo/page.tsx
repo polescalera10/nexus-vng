@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { createTeacher } from "@/lib/actions/teachers";
-import { getModalidadOptions } from "@/lib/queries/teachers";
+import { getModalidadOptions } from "@/lib/queries/catalogo";
 import { TeacherForm } from "../TeacherForm";
 
 export const metadata = { title: "Nuevo profesor · NEXUS VNG" };

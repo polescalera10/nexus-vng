@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Toggle } from "@/components/ui/Toggle";
 import type { TeacherFormState } from "@/lib/actions/teachers";
-import type { LinkableProfile, ModalidadOption } from "@/lib/queries/teachers";
+import type { ModalidadOption } from "@/lib/queries/catalogo";
+import type { LinkableProfile } from "@/lib/queries/teachers";
 import type { Teacher } from "@/types/database";
+import { ModalidadQuickAdd } from "../_components/ModalidadQuickAdd";
 import { AvailabilityEditor } from "./AvailabilityEditor";
 
 const initial: TeacherFormState = { status: "idle" };
@@ -20,7 +22,7 @@ const initial: TeacherFormState = { status: "idle" };
 export function TeacherForm({
   action,
   teacher,
-  modalidades,
+  modalidades: modalidadesIniciales,
   profiles,
 }: {
   action: (prev: TeacherFormState, formData: FormData) => Promise<TeacherFormState>;
@@ -32,6 +34,14 @@ export function TeacherForm({
   const [state, formAction, pending] = useActionState(action, initial);
   const [active, setActive] = useState(teacher?.active ?? true);
 
+  /**
+   * El catálogo se puede ampliar sin salir de aquí (ModalidadQuickAdd), así
+   * que vive en estado: la opción nueva aparece marcada al instante y no se
+   * pierde lo ya escrito en el resto del formulario.
+   */
+  const [modalidades, setModalidades] = useState(modalidadesIniciales);
+  const [extraChecked, setExtraChecked] = useState<string[]>([]);
+
   return (
     <form action={formAction} noValidate className="flex max-w-xl flex-col gap-5">
       <Input
@@ -41,6 +51,17 @@ export function TeacherForm({
         defaultValue={teacher?.full_name ?? ""}
         placeholder="Nombre y apellidos"
         error={state.errors?.full_name?.[0]}
+      />
+
+      <Input
+        label="Email"
+        name="email"
+        type="email"
+        required
+        defaultValue={teacher?.email ?? ""}
+        placeholder="nombre@ejemplo.com"
+        hint="Con este email entrará al área privada."
+        error={state.errors?.email?.[0]}
       />
 
       <Input
@@ -73,7 +94,10 @@ export function TeacherForm({
                   type="checkbox"
                   name="disciplines"
                   value={m.slug}
-                  defaultChecked={teacher?.disciplines.includes(m.slug) ?? false}
+                  defaultChecked={
+                    extraChecked.includes(m.slug) ||
+                    (teacher?.disciplines.includes(m.slug) ?? false)
+                  }
                   className="size-4 accent-accent"
                 />
                 {m.nombre}
@@ -86,6 +110,17 @@ export function TeacherForm({
             {state.errors.disciplines[0]}
           </p>
         )}
+
+        <div className="mt-2">
+          <ModalidadQuickAdd
+            onCreated={(m) => {
+              setModalidades((prev) =>
+                prev.some((x) => x.slug === m.slug) ? prev : [...prev, m],
+              );
+              setExtraChecked((prev) => [...new Set([...prev, m.slug])]);
+            }}
+          />
+        </div>
       </fieldset>
 
       <AvailabilityEditor

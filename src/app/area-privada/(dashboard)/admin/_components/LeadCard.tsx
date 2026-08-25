@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useOptimistic, useTransition } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { updateLeadEstado } from "@/lib/actions/leads";
@@ -117,6 +118,19 @@ export function LeadCard({ lead }: { lead: Lead }) {
           <a href={`mailto:${lead.email}`} className={action}>
             Email
           </a>
+        )}
+        {/* Aceptarlo como alumno: evita recopiar nombre, teléfono y email. */}
+        {lead.student_id ? (
+          <Link href={`/area-privada/admin/alumnos/${lead.student_id}`} className={action}>
+            Ver alumno
+          </Link>
+        ) : (
+          <Link
+            href={`/area-privada/admin/leads/${lead.id}/convertir`}
+            className="inline-flex min-h-11 items-center justify-center rounded-sm border border-accent/50 px-3 font-body text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 sm:min-h-9"
+          >
+            Convertir a alumno
+          </Link>
         )}
         {NEXT_ACTIONS[estado].map((next) => (
           <button

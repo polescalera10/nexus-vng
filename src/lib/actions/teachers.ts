@@ -45,6 +45,7 @@ function parseTeacherForm(formData: FormData):
 
   const parsed = teacherSchema.safeParse({
     full_name: formData.get("full_name"),
+    email: formData.get("email") ?? "",
     phone: formData.get("phone") ?? "",
     disciplines: formData.getAll("disciplines").map(String),
     weekly_availability,
@@ -68,9 +69,22 @@ function parseTeacherForm(formData: FormData):
   return { ok: true, data: parsed.data };
 }
 
-/** El índice único de teachers.profile_id salta si el perfil ya está vinculado. */
-function isProfileTaken(error: { code?: string }) {
-  return error.code === "23505";
+/**
+ * Los dos índices únicos de `teachers` devuelven el mismo código 23505, así
+ * que hay que mirar QUÉ índice ha saltado para dar un mensaje que sirva de
+ * algo: `teachers_profile_id_key` (acceso ya vinculado a otro profe) o
+ * `teachers_email_key` (email ya usado).
+ */
+function duplicateMessage(error: { code?: string; message?: string }): string | null {
+  if (error.code !== "23505") return null;
+  const detail = error.message ?? "";
+  if (detail.includes("teachers_email_key")) {
+    return "Ya hay un profesor con ese email.";
+  }
+  if (detail.includes("teachers_profile_id_key")) {
+    return "Ese acceso ya está vinculado a otro profesor.";
+  }
+  return "Ya existe un profesor con esos datos.";
 }
 
 export async function createTeacher(
@@ -92,6 +106,7 @@ export async function createTeacher(
   const supabase = await createClient();
   const { error } = await supabase.from("teachers").insert({
     full_name: data.full_name,
+    email: data.email,
     phone: data.phone || null,
     disciplines: data.disciplines,
     weekly_availability: data.weekly_availability,
@@ -103,9 +118,9 @@ export async function createTeacher(
     console.error("[createTeacher]", error.message);
     return {
       status: "error",
-      message: isProfileTaken(error)
-        ? "Ese acceso ya está vinculado a otro profesor."
-        : "No se ha podido crear el profesor. Inténtalo de nuevo.",
+      message:
+        duplicateMessage(error) ??
+        "No se ha podido crear el profesor. Inténtalo de nuevo.",
     };
   }
 
@@ -135,6 +150,7 @@ export async function updateTeacher(
     .from("teachers")
     .update({
       full_name: data.full_name,
+      email: data.email,
       phone: data.phone || null,
       disciplines: data.disciplines,
       weekly_availability: data.weekly_availability,
@@ -147,9 +163,9 @@ export async function updateTeacher(
     console.error("[updateTeacher]", error.message);
     return {
       status: "error",
-      message: isProfileTaken(error)
-        ? "Ese acceso ya está vinculado a otro profesor."
-        : "No se han podido guardar los cambios. Inténtalo de nuevo.",
+      message:
+        duplicateMessage(error) ??
+        "No se han podido guardar los cambios. Inténtalo de nuevo.",
     };
   }
 

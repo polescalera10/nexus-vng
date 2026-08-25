@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
-import { getModalidadOptions, getTeachers } from "@/lib/queries/teachers";
+import { getModalidadOptions } from "@/lib/queries/catalogo";
+import { getTeachers } from "@/lib/queries/teachers";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";

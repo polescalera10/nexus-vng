@@ -1,4 +1,5 @@
 import React from "react";
+import { safeImageSrc } from "@/lib/images";
 
 function parseInlineStyles(text: string): string {
   let html = text
@@ -13,35 +14,6 @@ function parseInlineStyles(text: string): string {
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
   
   return html;
-}
-
-/**
- * Lista blanca de orígenes para las imágenes del markdown de eventos.
- *
- * Sin ella, un `![alt](https://tercero/pixel.gif)` en la descripción de un
- * evento carga un recurso externo en una página pública: ese tercero recibe la
- * IP y el user-agent de cada visitante sin base legal (problema de RGPD, no de
- * XSS — React ya escapa el atributo). Se aceptan rutas propias (`/images/…`) y
- * Supabase Storage, que es de donde saldrán las imágenes reales.
- * Ver docs/auditoria-seguridad-2026-08-03.md (B2).
- */
-export function safeImageSrc(src: string | undefined): string | null {
-  if (!src) return null;
-  const value = src.trim();
-  // Ruta propia: debe empezar por "/" y no por "//" ni "/\" (dominio externo).
-  if (/^\/(?![/\\])[^\s\\]*$/.test(value)) return value;
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "https:") return null;
-    const siteHost = process.env.NEXT_PUBLIC_SITE_URL
-      ? new URL(process.env.NEXT_PUBLIC_SITE_URL).hostname
-      : null;
-    if (url.hostname.endsWith(".supabase.co")) return url.toString();
-    if (siteHost && url.hostname === siteHost) return url.toString();
-    return null;
-  } catch {
-    return null;
-  }
 }
 
 export function MarkdownRenderer({ content }: { content: string }) {

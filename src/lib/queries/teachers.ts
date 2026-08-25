@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Course, Modalidad, Profile, Teacher } from "@/types/database";
+import type { Course, Profile, Teacher } from "@/types/database";
 
 /**
  * Consultas del módulo Profesores (panel admin).
@@ -7,7 +7,6 @@ import type { Course, Modalidad, Profile, Teacher } from "@/types/database";
  * (lectura para autenticados, gestión solo admin según 0019).
  */
 
-export type ModalidadOption = Pick<Modalidad, "slug" | "nombre">;
 export type LinkableProfile = Pick<Profile, "id" | "nombre">;
 export type TeacherCourse = Pick<
   Course,
@@ -51,22 +50,6 @@ export async function getTeacherById(id: string): Promise<Teacher | null> {
     return null;
   }
   return data;
-}
-
-/** Modalidades activas para los checkboxes de disciplinas (slug → nombre). */
-export async function getModalidadOptions(): Promise<ModalidadOption[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("modalidades")
-    .select("slug, nombre")
-    .eq("activo", true)
-    .order("orden", { ascending: true });
-
-  if (error) {
-    console.error("[getModalidadOptions]", error.message);
-    return [];
-  }
-  return data ?? [];
 }
 
 /**

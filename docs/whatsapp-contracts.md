@@ -219,6 +219,68 @@ bajo `broadcast` + `payload.kind`.
 
 ---
 
+## 6 · `cumpleanos`
+
+**Disparo:** automático. `GET /api/cron/cumpleanos`, una vez al día (cron de
+Vercel a las 08:00 UTC, ver `vercel.json`). Recorre los alumnos **activos**
+cuya fecha de `birthday` cae hoy en hora de Madrid.
+
+**Payload:**
+
+```json
+{
+  "anio": "2026",
+  "fecha": "2026-08-25",
+  "student_name": "María López",
+  "nombre_corto": "María",
+  "phone": "+34600111222",
+  "edad": 32
+}
+```
+
+**Dedupe:** una felicitación por alumno y año. Doble red: la ruta consulta los
+eventos `cumpleanos` de este año antes de encolar, y hay un índice único
+parcial en BD sobre `(student_id, payload->>'anio')` (migración 0029) que
+bloquea el duplicado aunque el cron se reintente en paralelo.
+
+---
+
+## 7 · `puntos_hito`
+
+**Disparo:** automático, **desde la base de datos**. El trigger
+`point_events_check_milestones` (migración 0027) mira si el saldo del alumno ha
+cruzado alguno de los hitos activos de `point_milestones` y encola la fila.
+
+⚠️ Es el único tipo que **no** nace en la app: un trigger de Postgres no puede
+hacer POST a n8n, así que la fila se queda en `pendiente`. La vacía el mismo
+cron de cumpleaños (`flushPendingWhatsappEvents`). Si ese cron se desactiva,
+estos avisos se acumulan sin enviarse.
+
+**Payload:**
+
+```json
+{
+  "hito": 500,
+  "label": "500 puntos",
+  "saldo": 512
+}
+```
+
+**Dedupe:** índice único parcial sobre `(student_id, payload->>'hito')`
+(migración 0029). El trigger inserta con `on conflict do nothing`, así que un
+duplicado nunca revienta el apunte de puntos que lo disparó.
+
+---
+
+## 8 · `premio_canjeado`
+
+**Reservado.** El tipo existe en el enum desde la migración 0027 pero todavía
+no lo emite nadie: los canjes se gestionan dentro del panel
+(`/area-privada/admin/gamificacion`) y se entregan en clase. Está preparado
+para cuando se quiera avisar al alumno de que su premio está listo.
+
+---
+
 ## Estados de `whatsapp_events`
 
 | status      | Significado                                                        |
@@ -227,5 +289,16 @@ bajo `broadcast` + `payload.kind`.
 | `enviado`   | n8n respondió 2xx (**no** implica entrega del WhatsApp). `sent_at` guarda el momento. |
 | `error`     | El POST falló (timeout, red o HTTP no-2xx). Reintento manual/roadmap. |
 
-La tabla solo es visible para el admin (RLS); la ruta cron escribe con el
+La tabla solo es visible para el admin (RLS); las rutas cron escriben con el
 service role.
+
+**Cómo se vacía la cola.** Los eventos que nacen en la app se despachan en el
+acto (`dispatchWhatsappEvent`). Los que nacen en un trigger de Postgres
+(`puntos_hito`) no pueden hacerlo, así que `flushPendingWhatsappEvents` recoge
+todo lo que siga en `pendiente` y lo reenvía; lo llama
+`GET /api/cron/cumpleanos` en su pasada diaria.
+
+**Autenticación de los crons.** `cronRequestIsAuthorized` acepta las dos
+formas: `Authorization: Bearer $CRON_SECRET` (lo que manda Vercel Cron por su
+cuenta) y `x-cron-secret: $CRON_SECRET` (lo que manda n8n). La comparación es
+en tiempo constante.

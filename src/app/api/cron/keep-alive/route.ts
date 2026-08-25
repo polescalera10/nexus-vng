@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { secretMatches } from "@/lib/cron-auth";
+import { cronRequestIsAuthorized } from "@/lib/cron-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 
 /**
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     console.error("[keep-alive] CRON_SECRET no configurado.");
     return NextResponse.json({ error: "CRON_SECRET no configurado." }, { status: 500 });
   }
-  if (!secretMatches(request.headers.get("authorization"), `Bearer ${secret}`)) {
+  if (!cronRequestIsAuthorized(request, secret)) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 

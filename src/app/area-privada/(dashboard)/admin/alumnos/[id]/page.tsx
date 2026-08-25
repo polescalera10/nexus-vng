@@ -10,6 +10,7 @@ import {
   WEEKDAYS_SHORT,
 } from "@/lib/format";
 import { getStudentDetail } from "@/lib/queries/students";
+import { getPointRules, getStudentPoints } from "@/lib/queries/gamificacion";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -17,6 +18,8 @@ import type { InscripcionEstado } from "@/types/database";
 import { ActiveToggle } from "../ActiveToggle";
 import { PaymentToggle } from "../PaymentToggle";
 import { CuotaWhatsAppButton } from "./CuotaWhatsAppButton";
+import { GrantAccessButton } from "../../_components/GrantAccessButton";
+import { PuntosPanel } from "./PuntosPanel";
 
 const ENROLLMENT_BADGE: Record<
   InscripcionEstado,
@@ -47,6 +50,11 @@ export default async function AlumnoPage({
 
   const detail = await getStudentDetail(id);
   if (!detail) notFound();
+
+  const [puntos, reglas] = await Promise.all([
+    getStudentPoints(id, 20),
+    getPointRules(true),
+  ]);
 
   const { student, nivel, partner, enrollments, attendance } = detail;
   const pct =
@@ -94,6 +102,12 @@ export default async function AlumnoPage({
               </a>
             </DataRow>
             <DataRow label="Email">{student.email ?? "—"}</DataRow>
+            <DataRow label="Cumpleaños">
+              {student.birthday ? formatDate(student.birthday) : "—"}
+            </DataRow>
+            <DataRow label="Acceso al panel">
+              {student.profile_id ? "Sí" : "Sin acceso"}
+            </DataRow>
             <DataRow label="Rol de baile">{DANCE_ROLE_LABELS[student.dance_role]}</DataRow>
             <DataRow label="Nivel">{nivel?.nombre ?? "—"}</DataRow>
             <DataRow label="Pareja">
@@ -177,6 +191,26 @@ export default async function AlumnoPage({
                 </li>
               ))}
             </ul>
+          )}
+        </Card>
+
+        <Card title="Puntos" className="lg:col-span-2">
+          <PuntosPanel
+            studentId={student.id}
+            balance={puntos.balance}
+            events={puntos.events}
+            rules={reglas}
+          />
+        </Card>
+
+        <Card title="Acceso al área privada" className="lg:col-span-2">
+          {student.profile_id ? (
+            <p className="font-body text-sm text-text-body">
+              Ya tiene acceso. Entra en nexusvng.es/area-privada con{" "}
+              <span className="font-semibold">{student.email}</span>.
+            </p>
+          ) : (
+            <GrantAccessButton kind="student" id={student.id} email={student.email} />
           )}
         </Card>
 

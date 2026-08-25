@@ -95,7 +95,7 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
         text: "El otro pilar del baile social: mismo ambiente, misma gente y un básico que se aprende en un par de clases. Casi todo el mundo acaba haciendo las dos.",
       },
       {
-        slug: "lady-style",
+        slug: "lady-style-salsa",
         text: "Si quieres que tus giros, tus brazos y tu postura se vean como en tu cabeza, la técnica individual es el atajo. Se nota directamente en la rueda.",
       },
       {
@@ -154,8 +154,8 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
         text: "El complemento natural: mismo ambiente social, energía más alta y rueda de casino. En las fiestas suenan las dos, así que compensa tenerlas.",
       },
       {
-        slug: "lady-style",
-        text: "Técnica y estilo individual para que tus brazos, tus giros y tu postura acompañen. Es lo que hace que la misma figura se vea el doble de bien.",
+        slug: "lady-style-bachata",
+        text: "Técnica y estilo individual para que tus brazos, tus ondas y tu postura acompañen. Es lo que hace que la misma figura se vea el doble de bien.",
       },
       {
         slug: "reggaeton",
@@ -284,33 +284,33 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
     ],
   },
 
-  "lady-style": {
+  "lady-style-salsa": {
     lead:
-      "Técnica, presencia y estilo propio. Lady Style es la clase para trabajar tu forma de bailar: brazos, caderas, giros y seguridad que se ve desde lejos.",
-    queEsTitle: "¿Qué es Lady Style?",
+      "Técnica, presencia y estilo propio aplicados a la salsa cubana. Lady Style Salsa es la clase para trabajar tu forma de bailar: brazos, cadera, giros y seguridad que se ve desde lejos.",
+    queEsTitle: "¿Qué es Lady Style Salsa?",
     queEs: [
-      "Lady Style es una clase de técnica y estilo individual: se trabaja sin pareja, frente al espejo, puliendo todo lo que hace que un baile se vea bonito — la postura, las líneas de brazos, el movimiento de cadera, los giros y la actitud.",
-      "Todo lo que entrenas aquí se traslada directo a la salsa, la bachata o cualquier otro estilo que bailes: es la clase que hace que lo demás suba de nivel. Y también funciona sola, como espacio para ganar soltura, presencia y confianza con tu propio cuerpo.",
-      "En el baile social hay una parte que la pareja no puede darte: cómo colocas el brazo libre, cómo terminas un giro, qué haces con la mirada, cómo ocupas el espacio. Esa parte es tuya y solo se entrena por separado, con tiempo y con espejo. De eso va exactamente esta clase.",
-      "En el horario hay estilo femenino aplicado a la salsa y a la bachata: mismos principios de técnica, distinto vocabulario y distinta música. Puedes hacer uno, el otro o los dos según lo que estés bailando en pareja.",
+      "Lady Style Salsa es una clase de técnica y estilo individual: se trabaja sin pareja, frente al espejo, puliendo todo lo que hace que un baile se vea bonito — la postura, las líneas de brazos, el movimiento de cadera, los giros y la actitud.",
+      "El vocabulario es el de la salsa cubana: el mismo peso, los mismos tiempos y los mismos remates que después te encuentras en la rueda. Por eso lo que entrenas aquí se traslada directo al baile social — es la clase que hace que tu salsa suba de nivel.",
+      "En el baile en pareja hay una parte que el guía no puede darte: cómo colocas el brazo libre, cómo terminas un giro, qué haces con la mirada, cómo ocupas el espacio. Esa parte es tuya y solo se entrena por separado, con tiempo y con espejo.",
+      "Si lo tuyo es la bachata, la clase hermana es Lady Style Bachata: mismos principios de técnica, otro vocabulario y otra música. Se pueden hacer las dos.",
     ],
     aprenderas: [
       "Postura y líneas: cómo colocarte para que cada movimiento se vea limpio desde fuera.",
-      "Técnica de brazos y manos, el detalle que distingue a quien baila bien de quien solo ejecuta.",
-      "Movimiento de cadera, ondas y aislamientos con control y sin forzar la espalda.",
+      "Técnica de brazos y manos aplicada a los giros y remates de la salsa cubana.",
+      "Movimiento de cadera y peso al estilo cubano, con control y sin forzar la espalda.",
       "Técnica de giros: preparación, spot, eje y salida — para dejar de marearte y empezar a rematar.",
-      "Estilo aplicado a la música que ya bailas, no ejercicios sueltos sin contexto.",
+      "Musicalidad de la timba: dónde marcar, dónde parar y dónde soltarte.",
       "Presencia y actitud: bailar ocupando tu espacio, sin pedir permiso.",
     ],
     comoEsLaClase: [
       "Una hora muy de técnica, en formato clase de danza: calentamiento y movilidad, ejercicios de postura y brazos, trabajo de cadera y una batería de giros con progresión. Todo frente al espejo, que es la herramienta principal — verte es la mitad del aprendizaje.",
-      "La parte final es la más agradecida: se monta una secuencia corta con música donde se aplica todo lo trabajado. No es una coreografía de exhibición, es un laboratorio para probar el estilo hasta que deja de parecer prestado.",
-      "No hace falta pareja ni haber bailado antes, aunque la clase rinde el doble si además haces salsa o bachata: lo que aquí pules, allí se ve al instante. Ropa cómoda que te deje ver las líneas del cuerpo y calzado con el que estés a gusto girando.",
+      "La parte final es la más agradecida: se monta una secuencia corta con un tema de salsa donde se aplica todo lo trabajado. No es una coreografía de exhibición, es un laboratorio para probar el estilo hasta que deja de parecer prestado.",
+      "No hace falta pareja ni haber bailado antes, aunque la clase rinde el doble si además haces salsa cubana: lo que aquí pules, allí se ve al instante. Ropa cómoda que te deje ver las líneas del cuerpo y calzado con el que estés a gusto girando.",
     ],
     beneficios: [
       {
-        title: "Multiplica tus otros bailes",
-        text: "Cada hora de técnica se nota después en la pista: tu salsa y tu bachata cambian de categoría cuando el estilo lo pones tú y no la figura.",
+        title: "Multiplica tu salsa",
+        text: "Cada hora de técnica se nota después en la rueda: tu baile cambia de categoría cuando el estilo lo pones tú y no la figura.",
       },
       {
         title: "Postura y control corporal",
@@ -326,20 +326,80 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
       },
     ],
     paraTi:
-      "Si ya bailas en pareja y quieres pulir tu estilo, o si prefieres empezar trabajando tu propio movimiento antes de lanzarte al baile social, Lady Style es tu clase. También encaja si vuelves después de años parada y quieres reconciliarte con tu cuerpo sin la presión de una pista llena. Ven como eres: la elegancia no se trae de casa, se entrena.",
-    estilos: ["Lady Salsa", "Bachata Lady"],
+      "Si ya bailas salsa y quieres pulir tu estilo, o si prefieres empezar trabajando tu propio movimiento antes de lanzarte al baile social, Lady Style Salsa es tu clase. También encaja si vuelves después de años parada y quieres reconciliarte con tu cuerpo sin la presión de una pista llena. Ven como eres: la elegancia no se trae de casa, se entrena.",
+    estilos: ["Lady Salsa"],
+    relacionadas: [
+      {
+        slug: "salsa-cubana",
+        text: "El destino directo de todo lo que aquí trabajas: giros, rueda y baile social en grupo.",
+      },
+      {
+        slug: "lady-style-bachata",
+        text: "La clase hermana. Mismos principios de técnica, vocabulario de bachata: ondas, cadera lenta y musicalidad.",
+      },
+      {
+        slug: "cia-salsa",
+        text: "Si el gusanillo se convierte en ganas de escenario, la compañía de salsa es el siguiente paso.",
+      },
+    ],
+  },
+
+  "lady-style-bachata": {
+    lead:
+      "El lenguaje corporal de la bachata, entrenado en solitario. Ondas, cadera, brazos y musicalidad para que tu bachata se vea como suena.",
+    queEsTitle: "¿Qué es Lady Style Bachata?",
+    queEs: [
+      "Lady Style Bachata es la clase de técnica y estilo individual aplicada a la bachata: se trabaja sin pareja, frente al espejo, puliendo la postura, las líneas de brazos, las ondas de cuerpo, los giros y la actitud.",
+      "La bachata moderna pide un lenguaje corporal muy concreto — ondas continuas, disociación de cadera y torso, control de la lentitud — que en la clase de pareja casi nunca hay tiempo de trabajar a fondo. Aquí sí.",
+      "Todo lo que entrenas se traslada directo a la pista: la misma figura, con las ondas y los remates puestos, se ve el doble de bien. Y funciona también sola, como espacio para ganar soltura y confianza con tu propio cuerpo.",
+      "Si lo tuyo es la salsa, la clase hermana es Lady Style Salsa: misma técnica de base, otro vocabulario y otra música.",
+    ],
+    aprenderas: [
+      "Ondas de cuerpo y disociación cadera–torso, el sello de la bachata moderna.",
+      "Técnica de brazos y manos para los remates y las salidas de giro.",
+      "Control de la lentitud: mover despacio es más difícil que mover rápido, y se entrena.",
+      "Técnica de giros con eje y spot, adaptada a los tiempos de la bachata.",
+      "Musicalidad: dónde está el golpe de la güira y cómo aprovecharlo.",
+      "Presencia y actitud: bailar ocupando tu espacio, sin pedir permiso.",
+    ],
+    comoEsLaClase: [
+      "Calentamiento y movilidad de columna, que es la articulación protagonista, y después bloques de técnica: postura, brazos, ondas y aislamientos. Todo frente al espejo y con mucha corrección individual.",
+      "En la última parte se monta una secuencia corta sobre un tema de bachata para aplicar lo trabajado con música real, que es cuando la técnica deja de ser un ejercicio y se convierte en baile.",
+      "No hace falta pareja ni experiencia previa. Rinde el doble si además haces bachata en pareja: lo que aquí pules, allí se nota al instante. Ropa cómoda y calzado con el que estés a gusto girando.",
+    ],
+    beneficios: [
+      {
+        title: "Multiplica tu bachata",
+        text: "La misma figura con ondas y remates puestos se ve el doble de bien. Es la diferencia entre ejecutar y bailar.",
+      },
+      {
+        title: "Movilidad de columna",
+        text: "Trabajar ondas y aislamientos semana a semana es de lo mejor que puedes hacer por una espalda que pasa el día sentada.",
+      },
+      {
+        title: "Seguridad que se queda",
+        text: "Verte bailar bien en el espejo cambia cómo te mueves fuera de la sala. No es una frase: pasa.",
+      },
+      {
+        title: "Ritmo propio",
+        text: "Sin pareja no hay que esperar a nadie: avanzas a tu velocidad y en tu propio proceso.",
+      },
+    ],
+    paraTi:
+      "Si ya bailas bachata y quieres que tu estilo acompañe a tu técnica, o si prefieres empezar por ti antes de lanzarte a la pista, esta es tu clase. También si vuelves después de tiempo parada y quieres recuperar la relación con tu cuerpo sin prisa. Ven como eres: aquí se entrena, no se posa.",
+    estilos: ["Bachata Lady"],
     relacionadas: [
       {
         slug: "bachata",
-        text: "El destino más directo de todo lo que aquí trabajas: ondas, brazos y actitud aplicados a la pista con pareja.",
+        text: "El destino directo de todo lo que aquí trabajas: la pista, con pareja y con música de verdad.",
       },
       {
-        slug: "salsa-cubana",
-        text: "Giros, rueda y baile social en grupo. Con técnica detrás, la diferencia se ve desde el otro lado de la sala.",
+        slug: "lady-style-salsa",
+        text: "La clase hermana. Misma técnica de base con el vocabulario y los tiempos de la salsa cubana.",
       },
       {
-        slug: "heels",
-        text: "El siguiente escalón en presencia escénica: más potencia, más líneas y, si te apetece, tacones.",
+        slug: "cia-bachata-lady",
+        text: "Si te engancha el trabajo coreográfico, la compañía de bachata lady lo lleva al escenario.",
       },
     ],
   },
@@ -394,12 +454,191 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
         text: "El complemento perfecto: misma familia urbana, más cardio y coreografías sobre los temas del momento.",
       },
       {
-        slug: "lady-style",
-        text: "Técnica pura de brazos, giros y postura. Todo lo que aquí trabajas en tacón se refina allí en el suelo.",
+        slug: "sexy-style",
+        text: "La misma familia urbana con otro registro: control, respiración y sensualidad trabajada con técnica, sin tacón obligatorio.",
       },
       {
         slug: "reparto",
         text: "Si lo que te engancha es la actitud, el reparto es el lenguaje urbano cubano en estado puro: flow, disociación y calle.",
+      },
+    ],
+  },
+  "sexy-style": {
+    lead:
+      "Sensualidad trabajada con técnica: control, respiración y actitud. Sexy Style no va de gustar a nadie — va de moverte como te da la gana y que se note.",
+    queEsTitle: "¿Qué es Sexy Style?",
+    queEs: [
+      "Sexy Style es una clase de danza urbana centrada en la calidad del movimiento: cómo se mueve el cuerpo despacio, cómo se sostiene una pausa y cómo se cambia de nivel sin perder el control. Todo lo contrario a la caricatura: aquí hay técnica y hay trabajo físico.",
+      "Se baila descalza o con zapatilla, sin tacón obligatorio, y se trabaja mucho el suelo, las ondas y los aislamientos. La música va del R&B lento al urbano actual, y cada tema tiene su coreografía.",
+      "Comparte familia con Heels, pero pone el foco en otro sitio: menos líneas de tacón y más control del peso, la respiración y la intención. Muchas alumnas hacen las dos porque se complementan.",
+      "Es también, y esto no es menor, un espacio seguro para trabajar la relación con el propio cuerpo sin que nadie mire por encima del hombro.",
+    ],
+    aprenderas: [
+      "Calidad de movimiento: mover despacio con control, que es lo difícil de verdad.",
+      "Ondas, aislamientos y disociación de cadera, torso y hombros.",
+      "Trabajo de suelo y cambios de nivel adaptados a tu punto de partida.",
+      "Respiración e intención: lo que convierte una secuencia de pasos en una interpretación.",
+      "Coreografías completas sobre temas actuales, montadas por bloques.",
+      "Presencia: sostener la mirada y el silencio sin salir corriendo.",
+    ],
+    comoEsLaClase: [
+      "Calentamiento largo y consciente — movilidad de columna, cadera y hombros — porque casi todo lo que viene después sale de ahí. A continuación, bloques de técnica cruzando la sala y en el sitio.",
+      "La segunda mitad es coreografía: se monta la secuencia del tema por partes, se repite, se limpia y se baila entera con música. Cada bloque tiene versión suave y versión exigente; eliges la tuya.",
+      "No hay nivel mínimo ni cuerpo «adecuado». Ropa cómoda, rodilleras si vas a trabajar suelo y ganas de mirarte al espejo sin juzgarte.",
+    ],
+    beneficios: [
+      {
+        title: "Control corporal fino",
+        text: "Mover despacio exige fuerza isométrica y conciencia. Es entrenamiento real disfrazado de baile.",
+      },
+      {
+        title: "Confianza sin postureo",
+        text: "Trabajar la sensualidad como técnica, y no como pose, cambia la relación con el propio cuerpo.",
+      },
+      {
+        title: "Movilidad y espalda",
+        text: "Ondas y aislamientos semana a semana son de lo mejor que puedes hacer por una columna que pasa el día sentada.",
+      },
+      {
+        title: "Repertorio propio",
+        text: "Sales con coreografías completas que puedes bailar donde quieras. Eso engancha.",
+      },
+    ],
+    paraTi:
+      "Si quieres una clase que te saque de la zona conocida sin exponerte, que trabaje el cuerpo de verdad y que te deje con la sensación de haber hecho algo tuyo, Sexy Style encaja. Vengas del urbano o no hayas bailado nunca. Aquí no se compite con nadie.",
+    estilos: ["Sexy Style"],
+    relacionadas: [
+      {
+        slug: "heels",
+        text: "La hermana con tacón: más líneas, más potencia y el mismo trabajo de actitud escénica.",
+      },
+      {
+        slug: "reggaeton",
+        text: "Misma familia urbana, más cardio y coreografías sobre los temas del momento.",
+      },
+      {
+        slug: "lady-style-bachata",
+        text: "Si quieres llevar el control del movimiento a la pista social, la técnica de bachata lady es el puente.",
+      },
+    ],
+  },
+
+  "cia-salsa": {
+    lead:
+      "El grupo de compañía de salsa: montaje coreográfico, ensayo continuo y actuaciones. No es una clase suelta — es un proyecto de temporada.",
+    queEsTitle: "¿Qué es la Cía Salsa?",
+    queEs: [
+      "La compañía de salsa es el grupo que prepara y lleva a escena las coreografías de la escuela: festivales, fiestas, congresos y todo lo que surja durante la temporada.",
+      "No funciona como una clase abierta. Se entra por audición o invitación del equipo docente, hay un nivel técnico de partida y se pide compromiso con los ensayos: una coreografía de grupo solo funciona si están todos.",
+      "El trabajo es distinto al de una clase regular: se limpia hasta el detalle, se cuentan tiempos, se trabaja la sincronía y se ensaya con formaciones, entradas y salidas. Se aprende muchísimo, pero exige.",
+      "Importante y sin letra pequeña: los grupos de compañía quedan FUERA de la tarifa plana y de la plaza de socio fundador. Las condiciones se acuerdan aparte con la escuela.",
+    ],
+    aprenderas: [
+      "Montaje coreográfico completo: bloques, transiciones, entradas y salidas.",
+      "Sincronía de grupo y trabajo de formaciones sobre el escenario.",
+      "Limpieza técnica al detalle: la misma figura repetida hasta que sale igual en todos.",
+      "Musicalidad avanzada: contar, marcar acentos y respetar los silencios.",
+      "Presencia escénica y gestión de los nervios de una actuación.",
+      "Trabajo en equipo: una compañía es tan buena como su ensayo más flojo.",
+    ],
+    comoEsLaClase: [
+      "El ensayo semanal es largo y muy concreto: se repasa lo montado, se limpia lo que quedó flojo y se añade material nuevo. Hay repeticiones, muchas, porque es la única forma de que veinte cuerpos hagan lo mismo a la vez.",
+      "Según se acerca una actuación, el ritmo sube: pases completos, ensayo con vestuario y ajustes de espacio según el escenario real.",
+      "Se pide asistencia constante. Faltar a un ensayo no te afecta solo a ti: afecta a la formación entera.",
+    ],
+    beneficios: [
+      {
+        title: "Salto técnico real",
+        text: "Nada pule tanto como preparar una coreografía para escenario. Vuelves a la pista social con otro nivel.",
+      },
+      {
+        title: "Escenario de verdad",
+        text: "Bailar delante de público es una experiencia que no se parece a nada y que se recuerda mucho tiempo.",
+      },
+      {
+        title: "Grupo que se hace equipo",
+        text: "Ensayar juntos durante meses crea un vínculo distinto al de la clase semanal.",
+      },
+      {
+        title: "Disciplina que se contagia",
+        text: "El método de trabajo de una compañía — repetir, corregir, medir — sirve mucho más allá del baile.",
+      },
+    ],
+    paraTi:
+      "Si ya tienes base de salsa cubana, te sobra el gusanillo del escenario y puedes comprometerte con los ensayos de la temporada, este es tu sitio. Escríbenos y te contamos cuándo es la próxima audición y qué condiciones tiene el grupo.",
+    estilos: ["Cía Salsa"],
+    relacionadas: [
+      {
+        slug: "salsa-cubana",
+        text: "El punto de partida obligatorio: la clase regular donde se construye la base que aquí se pule.",
+      },
+      {
+        slug: "lady-style-salsa",
+        text: "La técnica individual que marca la diferencia cuando veinte personas hacen la misma figura.",
+      },
+      {
+        slug: "cia-bachata-lady",
+        text: "La otra compañía de la escuela, con formato parecido y vocabulario de bachata lady.",
+      },
+    ],
+  },
+
+  "cia-bachata-lady": {
+    lead:
+      "El grupo de compañía de bachata lady: montaje coreográfico, ensayo continuo y actuaciones. Un proyecto de temporada, no una clase suelta.",
+    queEsTitle: "¿Qué es la Cía Bachata Lady?",
+    queEs: [
+      "Es el grupo que prepara y lleva a escena las coreografías de bachata lady de la escuela: festivales, fiestas y congresos a lo largo de la temporada.",
+      "Se entra por audición o invitación del equipo docente. Hay un nivel técnico de partida — ondas, aislamientos y giros ya resueltos — y se pide compromiso con los ensayos.",
+      "El trabajo va del detalle: sincronía, limpieza, formaciones y calidad de movimiento. Una coreografía de bachata lady se sostiene sobre la precisión de las ondas y los remates, y eso solo sale repitiendo.",
+      "Como el resto de grupos de compañía, queda FUERA de la tarifa plana y de la plaza de socio fundador. Las condiciones se acuerdan aparte con la escuela.",
+    ],
+    aprenderas: [
+      "Montaje coreográfico completo, con transiciones y formaciones.",
+      "Sincronía de grupo aplicada a un vocabulario muy fino: ondas, pausas y remates.",
+      "Limpieza técnica al detalle bajo la mirada del espejo y del equipo docente.",
+      "Musicalidad avanzada de la bachata moderna.",
+      "Presencia escénica y gestión de los nervios de una actuación.",
+      "Trabajo en equipo y método de ensayo.",
+    ],
+    comoEsLaClase: [
+      "Ensayo semanal largo: repaso de lo montado, limpieza de lo que quedó flojo y material nuevo. Muchas repeticiones, que es lo que hace que el grupo se vea como un solo cuerpo.",
+      "Al acercarse una actuación se hacen pases completos, ensayo con vestuario y ajuste al escenario real.",
+      "Se pide asistencia constante: una ausencia rompe la formación de todo el grupo.",
+    ],
+    beneficios: [
+      {
+        title: "Salto técnico real",
+        text: "Preparar coreografía para escenario pule la técnica como no lo hace ninguna clase semanal.",
+      },
+      {
+        title: "Escenario de verdad",
+        text: "Bailar delante de público es una experiencia que no se parece a nada.",
+      },
+      {
+        title: "Grupo que se hace equipo",
+        text: "Meses de ensayo juntas crean un vínculo distinto al de la clase regular.",
+      },
+      {
+        title: "Método que se queda",
+        text: "Repetir, corregir y medir: la forma de trabajar de una compañía sirve mucho más allá del baile.",
+      },
+    ],
+    paraTi:
+      "Si ya tienes base de bachata lady, te tira el escenario y puedes comprometerte con los ensayos de la temporada, escríbenos: te contamos cuándo es la próxima audición y qué condiciones tiene el grupo.",
+    estilos: ["Cía Lady Bachata"],
+    relacionadas: [
+      {
+        slug: "lady-style-bachata",
+        text: "La clase regular donde se construye la técnica que aquí se lleva al escenario.",
+      },
+      {
+        slug: "bachata",
+        text: "La bachata en pareja: el otro lado del mismo baile, y la mejor forma de entender la música.",
+      },
+      {
+        slug: "cia-salsa",
+        text: "La otra compañía de la escuela, con formato parecido y vocabulario de salsa cubana.",
       },
     ],
   },

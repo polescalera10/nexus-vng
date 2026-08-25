@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
-import { DANCE_ROLE_LABELS } from "@/lib/format";
+import { DANCE_ROLE_LABELS, formatPoints } from "@/lib/format";
 import {
   getActiveCourses,
   getNiveles,
   listStudents,
   type StudentsEstadoFilter,
 } from "@/lib/queries/students";
+import { getBalancesByStudent } from "@/lib/queries/gamificacion";
 import { danceRoles, paymentStatuses } from "@/lib/validation/student";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -55,6 +56,11 @@ export default async function AlumnosPage({
     getNiveles(),
     getActiveCourses(),
   ]);
+
+  // Los saldos van en una segunda consulta y no en `listStudents`: la
+  // gamificación es un módulo aparte y meterla en la query de alumnos ataría
+  // el listado a una tabla que puede no interesar en otras pantallas.
+  const balances = await getBalancesByStudent(students.map((s) => s.id));
 
   const hasFilters = Boolean(q || nivel || curso || rol || cuota || estado !== "activos");
 
@@ -106,6 +112,7 @@ export default async function AlumnosPage({
               <Th>Nivel</Th>
               <Th>Rol</Th>
               <Th>Cuota</Th>
+              <Th>Puntos</Th>
               <Th>Estado</Th>
             </Tr>
           </THead>
@@ -134,6 +141,7 @@ export default async function AlumnosPage({
                     status={s.payment_status}
                   />
                 </Td>
+                <Td>{formatPoints(balances.get(s.id) ?? 0)}</Td>
                 <Td>
                   <Badge variant={s.active ? "success" : "neutral"}>
                     {s.active ? "Activo" : "Inactivo"}

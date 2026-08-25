@@ -1,4 +1,4 @@
-import { createPublicClient } from "@/lib/supabase/public";
+import { createPublicClient, withRetry } from "@/lib/supabase/public";
 import { modalidadesFallback } from "@/content/landing";
 import type { Modalidad } from "@/types/database";
 
@@ -15,16 +15,19 @@ export async function getModalidades(): Promise<ModalidadCard[]> {
   if (!hasSupabaseEnv()) return modalidadesFallback;
 
   try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("modalidades")
-      .select("slug, nombre, descripcion")
-      .eq("activo", true)
-      .order("orden", { ascending: true });
+    return await withRetry(async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase
+        .from("modalidades")
+        .select("slug, nombre, descripcion")
+        .eq("activo", true)
+        .order("orden", { ascending: true });
 
-    if (error || !data || data.length === 0) return modalidadesFallback;
-    return data;
-  } catch {
+      if (error) throw new Error(error.message);
+      return !data || data.length === 0 ? modalidadesFallback : data;
+    });
+  } catch (e) {
+    console.error("[getModalidades]", e);
     return modalidadesFallback;
   }
 }
@@ -35,15 +38,19 @@ export async function getModalidadBySlug(slug: string): Promise<ModalidadCard | 
     return modalidadesFallback.find((m) => m.slug === slug) ?? null;
   }
   try {
-    const supabase = createPublicClient();
-    const { data } = await supabase
-      .from("modalidades")
-      .select("slug, nombre, descripcion")
-      .eq("slug", slug)
-      .eq("activo", true)
-      .maybeSingle();
-    return data ?? modalidadesFallback.find((m) => m.slug === slug) ?? null;
-  } catch {
+    return await withRetry(async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase
+        .from("modalidades")
+        .select("slug, nombre, descripcion")
+        .eq("slug", slug)
+        .eq("activo", true)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data ?? modalidadesFallback.find((m) => m.slug === slug) ?? null;
+    });
+  } catch (e) {
+    console.error("[getModalidadBySlug]", e);
     return modalidadesFallback.find((m) => m.slug === slug) ?? null;
   }
 }
@@ -68,18 +75,22 @@ export async function getModalidadesSitemap(): Promise<
   if (!hasSupabaseEnv()) return modalidadesFallback.map((m) => ({ slug: m.slug }));
 
   try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("modalidades")
-      .select("slug, updated_at")
-      .eq("activo", true)
-      .order("orden", { ascending: true });
+    return await withRetry(async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase
+        .from("modalidades")
+        .select("slug, updated_at")
+        .eq("activo", true)
+        .order("orden", { ascending: true });
 
-    if (error || !data || data.length === 0) {
-      return modalidadesFallback.map((m) => ({ slug: m.slug }));
-    }
-    return data.map((m) => ({ slug: m.slug, updatedAt: m.updated_at ?? undefined }));
-  } catch {
+      if (error) throw new Error(error.message);
+      if (!data || data.length === 0) {
+        return modalidadesFallback.map((m) => ({ slug: m.slug }));
+      }
+      return data.map((m) => ({ slug: m.slug, updatedAt: m.updated_at ?? undefined }));
+    });
+  } catch (e) {
+    console.error("[getModalidadesSitemap]", e);
     return modalidadesFallback.map((m) => ({ slug: m.slug }));
   }
 }

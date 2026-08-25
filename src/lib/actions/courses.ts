@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { formatTime, WEEKDAYS } from "@/lib/format";
+import { isAdminSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { courseSchema } from "@/lib/validation/course";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -27,20 +28,6 @@ export type ActionResult = {
 };
 
 /** true si el usuario logueado es admin (defensa además de la RLS). */
-async function isAdmin(): Promise<boolean> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  return profile?.role === "admin";
-}
 
 /** Revalida las vistas (admin + profe) que pintan datos del curso. */
 function revalidateCourse(courseId?: string) {
@@ -60,7 +47,7 @@ export async function saveCourse(
   _prev: CourseFormState,
   formData: FormData,
 ): Promise<CourseFormState> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para gestionar cursos." };
   }
 
@@ -149,7 +136,7 @@ export async function generateSessions(
   courseId: string,
   weeks = 4,
 ): Promise<ActionResult> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para generar sesiones." };
   }
 
@@ -214,7 +201,7 @@ export async function updateSessionStatus(
   sessionId: string,
   status: Extract<SessionStatus, "programada" | "cancelada">,
 ): Promise<ActionResult> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para editar sesiones." };
   }
 
@@ -250,7 +237,7 @@ export async function assignSubstitute(
   sessionId: string,
   teacherId: string | null,
 ): Promise<ActionResult> {
-  if (!(await isAdmin())) {
+  if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para asignar sustitutos." };
   }
 

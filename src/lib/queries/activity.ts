@@ -330,3 +330,19 @@ export async function getActivityFeed(limit = 25): Promise<ActivityItem[]> {
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
     .slice(0, limit);
 }
+
+/** Un lead por id (ficha de conversión). */
+export async function getLeadById(id: string): Promise<Lead | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[getLeadById] error:", error.message);
+    return null;
+  }
+  return data;
+}

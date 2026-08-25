@@ -1,3 +1,11 @@
+import type {
+  EventoTipo,
+  PointSource,
+  RedemptionStatus,
+  WhatsappEventStatus,
+  WhatsappEventType,
+} from "@/types/database";
+
 /**
  * Helpers de formato compartidos por el panel interno.
  * Convención weekday: 1=Lunes … 7=Domingo (heredada de la tabla `clases`).
@@ -132,3 +140,65 @@ export const CYCLE_TYPE_LABELS: Record<string, string> = {
   curso: "Curso (ciclo cerrado)",
   suelta: "Clase suelta",
 };
+
+/**
+ * Etiquetas de los eventos de WhatsApp. Vivían dentro de la página del panel,
+ * pero el cron de cumpleaños y la vista de alumno también las necesitan: un
+ * mapa incompleto en dos sitios es exactamente cómo se cuelan los tipos nuevos
+ * sin traducir.
+ */
+export const WHATSAPP_TYPE_LABELS: Record<WhatsappEventType, string> = {
+  recordatorio_clase: "Recordatorio de clase",
+  cuota_pendiente: "Cuota pendiente",
+  alumno_inactivo: "Alumno inactivo",
+  confirmacion_lista_espera: "Plaza confirmada",
+  broadcast: "Broadcast",
+  cumpleanos: "Cumpleaños",
+  puntos_hito: "Hito de puntos",
+  premio_canjeado: "Premio canjeado",
+};
+
+export const WHATSAPP_STATUS_LABELS: Record<WhatsappEventStatus, string> = {
+  pendiente: "Pendiente",
+  enviado: "Enviado a n8n",
+  error: "Error",
+};
+
+export const POINT_SOURCE_LABELS: Record<PointSource, string> = {
+  asistencia: "Asistencia",
+  evento: "Evento",
+  manual: "Manual",
+  canje: "Canje",
+  ajuste: "Ajuste",
+};
+
+export const REDEMPTION_STATUS_LABELS: Record<RedemptionStatus, string> = {
+  solicitado: "Solicitado",
+  entregado: "Entregado",
+  cancelado: "Cancelado",
+};
+
+export const EVENTO_TIPO_LABELS: Record<EventoTipo, string> = {
+  fiesta: "Fiesta",
+  social: "Social",
+  masterclass: "Masterclass",
+  congreso: "Congreso",
+  taller: "Taller",
+  intensivo: "Intensivo",
+  otro: "Otro",
+};
+
+/** timestamptz → "17 jul, 09:30" */
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("es-ES", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** 1250 → "1.250" (los saldos de puntos se leen mejor con separador). */
+export function formatPoints(points: number): string {
+  return new Intl.NumberFormat("es-ES").format(points);
+}

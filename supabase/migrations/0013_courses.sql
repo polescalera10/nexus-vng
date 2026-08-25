@@ -13,6 +13,15 @@
 drop policy if exists "clases: lectura autenticados" on public.clases;
 drop policy if exists "clases: profesor gestiona las suyas" on public.clases;
 
+-- Las de `inscripciones` y `asistencia` también leen clases.profesor_id (un
+-- EXISTS contra la tabla), así que Postgres las cuenta como dependientes de la
+-- columna y bloquea el DROP COLUMN. Se retiran aquí aunque 0015/0016 vuelvan a
+-- intentarlo (son `drop ... if exists`); sus sustitutas llegan en 0019.
+drop policy if exists "inscripciones: alumno ve lo suyo / profesor de su clase / admin" on public.inscripciones;
+drop policy if exists "inscripciones: alumno gestiona la suya" on public.inscripciones;
+drop policy if exists "asistencia: alumno ve la suya / profesor de su clase / admin" on public.asistencia;
+drop policy if exists "asistencia: profesor de la clase registra / admin" on public.asistencia;
+
 alter table public.clases rename to courses;
 alter table public.courses rename column dia_semana to weekday;
 alter table public.courses rename column hora to start_time;

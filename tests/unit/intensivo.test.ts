@@ -35,7 +35,7 @@ describe("catálogo de intensivos", () => {
   });
 
   it("compone el título con el nivel cuando lo hay", () => {
-    expect(intensivoTitulo(intensivoSesiones[0])).toBe("Salsa (Nivel 2)");
+    expect(intensivoTitulo(intensivoSesiones[0]!)).toBe("Salsa (Nivel 2)");
     const sinNivel = intensivoSesiones.find((s) => !s.nivel)!;
     expect(intensivoTitulo(sinNivel)).toBe(sinNivel.estilo);
   });

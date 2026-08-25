@@ -10,22 +10,13 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Table, TBody, Td, Th, THead, Tr } from "@/components/ui/Table";
-import type { WhatsappEventStatus, WhatsappEventType } from "@/types/database";
+import {
+  WHATSAPP_STATUS_LABELS as STATUS_LABELS,
+  WHATSAPP_TYPE_LABELS as TYPE_LABELS,
+  formatDateTime,
+} from "@/lib/format";
+import type { WhatsappEventStatus } from "@/types/database";
 import { BroadcastForm } from "./BroadcastForm";
-
-const TYPE_LABELS: Record<WhatsappEventType, string> = {
-  recordatorio_clase: "Recordatorio de clase",
-  cuota_pendiente: "Cuota pendiente",
-  alumno_inactivo: "Alumno inactivo",
-  confirmacion_lista_espera: "Plaza confirmada",
-  broadcast: "Broadcast",
-};
-
-const STATUS_LABELS: Record<WhatsappEventStatus, string> = {
-  pendiente: "Pendiente",
-  enviado: "Enviado a n8n",
-  error: "Error",
-};
 
 const STATUS_BADGE: Record<WhatsappEventStatus, "neutral" | "success" | "danger"> = {
   pendiente: "neutral",
@@ -33,15 +24,6 @@ const STATUS_BADGE: Record<WhatsappEventStatus, "neutral" | "success" | "danger"
   error: "danger",
 };
 
-/** timestamptz → "17 jul, 09:30" */
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("es-ES", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function RecipientCell({ event }: { event: WhatsappEventListItem }) {
   if (event.student_id) {
