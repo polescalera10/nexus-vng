@@ -264,6 +264,7 @@ design-reference/                    prototipos de la marca ANTIGUA (histórico)
 - **Nada de datos inventados** en la web: precios, fechas, reseñas o eventos solo con datos reales. Si no los hay, estado vacío honesto.
 - **Tipos**: `src/types/database.ts` se mantiene a mano en sincronía con las migraciones (ver "Tipos de la BD").
 - **Mobile-first, sin excepciones**: toda la navegación debe existir por debajo de 768px, objetivos táctiles ≥44px, campos de formulario a 16px en móvil (por debajo, Safari iOS hace zoom al enfocar), `min-h-dvh` y `minmax(min(Npx,100%),1fr)` en los grids `auto-fit`.
+- **`package.json` y `pnpm-lock.yaml` van en el mismo commit**: Vercel instala con `--frozen-lockfile`, así que un lockfile desincronizado tumba el despliegue antes de compilar nada (`ERR_PNPM_OUTDATED_LOCKFILE`). Tras tocar dependencias: `pnpm install --lockfile-only` y comprobarlo con `pnpm install --frozen-lockfile`.
 - **Antes de dar algo por terminado**: `pnpm typecheck && pnpm test && pnpm test:e2e`.
 
 ## Deploy
