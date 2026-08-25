@@ -1,4 +1,25 @@
-> **NOTA (23-07-2026):** este documento es el brief original bajo la marca antigua "Aranha Baile". El proyecto se renombró a **NEXUS VNG** (dominio nexusvng.es, Instagram @nexusvng) con identidad dark neón. Se conserva tal cual como registro histórico.
+> **DOCUMENTO HISTÓRICO — no es la especificación vigente.**
+>
+> Este es el brief original del MVP (julio 2026), escrito bajo la marca antigua
+> "Aranha Baile". Se conserva tal cual porque explica **por qué** el modelo de
+> datos es como es (roles leader/follower, cursos por ciclos, sin pasarela de
+> pagos), pero ya no describe el estado del proyecto.
+>
+> **Dónde está el estado real:**
+> - `README.md` — rutas, roles, scripts, estructura y convenciones vigentes.
+> - `CLAUDE.md` (carpeta del proyecto) — contexto y reglas de trabajo.
+> - `MEMORY.md` (carpeta del proyecto) — historial de decisiones y avances.
+> - `docs/informe-repo-2026-08-25.md` — último informe de repo y BD.
+>
+> **Qué ha cambiado respecto a este brief (25-08-2026):**
+> - El proyecto se renombró a **NEXUS VNG** (nexusvng.es, @nexusvng), identidad dark neón.
+> - El rol `alumno` **ya no es roadmap**: tiene login y panel propio.
+> - Módulos que este brief no contemplaba y hoy existen: **leads**, **intensivos**,
+>   **eventos**, **gamificación por puntos y premios**, y **conversión de lead a alumno**.
+> - Las 30 landings de campaña por dolor de ICP (`/l/[icp]/[dolor]`) son posteriores.
+> - Del § 7 (roadmap) ya están hechos: login de alumno y eventos sociales.
+>   Siguen sin hacer: recuperación de clases, vídeos por curso y progresión de nivel
+>   con validación del profe.
 
 # /goal — Aranha Baile: App de gestión de escuela de baile (MVP)
 

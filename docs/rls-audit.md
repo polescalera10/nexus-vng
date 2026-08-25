@@ -1,5 +1,13 @@
 # Auditoría RLS del panel interno — Fase 4
 
+> ⚠️ **Documento vivo. Lee antes el § 7 (addendum del 25-08-2026).**
+> Cuando se escribió esto (18-07-2026), las migraciones `0011`–`0020`
+> **existían en el repo pero no estaban aplicadas en producción** — cosa que
+> nadie sabía entonces. El modelo descrito aquí sigue siendo válido, pero las
+> migraciones `0026`, `0027` y `0030` añadieron el rol `alumno`, la
+> gamificación y el cierre de las funciones RPC. El § 7 recoge esos cambios y
+> el estado real de la validación.
+
 > **Alcance y método.** Pase adversarial **estático**: lectura de las migraciones
 > `0001`–`0020` y de todo `src/lib/{actions,queries}` + páginas del dashboard.
 > **No** se ejecutó contra un Postgres real (no hay Docker ni supabase CLI en la
@@ -219,3 +227,112 @@ Esto es auditoría estática. Pol debe, en local:
 > Si al validar en local alguna policy de 0020 rompe un flujo legítimo del
 > profesor, el ajuste correcto es afinar la policy/trigger en una `0021`, **no**
 > relajar la Server Action.
+
+---
+
+## 7. Addendum · 25-08-2026
+
+### 7.1 · Lo que había pasado de verdad
+
+Esta auditoría se escribió sobre el SQL del repo. En producción,
+`supabase_migrations` solo registraba `0001`–`0009`, `0021`–`0024`: **las
+migraciones `0011`–`0020` nunca se habían aplicado**, así que ni las políticas
+del panel ni el endurecimiento de la `0020` existían en la BD real. El único
+motivo por el que eso no fue un incidente es que las tablas que protegían
+tampoco existían.
+
+El hotfix `0022` fue lo que salvó el hueco: extrajo de la `0020` el bloque de
+`profiles` (el único que no dependía de las tablas del panel) y sí se aplicó el
+03-08. Con él, **H0 estaba cerrado en producción** aunque el resto de la `0020`
+no lo estuviera.
+
+Las `0010`–`0020` se aplicaron el 25-08-2026. Ver
+`docs/informe-repo-2026-08-25.md` § 1, incluido el bug de la `0013` que impedía
+ejecutarla.
+
+### 7.2 · Cambios sobre el modelo auditado
+
+**`0026` — el rol `alumno` deja de ser teórico.** Ya no es "un rol reservado sin
+vistas": tiene panel en `/area-privada/alumno`. Sus políticas de SELECT son
+todas del mismo patrón, `= public.current_student_id()`, y no hay ninguna de
+escritura salvo la solicitud de canje:
+
+| Tabla | Qué ve el alumno |
+|---|---|
+| `students` | Solo su fila (`profile_id = auth.uid()`). |
+| `enrollments` · `class_sessions` · `attendance` | Solo lo suyo. |
+| `courses` | Solo aquellos en los que está matriculado. |
+| `teachers` | Solo los profesores de esos cursos (no el listado completo). |
+| `point_events` · `reward_redemptions` | Solo los suyos. |
+
+`public.current_student_id()` es `security definer` (lee `students` sin
+recursión con las políticas de la propia tabla) y su `EXECUTE` está revocado de
+`PUBLIC` y `anon`: solo `authenticated`, que es quien la evalúa dentro de las
+políticas.
+
+**`0026` — los guards de columnas pasan a lista blanca.** `students_guard_teacher_update`
+y `class_sessions_guard_teacher_update` enumeraban las columnas **prohibidas**.
+Ese diseño se rompe en silencio: al añadir `birthday` y `profile_id` a
+`students`, ambas habrían quedado fuera del guard y un profesor podría haberlas
+reescrito por REST. Ahora comparan la fila entera menos lo que sí se permite
+tocar:
+
+```sql
+if (to_jsonb(new) - 'notes' - 'payment_status' - 'updated_at')
+   is distinct from
+   (to_jsonb(old) - 'notes' - 'payment_status' - 'updated_at')
+then raise exception …
+```
+
+Cualquier columna futura queda protegida por defecto. **Regla del proyecto: los
+guards se escriben así, nunca enumerando prohibidas.**
+
+**`0027` — la gamificación aplica sus reglas en la BD, no en la app.** Es la
+respuesta directa al vector central de esta auditoría. Saldo suficiente, stock y
+el apunte negativo del canje los impone el trigger `reward_redemptions_apply`; el
+alumno solo puede INSERTAR en `reward_redemptions` con `status = 'solicitado'`,
+`student_id` propio y un `cost_points` que **coincida con el del premio** — dos
+barreras para lo mismo, a propósito. El saldo nunca se materializa: es la suma de
+`point_events`, expuesta por la vista `student_point_balances`, declarada
+`security_invoker` para que herede la RLS de la tabla en vez de saltársela.
+
+**`0030` — funciones internas fuera de la API REST.** La `0026` intentó revocar
+`EXECUTE` de `handle_new_user` y `rls_auto_enable` sobre `anon` y `authenticated`
+y **no quitó nada**: en Postgres **`PUBLIC` tiene `EXECUTE` por defecto**, así
+que el permiso venía por ahí y PostgREST las seguía publicando en
+`/rest/v1/rpc/…`. La `0030` revoca de `PUBLIC` en todas las funciones de trigger
+y de evento (`handle_new_user`, `rls_auto_enable`, `set_updated_at`, los tres
+guards, `reward_redemptions_apply`, `point_events_check_milestones`,
+`student_point_balance`) y reconcede solo donde hace falta.
+
+> El permiso de un trigger se comprueba **al crearlo**, no al dispararse:
+> revocar `EXECUTE` no rompe ningún trigger existente.
+
+`is_admin()` y `current_role()` **siguen ejecutables por `anon` a propósito**:
+las políticas públicas de `modalidades` y `eventos` (`activo OR is_admin()`) las
+evalúan con el rol del que consulta. Sin sesión devuelven `false`/`null`: no
+filtran nada.
+
+### 7.3 · Estado de los riesgos del § 4
+
+| Riesgo | Estado a 25-08-2026 |
+|---|---|
+| **R1** · Aforo solo en la Server Action | **Sigue abierto y sigue aceptado.** La escritura de `enrollments` continúa siendo admin-only, así que el único que puede saltarse el aforo por REST es un admin. La conversión de lead → alumno también respeta el aforo en la Server Action. Si algún día se abre la matrícula al profesor o al alumno, esto pasa a ser bloqueante. |
+| **R2** · `attendance UPDATE` sobre sesión cancelada | Sin cambios. Ventana estrecha, anotado por transparencia. |
+| **R3** · `enable_signup = true` | **Menos urgente, no resuelto.** Con `0022`/`0020` un alta anónima entra siempre como `alumno` y no puede escalar. Pero ahora el rol `alumno` **sí tiene panel**: un registro anónimo llega a `/area-privada/alumno` y ve la pantalla de "tu cuenta no está enlazada a una ficha" — no filtra datos de nadie, pero permite crear cuentas a discreción. Como los accesos se dan desde el panel ("Crear acceso al panel"), **`enable_signup = false` ya no rompe ningún flujo.** Decisión de producto para Pol. |
+
+### 7.4 · Validación del § 5
+
+Sigue **pendiente** en lo que importa: no se ha ejecutado un test de acceso por
+rol contra la API REST. El entorno de trabajo del 25-08 no tenía las credenciales
+reales (`.env.local` con valores de relleno), así que se verificó lo que sí se
+podía: `tsc`, `eslint`, 151 tests unitarios, 159 e2e y `next build` completo.
+
+Lo que queda por hacer, tal cual, con la lista del § 5 más:
+
+5. Un usuario con rol `alumno` y ficha enlazada **no** debe poder leer
+   `students`, `courses`, `teachers`, `point_events` ni `reward_redemptions` de
+   otro alumno vía `/rest/v1`.
+6. Un alumno **no** debe poder canjear un premio por debajo de su precio ni por
+   encima de su saldo (el trigger debe rechazarlo aunque la política lo dejara
+   pasar).
