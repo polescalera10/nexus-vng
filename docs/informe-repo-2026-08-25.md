@@ -96,6 +96,37 @@ inventados) y, con fechas y precios de por medio, roza la publicidad engañosa.
 
 ---
 
+## 3 bis · El entorno local no apunta a la base de datos real
+
+`.env.local` tiene **credenciales de relleno**:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://dummy-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy-anon-key…
+SUPABASE_SERVICE_ROLE_KEY=dummy-service-role…
+NEXT_PUBLIC_SITE_URL=https://aranhabaile.co…   ← dominio ANTIGUO
+```
+
+Consecuencias:
+
+- **Nada de lo que se ve en local sale de la BD real.** Toda consulta pública
+  falla y cae al fallback estático, así que el panel entero (Alumnos, Cursos,
+  Profesores, Gamificación, Eventos) aparece vacío en `next dev` aunque
+  funcione en producción. Es fácil confundir eso con un bug.
+- `NEXT_PUBLIC_SITE_URL` apunta al **dominio antiguo**, y esa variable alimenta
+  las URLs canónicas y la lista blanca de orígenes de imágenes
+  (`safeImageSrc`). En producción está bien; en local, no.
+
+**Recomendación:** `vercel env pull .env.local` para trabajar contra los mismos
+valores que producción. El fichero está en `.gitignore` y no se ha subido nunca.
+
+Esto es también el motivo de que en este pase **no se haya podido verificar el
+panel contra datos reales**: el entorno de trabajo no tiene esas credenciales.
+Lo verificado es `tsc`, `eslint`, **151 tests unitarios** y **159 e2e** en
+verde, más `next build` completo.
+
+---
+
 ## 4 · Código y datos sin usar
 
 Nada de esto se ha borrado (salvo lo indicado): son decisiones tuyas.
@@ -215,3 +246,5 @@ Contratos en `docs/whatsapp-contracts.md`.
 6. **Tabla `contenido` y `profiles.avatar_url`**: mantener o borrar (§4.2).
 7. **Plantillas de n8n** para `cumpleanos` y `puntos_hito`: el contrato está
    escrito, los flujos hay que montarlos.
+8. **`vercel env pull .env.local`** y repasar el panel en local con datos
+   reales (ver §3 bis) antes de dar el pase por cerrado.
