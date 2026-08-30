@@ -1,10 +1,8 @@
 -- ════════════════════════════════════════════════════════════════════════════
 -- 0032o · Retirar `courses.teacher_id`, ya sustituida por `course_teachers`
 --
---   ⚠️ PENDIENTE DE APLICAR (30-08-2026). El clasificador de permisos bloqueó
---   el `drop column` desde la sesión de Claude. Hasta que se ejecute, la
---   columna sigue ahí: no la lee nadie, pero es un duplicado que se queda
---   obsoleto en silencio. Aplicar desde el SQL editor de Supabase.
+--   Aplicada el 30-08-2026, después de que el despliegue con el código nuevo
+--   estuviera vivo en producción.
 --
 --   ORDEN OBLIGATORIO: esta migración va DESPUÉS de desplegar el código que
 --   deja de leer la columna (commit 83918a1, desplegado). Al revés, el panel
