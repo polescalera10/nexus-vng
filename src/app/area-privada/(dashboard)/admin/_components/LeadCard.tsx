@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useOptimistic, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useOptimistic, useState, useTransition } from "react";
 import { Badge } from "@/components/ui/Badge";
+import { quickConvertLead } from "@/lib/actions/lead-conversion";
 import { updateLeadEstado } from "@/lib/actions/leads";
 import { LEAD_ESTADO_LABELS, LEAD_ORIGEN_LABELS, formatRelative } from "@/lib/format";
 import { buildLeadWaLink } from "@/lib/whatsapp";
@@ -32,14 +34,37 @@ const NEXT_ACTIONS: Record<LeadEstado, LeadEstado[]> = {
 };
 
 export function LeadCard({ lead }: { lead: Lead }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [estado, setEstado] = useOptimistic(lead.estado);
+  const [convertError, setConvertError] = useState<string | null>(null);
 
   function move(next: LeadEstado) {
     startTransition(async () => {
       setEstado(next);
       const res = await updateLeadEstado(lead.id, next);
       if (!res.ok) console.error("[LeadCard]", res.message);
+    });
+  }
+
+  /**
+   * Un clic = ficha creada. Solo se cae a la pantalla de conversión cuando
+   * falta algo que hay que escribir (teléfono raro, email ya usado).
+   */
+  function convert() {
+    setConvertError(null);
+    startTransition(async () => {
+      const res = await quickConvertLead(lead.id);
+      if (res.ok) {
+        router.push(`/area-privada/admin/alumnos/${res.studentId}`);
+        return;
+      }
+      console.error("[LeadCard] convertir:", res.message);
+      if (res.needsForm) {
+        router.push(`/area-privada/admin/leads/${lead.id}/convertir`);
+        return;
+      }
+      setConvertError(res.message);
     });
   }
 
@@ -125,12 +150,14 @@ export function LeadCard({ lead }: { lead: Lead }) {
             Ver alumno
           </Link>
         ) : (
-          <Link
-            href={`/area-privada/admin/leads/${lead.id}/convertir`}
-            className="inline-flex min-h-11 items-center justify-center rounded-sm border border-accent/50 px-3 font-body text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 sm:min-h-9"
+          <button
+            type="button"
+            onClick={convert}
+            disabled={isPending}
+            className="inline-flex min-h-11 items-center justify-center rounded-sm border border-accent/50 px-3 font-body text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 disabled:pointer-events-none disabled:opacity-55 sm:min-h-9"
           >
             Convertir a alumno
-          </Link>
+          </button>
         )}
         {NEXT_ACTIONS[estado].map((next) => (
           <button
@@ -144,6 +171,15 @@ export function LeadCard({ lead }: { lead: Lead }) {
           </button>
         ))}
       </div>
+
+      {convertError && (
+        <p
+          role="alert"
+          className="mt-2 font-body text-[13px] text-danger"
+        >
+          {convertError}
+        </p>
+      )}
     </li>
   );
 }

@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdminSession } from "@/lib/auth";
+import { toE164 } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
 import { leadConversionSchema } from "@/lib/validation/lead-conversion";
-import type { EnrollmentRole } from "@/types/database";
+import type { DanceRole, EnrollmentRole } from "@/types/database";
 
 /**
  * Aceptar un lead como alumno.
@@ -24,6 +25,28 @@ export type LeadConversionState = {
   message?: string;
   errors?: Record<string, string[]>;
 };
+
+/**
+ * Resultado de la conversión en un clic desde la lista de leads.
+ *
+ * `needsForm` distingue lo que se arregla escribiendo (un teléfono que no es
+ * E.164, un email ya usado) de lo que no: en ese caso la tarjeta abre la
+ * pantalla de conversión en vez de dejar al admin con un error seco.
+ */
+export type QuickConversionResult =
+  | { ok: true; studentId: string }
+  | { ok: false; message: string; needsForm?: boolean };
+
+/** Motivo legible de por qué la BD ha rechazado la ficha. */
+function studentInsertMessage(error: { code?: string; message?: string } | null) {
+  if (error?.code === "23505") return "Ya hay un alumno con ese email.";
+  if (error?.code === "42501") {
+    return "La base de datos ha rechazado la ficha por permisos (RLS).";
+  }
+  return error?.message
+    ? `No se ha podido crear la ficha de alumno: ${error.message}`
+    : "No se ha podido crear la ficha de alumno.";
+}
 
 /** Matrículas `activa` de ese rol en el curso (las pausadas no ocupan plaza). */
 async function countActive(
@@ -102,13 +125,7 @@ export async function convertLeadToStudent(
 
   if (studentError || !student) {
     console.error("[convertLeadToStudent] alumno:", studentError?.message);
-    return {
-      status: "error",
-      message:
-        studentError?.code === "23505"
-          ? "Ya hay un alumno con ese email."
-          : "No se ha podido crear la ficha de alumno.",
-    };
+    return { status: "error", message: studentInsertMessage(studentError) };
   }
 
   // 3) Matrícula opcional. Si el rol está lleno entra en lista de espera en vez
@@ -162,4 +179,102 @@ export async function convertLeadToStudent(
   redirect(
     `/area-privada/admin/alumnos/${student.id}${waitlisted ? "?aviso=lista_espera" : ""}`,
   );
+}
+
+/**
+ * Convertir un lead en alumno de un solo clic, desde la propia lista.
+ *
+ * El caso normal es que el lead ya traiga todo lo que la ficha necesita
+ * (nombre, teléfono y, casi siempre, email): abrir un formulario para
+ * confirmar tres campos que nadie toca era un paso de más. Aquí se crea la
+ * ficha con lo que hay y se deja el resto —cumpleaños, nivel, pareja, curso—
+ * para la ficha del alumno, que es donde se rellena de verdad.
+ *
+ * Solo se delega en la pantalla larga cuando falta algo que hay que escribir a
+ * mano: teléfono no convertible a E.164 o nombre inservible.
+ */
+export async function quickConvertLead(leadId: string): Promise<QuickConversionResult> {
+  if (!(await isAdminSession())) {
+    return { ok: false, message: "No tienes permiso para convertir leads." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: lead, error: leadError } = await supabase
+    .from("leads")
+    .select("id, nombre, telefono, email, student_id")
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (leadError || !lead) {
+    return { ok: false, message: "Ese lead ya no existe." };
+  }
+  if (lead.student_id) {
+    // Doble clic o dos pestañas: no es un error, ya está hecho.
+    return { ok: true, studentId: lead.student_id };
+  }
+
+  const fullName = (lead.nombre ?? "").trim();
+  if (fullName.length < 2 || fullName.length > 120) {
+    return {
+      ok: false,
+      needsForm: true,
+      message: "El nombre del lead no sirve para una ficha. Complétalo a mano.",
+    };
+  }
+
+  const phone = toE164(lead.telefono ?? "");
+  if (!phone) {
+    return {
+      ok: false,
+      needsForm: true,
+      message: `El teléfono (${lead.telefono}) no es un número internacional válido.`,
+    };
+  }
+
+  // `students.email` admite null: un lead sin email se convierte igual y el
+  // email se pide luego (sin él no habrá acceso al área privada, nada más).
+  const email = (lead.email ?? "").trim().toLowerCase() || null;
+
+  const { data: student, error: studentError } = await supabase
+    .from("students")
+    .insert({
+      full_name: fullName,
+      phone,
+      email,
+      dance_role: "both" as DanceRole,
+      payment_status: "pendiente",
+      active: true,
+    })
+    .select("id")
+    .single();
+
+  if (studentError || !student) {
+    console.error("[quickConvertLead] alumno:", studentError?.message);
+    return {
+      ok: false,
+      // Un email duplicado se resuelve editándolo: la pantalla larga sirve.
+      needsForm: studentError?.code === "23505",
+      message: studentInsertMessage(studentError),
+    };
+  }
+
+  const { error: linkError } = await supabase
+    .from("leads")
+    .update({
+      student_id: student.id,
+      converted_at: new Date().toISOString(),
+      estado: "convertido",
+    })
+    .eq("id", leadId);
+
+  if (linkError) {
+    console.error("[quickConvertLead] enlazar lead:", linkError.message);
+  }
+
+  revalidatePath("/area-privada/admin");
+  revalidatePath("/area-privada/admin/leads");
+  revalidatePath("/area-privada/admin/alumnos");
+
+  return { ok: true, studentId: student.id };
 }
