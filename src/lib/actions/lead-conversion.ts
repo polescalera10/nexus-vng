@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdminSession } from "@/lib/auth";
+import { roleCapacity } from "@/lib/enrollment-capacity";
 import { buildConversionQuery } from "@/lib/leads/conversion-notice";
 import { matchLeadCourses } from "@/lib/leads/course-match";
 import { toE164 } from "@/lib/phone";
@@ -61,24 +62,39 @@ async function enrollFromLead(
   studentId: string,
   courseIds: string[],
   role: EnrollmentRole,
-): Promise<{ enrolled: number; waitlisted: number; failed: number }> {
+): Promise<{
+  enrolled: number;
+  waitlisted: number;
+  failed: number;
+  /** Clases que pidió pero que no admiten su rol (p. ej. un leader en Heels). */
+  closed: string[];
+}> {
   let enrolled = 0;
   let waitlisted = 0;
   let failed = 0;
+  const closed: string[] = [];
 
   for (const courseId of courseIds) {
     const { data: course } = await supabase
       .from("courses")
-      .select("capacity_leaders, capacity_followers")
+      .select("name, capacity_leaders, capacity_followers")
       .eq("id", courseId)
       .maybeSingle();
+    if (!course) {
+      failed += 1;
+      continue;
+    }
 
-    // Aforo 0 = sin límite, que es como está el catálogo hoy.
-    const capacity =
-      role === "leader" ? (course?.capacity_leaders ?? 0) : (course?.capacity_followers ?? 0);
     const taken = await countActive(supabase, courseId, role);
-    const full = capacity > 0 && taken >= capacity;
+    const capacity = roleCapacity(course, role, taken);
 
+    // Rol cerrado: no se inventa una matrícula imposible, se cuenta y se dice.
+    if (capacity.kind === "closed") {
+      closed.push(course.name);
+      continue;
+    }
+
+    const full = capacity.kind === "full";
     const { error } = await supabase.from("enrollments").insert({
       student_id: studentId,
       course_id: courseId,
@@ -96,7 +112,7 @@ async function enrollFromLead(
     }
   }
 
-  return { enrolled, waitlisted, failed };
+  return { enrolled, waitlisted, failed, closed };
 }
 
 /** Matrículas `activa` de ese rol en el curso (las pausadas no ocupan plaza). */
@@ -179,32 +195,41 @@ export async function convertLeadToStudent(
     return { status: "error", message: studentInsertMessage(studentError) };
   }
 
-  // 3) Matrícula opcional. Si el rol está lleno entra en lista de espera en vez
-  //    de fallar: la ficha ya está creada y perderla por un aforo sería peor.
+  // 3) Matrícula opcional. Ni un aforo lleno ni un rol cerrado cancelan nada:
+  //    la ficha ya está creada y perderla por eso sería peor. Se cuenta y se
+  //    cuenta en el parte.
   let waitlisted = false;
+  let enrolled = 0;
+  const closed: string[] = [];
   if (data.course_id && data.role_in_course) {
     const role = data.role_in_course as EnrollmentRole;
     const { data: course } = await supabase
       .from("courses")
-      .select("capacity_leaders, capacity_followers")
+      .select("name, capacity_leaders, capacity_followers")
       .eq("id", data.course_id)
       .maybeSingle();
 
-    const capacity =
-      role === "leader" ? (course?.capacity_leaders ?? 0) : (course?.capacity_followers ?? 0);
     const taken = await countActive(supabase, data.course_id, role);
-    waitlisted = capacity > 0 && taken >= capacity;
+    const capacity = course
+      ? roleCapacity(course, role, taken)
+      : ({ kind: "closed" } as const);
 
-    const { error: enrollError } = await supabase.from("enrollments").insert({
-      student_id: student.id,
-      course_id: data.course_id,
-      role_in_course: role,
-      status: waitlisted ? "lista_espera" : "activa",
-    });
+    if (capacity.kind === "closed") {
+      closed.push(course?.name ?? "El curso elegido");
+    } else {
+      waitlisted = capacity.kind === "full";
+      const { error: enrollError } = await supabase.from("enrollments").insert({
+        student_id: student.id,
+        course_id: data.course_id,
+        role_in_course: role,
+        status: waitlisted ? "lista_espera" : "activa",
+      });
 
-    if (enrollError) {
-      // La ficha se queda creada: es lo valioso. Se avisa para matricular a mano.
-      console.error("[convertLeadToStudent] matrícula:", enrollError.message);
+      if (enrollError) {
+        console.error("[convertLeadToStudent] matrícula:", enrollError.message);
+      } else if (!waitlisted) {
+        enrolled = 1;
+      }
     }
   }
 
@@ -230,9 +255,10 @@ export async function convertLeadToStudent(
   // Mismo parte que la conversión rápida: la ficha ya sabe pintarlo y así el
   // aviso de lista de espera deja de depender de un parámetro que nadie leía.
   const query = buildConversionQuery({
-    enrolled: data.course_id && !waitlisted ? 1 : 0,
+    enrolled,
     waitlisted: waitlisted ? 1 : 0,
     failed: 0,
+    closed,
     unmatched: [],
   });
   redirect(`/area-privada/admin/alumnos/${student.id}${query}`);

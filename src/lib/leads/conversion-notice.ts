@@ -15,6 +15,8 @@ export type ConversionSummary = {
   enrolled: number;
   waitlisted: number;
   failed: number;
+  /** Clases que pidió pero que no admiten su rol (un leader en Heels). */
+  closed: string[];
   /** Lo que pidió el lead y no se ha podido cruzar con ningún curso. */
   unmatched: string[];
 };
@@ -27,6 +29,9 @@ export function buildConversionQuery(summary: ConversionSummary): string {
   if (summary.enrolled > 0) params.set("alta", String(summary.enrolled));
   if (summary.waitlisted > 0) params.set("espera", String(summary.waitlisted));
   if (summary.failed > 0) params.set("fallidas", String(summary.failed));
+  if (summary.closed.length > 0) {
+    params.set("rol_cerrado", summary.closed.slice(0, UNMATCHED_LIMIT).join("|"));
+  }
   if (summary.unmatched.length > 0) {
     params.set("sin_cruzar", summary.unmatched.slice(0, UNMATCHED_LIMIT).join("|"));
     const rest = summary.unmatched.length - UNMATCHED_LIMIT;
@@ -64,6 +69,7 @@ export function readConversionNotice(
   const enrolled = toInt(searchParams.alta);
   const waitlisted = toInt(searchParams.espera);
   const failed = toInt(searchParams.fallidas);
+  const closed = first(searchParams.rol_cerrado).split("|").filter(Boolean);
   const unmatched = first(searchParams.sin_cruzar).split("|").filter(Boolean);
   const unmatchedRest = toInt(searchParams.sin_cruzar_mas);
 
@@ -83,6 +89,11 @@ export function readConversionNotice(
       `${failed} ${clases(failed)} no se pudieron guardar. Añádelas desde Editar alumno.`,
     );
   }
+  if (closed.length > 0) {
+    lines.push(
+      `${closed.join(", ")} no admite su rol, así que no se ha matriculado ahí.`,
+    );
+  }
   if (unmatched.length > 0) {
     const extra = unmatchedRest > 0 ? ` y ${unmatchedRest} más` : "";
     lines.push(
@@ -91,7 +102,8 @@ export function readConversionNotice(
   }
 
   return {
-    tone: waitlisted + failed + unmatched.length > 0 ? "warning" : "success",
+    tone:
+      waitlisted + failed + closed.length + unmatched.length > 0 ? "warning" : "success",
     lines,
   };
 }

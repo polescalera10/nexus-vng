@@ -24,15 +24,11 @@ function SubmitButton() {
   );
 }
 
-/** Plazas libres legibles: "3 leaders · 1 follower" o "sin límite". */
+/** Plazas libres legibles: "3 leaders · 1 follower", o "solo followers". */
 function plazas(course: CourseOption): string {
-  const partes = [
-    course.free_leaders === null ? "leaders sin límite" : `${course.free_leaders} leaders`,
-    course.free_followers === null
-      ? "followers sin límite"
-      : `${course.free_followers} followers`,
-  ];
-  return partes.join(" · ");
+  if (!course.admits_leaders) return `solo followers · ${course.free_followers} libres`;
+  if (!course.admits_followers) return `solo leaders · ${course.free_leaders} libres`;
+  return `${course.free_leaders} leaders · ${course.free_followers} followers`;
 }
 
 /**

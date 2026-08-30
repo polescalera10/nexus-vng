@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { formatTime, WEEKDAYS } from "@/lib/format";
 import { isAdminSession } from "@/lib/auth";
+import { closedRoleMessage, roleCapacity } from "@/lib/enrollment-capacity";
 import { createClient } from "@/lib/supabase/server";
 import { enrollmentSchema } from "@/lib/validation/enrollment";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -41,15 +42,6 @@ function revalidateCourse(courseId: string, studentId?: string) {
     revalidatePath(`/area-privada/admin/alumnos/${studentId}`);
     revalidatePath(`/area-privada/admin/alumnos/${studentId}/editar`);
   }
-}
-
-/**
- * Aforo lleno para ese rol. Capacidad 0 significa "no se controla" (así lo
- * dejó 0013_courses y así lo lee `getCourseOptions`), no "no cabe nadie": sin
- * esta distinción el catálogo actual, todo a 0/0, daría lleno siempre.
- */
-function isRoleFull(capacity: number, current: number): boolean {
-  return capacity > 0 && current >= capacity;
 }
 
 /** Matrículas `activa` del rol en el curso (las pausadas no cuentan). */
@@ -120,7 +112,7 @@ export async function enrollStudent(
 
   const { data: course } = await supabase
     .from("courses")
-    .select("id, capacity_leaders, capacity_followers")
+    .select("id, name, capacity_leaders, capacity_followers")
     .eq("id", course_id)
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
@@ -140,15 +132,22 @@ export async function enrollStudent(
   }
 
   // Aforo del rol.
-  const capacity =
-    role_in_course === "leader" ? course.capacity_leaders : course.capacity_followers;
   const current = await countActive(course_id, role_in_course);
-  const isFull = isRoleFull(capacity, current);
+  const capacity = roleCapacity(course, role_in_course, current);
 
+  // Rol cerrado: no hay lista de espera que valga, la plaza no existe.
+  if (capacity.kind === "closed") {
+    return {
+      status: "error",
+      errors: { role_in_course: [closedRoleMessage(course.name, role_in_course)] },
+    };
+  }
+
+  const isFull = capacity.kind === "full";
   if (isFull && !to_waitlist) {
     return {
       status: "full",
-      message: `Aforo de ${ROLE_LABEL[role_in_course]} completo (${current}/${capacity}). Confirma para apuntar a ${student.full_name} a la lista de espera.`,
+      message: `Aforo de ${ROLE_LABEL[role_in_course]} completo (${current}/${course[role_in_course === "leader" ? "capacity_leaders" : "capacity_followers"]}). Confirma para apuntar a ${student.full_name} a la lista de espera.`,
     };
   }
 
@@ -258,16 +257,19 @@ export async function promoteFromWaitlist(
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
 
-  const capacity =
-    enrollment.role_in_course === "leader"
-      ? course.capacity_leaders
-      : course.capacity_followers;
   const current = await countActive(enrollment.course_id, enrollment.role_in_course);
+  const capacity = roleCapacity(course, enrollment.role_in_course, current);
 
-  if (isRoleFull(capacity, current)) {
+  if (capacity.kind === "closed") {
     return {
       status: "error",
-      message: `El aforo de ${ROLE_LABEL[enrollment.role_in_course]} sigue completo (${current}/${capacity}). Libera una plaza antes de promocionar.`,
+      message: `${closedRoleMessage(course.name, enrollment.role_in_course)} Cambia el rol de la matrícula antes de activarla.`,
+    };
+  }
+  if (capacity.kind === "full") {
+    return {
+      status: "error",
+      message: `El aforo de ${ROLE_LABEL[enrollment.role_in_course]} sigue completo (${current}). Libera una plaza antes de promocionar.`,
     };
   }
 
@@ -336,15 +338,22 @@ export async function setEnrollmentRole(
 
   const { data: course } = await supabase
     .from("courses")
-    .select("capacity_leaders, capacity_followers")
+    .select("name, capacity_leaders, capacity_followers")
     .eq("id", enrollment.course_id)
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
 
-  const capacity = role === "leader" ? course.capacity_leaders : course.capacity_followers;
-  const full =
-    enrollment.status === "activa" &&
-    isRoleFull(capacity, await countActive(enrollment.course_id, role));
+  const capacity = roleCapacity(
+    course,
+    role,
+    await countActive(enrollment.course_id, role),
+  );
+
+  // Pasar a un rol que la clase no admite dejaría una matrícula imposible.
+  if (capacity.kind === "closed") {
+    return { status: "error", message: closedRoleMessage(course.name, role) };
+  }
+  const full = capacity.kind === "full" && enrollment.status === "activa";
 
   const { error } = await supabase
     .from("enrollments")
@@ -403,7 +412,7 @@ export async function addStudentEnrollment(
 
   const { data: course } = await supabase
     .from("courses")
-    .select("id, capacity_leaders, capacity_followers")
+    .select("id, name, capacity_leaders, capacity_followers")
     .eq("id", courseId)
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
@@ -418,8 +427,11 @@ export async function addStudentEnrollment(
     return { status: "error", message: "Ya está matriculado en ese curso." };
   }
 
-  const capacity = role === "leader" ? course.capacity_leaders : course.capacity_followers;
-  const full = isRoleFull(capacity, await countActive(courseId, role));
+  const capacity = roleCapacity(course, role, await countActive(courseId, role));
+  if (capacity.kind === "closed") {
+    return { status: "error", message: closedRoleMessage(course.name, role) };
+  }
+  const full = capacity.kind === "full";
   const newStatus: InscripcionEstado = full ? "lista_espera" : "activa";
 
   const { error } = existing

@@ -200,6 +200,7 @@ export function CourseForm({
         max={200}
         required
         defaultValue={course?.capacity_leaders ?? 10}
+        hint="0 = la clase no admite leaders (estilos lady)"
         error={err("capacity_leaders")}
       />
 
@@ -212,6 +213,7 @@ export function CourseForm({
         max={200}
         required
         defaultValue={course?.capacity_followers ?? 10}
+        hint="0 = la clase no admite followers"
         error={err("capacity_followers")}
       />
 

@@ -17,13 +17,13 @@ describe("readConversionNotice", () => {
   });
 
   it("celebra la conversión limpia", () => {
-    const notice = roundTrip({ enrolled: 2, waitlisted: 0, failed: 0, unmatched: [] });
+    const notice = roundTrip({ enrolled: 2, waitlisted: 0, failed: 0, closed: [], unmatched: [] });
     expect(notice?.tone).toBe("success");
     expect(notice?.lines).toEqual(["Matriculado en 2 clases."]);
   });
 
   it("singulariza una sola clase", () => {
-    const notice = roundTrip({ enrolled: 1, waitlisted: 0, failed: 0, unmatched: [] });
+    const notice = roundTrip({ enrolled: 1, waitlisted: 0, failed: 0, closed: [], unmatched: [] });
     expect(notice?.lines).toEqual(["Matriculado en 1 clase."]);
   });
 
@@ -32,6 +32,7 @@ describe("readConversionNotice", () => {
       enrolled: 1,
       waitlisted: 1,
       failed: 0,
+      closed: [],
       unmatched: ["Bachata 0 · Jueves 21:30"],
     });
     expect(notice?.tone).toBe("warning");
@@ -43,7 +44,7 @@ describe("readConversionNotice", () => {
   });
 
   it("dice que la ficha se creó sin matrículas cuando no entró ninguna", () => {
-    const notice = roundTrip({ enrolled: 0, waitlisted: 0, failed: 0, unmatched: [] });
+    const notice = roundTrip({ enrolled: 0, waitlisted: 0, failed: 0, closed: [], unmatched: [] });
     expect(notice?.tone).toBe("success");
     expect(notice?.lines).toEqual(["Ficha creada sin matrículas."]);
   });
@@ -53,11 +54,27 @@ describe("readConversionNotice", () => {
       enrolled: 0,
       waitlisted: 0,
       failed: 0,
+      closed: [],
       unmatched: ["a", "b", "c", "d", "e"],
     });
     expect(notice?.lines[1]).toBe(
       "Pidió a, b, c y 2 más, que no corresponde a ningún curso activo.",
     );
+  });
+
+  it("dice qué clase rechaza su rol", () => {
+    const notice = roundTrip({
+      enrolled: 1,
+      waitlisted: 0,
+      failed: 0,
+      closed: ["Heels"],
+      unmatched: [],
+    });
+    expect(notice?.tone).toBe("warning");
+    expect(notice?.lines).toEqual([
+      "Matriculado en 1 clase.",
+      "Heels no admite su rol, así que no se ha matriculado ahí.",
+    ]);
   });
 
   it("ignora contadores corruptos en la URL", () => {

@@ -73,6 +73,19 @@ export function EnrollmentsEditor({
   }
 
   const available = courses.filter((c) => isAvailable(c.id, enrollments));
+  const picked = available.find((c) => c.id === newCourseId);
+
+  // Una clase de estilo lady no admite leaders: ofrecer el rol sería ofrecer
+  // una plaza que no existe.
+  const rolesForPicked: EnrollmentRole[] = picked
+    ? ([
+        ...(picked.admits_leaders ? (["leader"] as const) : []),
+        ...(picked.admits_followers ? (["follower"] as const) : []),
+      ] as EnrollmentRole[])
+    : ["leader", "follower"];
+  const effectiveRole = rolesForPicked.includes(newRole)
+    ? newRole
+    : (rolesForPicked[0] ?? newRole);
 
   return (
     <div className="grid gap-5">
@@ -145,12 +158,15 @@ export function EnrollmentsEditor({
 
         <Select
           label="Rol"
-          value={newRole}
-          disabled={isPending}
+          value={effectiveRole}
+          disabled={isPending || rolesForPicked.length < 2}
           onChange={(ev) => setNewRole(ev.target.value as EnrollmentRole)}
         >
-          <option value="leader">Leader</option>
-          <option value="follower">Follower</option>
+          {rolesForPicked.map((r) => (
+            <option key={r} value={r}>
+              {r === "leader" ? "Leader" : "Follower"}
+            </option>
+          ))}
         </Select>
 
         <Button
@@ -160,7 +176,7 @@ export function EnrollmentsEditor({
           disabled={!newCourseId}
           onClick={() =>
             run(async () => {
-              const res = await addStudentEnrollment(studentId, newCourseId, newRole);
+              const res = await addStudentEnrollment(studentId, newCourseId, effectiveRole);
               if (res.status === "success") setNewCourseId("");
               return res;
             })

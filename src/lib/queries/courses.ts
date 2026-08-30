@@ -323,8 +323,11 @@ export type CourseOption = {
   name: string;
   weekday: number;
   start_time: string;
-  free_leaders: number | null;
-  free_followers: number | null;
+  /** Plazas libres. 0 puede ser "aforo completo" o "no admite ese rol". */
+  free_leaders: number;
+  free_followers: number;
+  admits_leaders: boolean;
+  admits_followers: boolean;
 };
 
 /**
@@ -371,12 +374,10 @@ export async function getCourseOptions(): Promise<CourseOption[]> {
       name: c.name,
       weekday: c.weekday,
       start_time: c.start_time,
-      free_leaders:
-        c.capacity_leaders > 0 ? Math.max(0, c.capacity_leaders - used.leader) : null,
-      free_followers:
-        c.capacity_followers > 0
-          ? Math.max(0, c.capacity_followers - used.follower)
-          : null,
+      free_leaders: Math.max(0, c.capacity_leaders - used.leader),
+      free_followers: Math.max(0, c.capacity_followers - used.follower),
+      admits_leaders: c.capacity_leaders > 0,
+      admits_followers: c.capacity_followers > 0,
     };
   });
 }
