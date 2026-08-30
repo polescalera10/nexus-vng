@@ -95,7 +95,7 @@ export default async function AdminCursosPage({
                   course,
                   modalidadNombre,
                   nivelNombre,
-                  teacherName,
+                  teacherNames,
                   leadersCount,
                   followersCount,
                 }) => (
@@ -114,7 +114,13 @@ export default async function AdminCursosPage({
                     <Td>
                       {WEEKDAYS_SHORT[course.weekday]} · {formatTime(course.start_time)}
                     </Td>
-                    <Td>{teacherName ?? <span className="text-text-faint">Sin profe</span>}</Td>
+                    <Td>
+                      {teacherNames.length > 0 ? (
+                        teacherNames.join(" y ")
+                      ) : (
+                        <span className="text-text-faint">Sin profe</span>
+                      )}
+                    </Td>
                     <Td>
                       {leadersCount}/{course.capacity_leaders} leaders ·{" "}
                       {followersCount}/{course.capacity_followers} followers

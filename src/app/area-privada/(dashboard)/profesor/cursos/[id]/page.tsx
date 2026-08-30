@@ -53,13 +53,14 @@ export default async function ProfesorCursoDetailPage({
   const detail = await getCourseDetail(id);
   if (!detail) notFound();
 
-  const { course, modalidadNombre, nivelNombre, teacher: titular, enrollments, sessions } =
+  const { course, modalidadNombre, nivelNombre, teachers: titulares, enrollments, sessions } =
     detail;
+
+  const esTitular = titulares.some((t) => t.id === teacher.id);
 
   // La RLS deja leer todos los cursos: el cerrojo por profe va aquí.
   const canView =
-    course.teacher_id === teacher.id ||
-    sessions.some((s) => s.substitute_teacher_id === teacher.id);
+    esTitular || sessions.some((s) => s.substitute_teacher_id === teacher.id);
   if (!canView) notFound();
 
   const enrolled = enrollments.filter(
@@ -87,14 +88,17 @@ export default async function ProfesorCursoDetailPage({
         {[modalidadNombre, nivelNombre].filter(Boolean).join(" · ")}
         {" · "}
         {WEEKDAYS[course.weekday]} {formatTime(course.start_time)} ·{" "}
-        {course.duration_min} min · {titular?.full_name ?? "Sin profe titular"}
+        {course.duration_min} min ·{" "}
+        {titulares.length > 0
+          ? titulares.map((t) => t.full_name).join(" y ")
+          : "Sin profe titular"}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Badge variant={course.active ? "success" : "neutral"}>
           {course.active ? "Activo" : "Inactivo"}
         </Badge>
         <Badge variant="neutral">{CYCLE_TYPE_LABELS[course.cycle_type]}</Badge>
-        {course.teacher_id !== teacher.id && (
+        {!esTitular && (
           <Badge variant="warning">Cubres sustituciones</Badge>
         )}
       </div>

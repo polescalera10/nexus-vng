@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { formatTime, WEEKDAYS } from "@/lib/format";
 import { isAdminSession } from "@/lib/auth";
+import { syncCourseTeachers } from "@/lib/queries/course-teachers";
 import { createClient } from "@/lib/supabase/server";
 import { courseSchema } from "@/lib/validation/course";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -57,7 +58,7 @@ export async function saveCourse(
     name: formData.get("name"),
     modalidad_id: formData.get("modalidad_id"),
     nivel_id: formData.get("nivel_id") ?? "",
-    teacher_id: formData.get("teacher_id") ?? "",
+    teacher_ids: formData.getAll("teacher_ids").map(String).filter(Boolean),
     weekday: formData.get("weekday"),
     start_time: formData.get("start_time"),
     duration_min: formData.get("duration_min"),
@@ -82,7 +83,6 @@ export async function saveCourse(
     name: parsed.data.name,
     modalidad_id: parsed.data.modalidad_id,
     nivel_id: parsed.data.nivel_id || null,
-    teacher_id: parsed.data.teacher_id || null,
     weekday: parsed.data.weekday,
     start_time: parsed.data.start_time,
     duration_min: parsed.data.duration_min,
@@ -114,6 +114,16 @@ export async function saveCourse(
       return { status: "error", message: "No se ha podido crear el curso. Inténtalo de nuevo." };
     }
     courseId = data.id;
+  }
+
+  // Los profes van en `course_teachers` (0032): un curso puede tener varios.
+  const { error: teachersError } = await syncCourseTeachers(courseId, parsed.data.teacher_ids);
+  if (teachersError) {
+    console.error("[saveCourse] course_teachers:", teachersError);
+    return {
+      status: "error",
+      message: "El curso se ha guardado, pero no se han podido asignar los profes.",
+    };
   }
 
   revalidateCourse(courseId);

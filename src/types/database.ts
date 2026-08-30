@@ -156,7 +156,6 @@ export type Course = {
   name: string;
   modalidad_id: string;
   nivel_id: string | null;
-  teacher_id: string | null;
   /** 1=Lun … 7=Dom (convención heredada de `clases`). */
   weekday: number;
   start_time: string;
@@ -169,6 +168,17 @@ export type Course = {
   active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Profes titulares de un curso (N:N). Sustituye a `courses.teacher_id`, que
+ * solo admitía uno: el cartel tiene clases a dos (Bachata 2, Martina y Davide).
+ * El sustituto puntual no vive aquí, sigue en `class_sessions`.
+ */
+export type CourseTeacher = {
+  course_id: string;
+  teacher_id: string;
+  created_at: string;
 }
 
 export type Enrollment = {
@@ -359,6 +369,12 @@ export interface Database {
         Row: Course;
         Insert: Pick<Course, "modalidad_id" | "weekday" | "start_time"> & Partial<Course>;
         Update: Partial<Course>;
+        Relationships: [];
+      };
+      course_teachers: {
+        Row: CourseTeacher;
+        Insert: Pick<CourseTeacher, "course_id" | "teacher_id"> & Partial<CourseTeacher>;
+        Update: Partial<CourseTeacher>;
         Relationships: [];
       };
       enrollments: {

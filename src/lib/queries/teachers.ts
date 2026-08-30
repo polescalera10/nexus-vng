@@ -1,3 +1,4 @@
+import { getCourseIdsForTeacher } from "@/lib/queries/course-teachers";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, Profile, Teacher } from "@/types/database";
 
@@ -98,10 +99,13 @@ export async function getProfileName(profileId: string): Promise<string | null> 
 export async function getTeacherCourses(teacherId: string): Promise<TeacherCourse[]> {
   const supabase = await createClient();
 
+  const courseIds = await getCourseIdsForTeacher(teacherId);
+  if (courseIds.length === 0) return [];
+
   const { data: courses, error } = await supabase
     .from("courses")
     .select("id, name, modalidad_id, weekday, start_time, duration_min, active")
-    .eq("teacher_id", teacherId)
+    .in("id", courseIds)
     .order("weekday", { ascending: true })
     .order("start_time", { ascending: true });
 
@@ -156,17 +160,23 @@ export async function getTeacherHoursReport(
     ]),
   );
 
-  const { data: ownCourses, error: cErr } = await supabase
-    .from("courses")
-    .select("id, duration_min")
-    .eq("teacher_id", teacherId);
+  const ownCourseIds = await getCourseIdsForTeacher(teacherId);
 
-  if (cErr) {
-    console.error("[getTeacherHoursReport] courses:", cErr.message);
-    return [...rows.values()];
+  let ownCourses: { id: string; duration_min: number }[] = [];
+  if (ownCourseIds.length > 0) {
+    const { data, error: cErr } = await supabase
+      .from("courses")
+      .select("id, duration_min")
+      .in("id", ownCourseIds);
+
+    if (cErr) {
+      console.error("[getTeacherHoursReport] courses:", cErr.message);
+      return [...rows.values()];
+    }
+    ownCourses = data ?? [];
   }
 
-  const durationByCourse = new Map((ownCourses ?? []).map((c) => [c.id, c.duration_min]));
+  const durationByCourse = new Map(ownCourses.map((c) => [c.id, c.duration_min]));
 
   // Titular: sesiones impartidas de sus cursos sin sustituto.
   if (durationByCourse.size > 0) {

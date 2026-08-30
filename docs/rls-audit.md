@@ -37,7 +37,7 @@ directo a la API saltándose la Server Action.
 
 | # | Actor | Acción | Esperado | Según 0019 | Veredicto |
 |---|-------|--------|----------|------------|-----------|
-| 1 | Profesor A | Leer cursos/sesiones/matrículas/asistencia de profe B (titular ajeno) | Denegado | Denegado (las políticas cruzan `teacher_id`/matrícula con `auth.uid()`) | OK |
+| 1 | Profesor A | Leer cursos/sesiones/matrículas/asistencia de profe B (titular ajeno) | Denegado | Denegado (las políticas cruzan `course_teachers`/matrícula con `auth.uid()`) | OK |
 | 2 | Profesor | Leer sus propios cursos como titular y como sustituto | Permitido | Permitido | OK |
 | 3 | **Profesor A** | **INSERT en `class_sessions` de un curso de B poniéndose `substitute_teacher_id = A`** | **Denegado** | **PERMITIDO** (el `with check` del `for all` acepta la rama "soy sustituto de la fila nueva") | **FALLO — H1** |
 | 4 | Profesor A (tras H1) | Leer alumnos/matrículas y pasar lista de ese curso ajeno | Denegado | Permitido en cascada (las políticas conceden por "sustituto de una sesión del curso") | FALLO (consecuencia de H1) |

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
+import { getTeacherIdsByCourse } from "@/lib/queries/course-teachers";
 import { getCourseById, getCourseCatalogs } from "@/lib/queries/courses";
 import { Card } from "@/components/ui/Card";
 import { CourseForm } from "../../CourseForm";
@@ -14,7 +15,11 @@ export default async function EditarCursoPage({
   await requireRole("admin");
 
   const { id } = await params;
-  const [course, catalogs] = await Promise.all([getCourseById(id), getCourseCatalogs()]);
+  const [course, catalogs, teacherIdsByCourse] = await Promise.all([
+    getCourseById(id),
+    getCourseCatalogs(),
+    getTeacherIdsByCourse([id]),
+  ]);
   if (!course) notFound();
 
   return (
@@ -32,6 +37,7 @@ export default async function EditarCursoPage({
       <Card className="mt-8">
         <CourseForm
           course={course}
+          teacherIds={teacherIdsByCourse.get(id) ?? []}
           modalidades={catalogs.modalidades}
           niveles={catalogs.niveles}
           teachers={catalogs.teachers}

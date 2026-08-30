@@ -96,7 +96,9 @@ export default async function AlumnoPage() {
                       {c.course
                         ? `${WEEKDAYS[c.course.weekday]} · ${formatTime(c.course.start_time)} · ${c.course.duration_min} min`
                         : ""}
-                      {c.teacherName ? ` · con ${c.teacherName}` : ""}
+                      {c.teacherNames.length > 0
+                        ? ` · con ${c.teacherNames.join(" y ")}`
+                        : ""}
                       {` · ${DANCE_ROLE_LABELS[c.role_in_course]}`}
                     </p>
                   </div>

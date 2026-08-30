@@ -1,3 +1,4 @@
+import { getCourseIdsForTeacher, getTeacherIdsByCourse } from "@/lib/queries/course-teachers";
 import { createClient } from "@/lib/supabase/server";
 import {
   getModalidadOptions,
@@ -24,7 +25,9 @@ export type CourseListItem = {
   course: Course;
   modalidadNombre: string | null;
   nivelNombre: string | null;
-  teacherName: string | null;
+  /** Profes titulares del curso (0032: pueden ser varios). */
+  teacherIds: string[];
+  teacherNames: string[];
   /** Matrículas `activa` por rol (las pausadas no cuentan contra aforo). */
   leadersCount: number;
   followersCount: number;
@@ -42,7 +45,7 @@ export type CourseDetail = {
   course: Course;
   modalidadNombre: string | null;
   nivelNombre: string | null;
-  teacher: Pick<Teacher, "id" | "full_name"> | null;
+  teachers: Pick<Teacher, "id" | "full_name">[];
   enrollments: EnrollmentWithStudent[];
   sessions: SessionWithSubstitute[];
 };
@@ -85,7 +88,7 @@ async function buildListItems(courses: Course[]): Promise<CourseListItem[]> {
   const supabase = await createClient();
   const courseIds = courses.map((c) => c.id);
 
-  const [modalidades, niveles, teachers, enrollments] = await Promise.all([
+  const [modalidades, niveles, teachers, enrollments, teacherIdsByCourse] = await Promise.all([
     supabase.from("modalidades").select("id, nombre"),
     supabase.from("niveles").select("id, nombre"),
     supabase.from("teachers").select("id, full_name"),
@@ -94,6 +97,7 @@ async function buildListItems(courses: Course[]): Promise<CourseListItem[]> {
       .select("course_id, role_in_course")
       .in("course_id", courseIds)
       .eq("status", "activa"),
+    getTeacherIdsByCourse(courseIds),
   ]);
 
   const modalidadById = new Map((modalidades.data ?? []).map((m) => [m.id, m.nombre]));
@@ -112,7 +116,10 @@ async function buildListItems(courses: Course[]): Promise<CourseListItem[]> {
     course,
     modalidadNombre: modalidadById.get(course.modalidad_id) ?? null,
     nivelNombre: course.nivel_id ? (nivelById.get(course.nivel_id) ?? null) : null,
-    teacherName: course.teacher_id ? (teacherById.get(course.teacher_id) ?? null) : null,
+    teacherIds: teacherIdsByCourse.get(course.id) ?? [],
+    teacherNames: (teacherIdsByCourse.get(course.id) ?? [])
+      .map((id) => teacherById.get(id))
+      .filter((name): name is string => !!name),
     leadersCount: counts.get(course.id)?.leaders ?? 0,
     followersCount: counts.get(course.id)?.followers ?? 0,
   }));
@@ -151,18 +158,12 @@ export async function getCourseDetail(id: string): Promise<CourseDetail | null> 
     .maybeSingle();
   if (!course) return null;
 
-  const [modalidad, nivel, teacher, enrollmentsRes, sessionsRes] = await Promise.all([
+  const [modalidad, nivel, teacherIdsByCourse, enrollmentsRes, sessionsRes] = await Promise.all([
     supabase.from("modalidades").select("nombre").eq("id", course.modalidad_id).maybeSingle(),
     course.nivel_id
       ? supabase.from("niveles").select("nombre").eq("id", course.nivel_id).maybeSingle()
       : Promise.resolve({ data: null }),
-    course.teacher_id
-      ? supabase
-          .from("teachers")
-          .select("id, full_name")
-          .eq("id", course.teacher_id)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
+    getTeacherIdsByCourse([id]),
     supabase
       .from("enrollments")
       .select("*")
@@ -177,6 +178,18 @@ export async function getCourseDetail(id: string): Promise<CourseDetail | null> 
 
   const enrollmentRows = enrollmentsRes.data ?? [];
   const sessions = sessionsRes.data ?? [];
+
+  // Profes titulares del curso (0032: pueden ser varios).
+  const teacherIds = teacherIdsByCourse.get(id) ?? [];
+  let teachers: Pick<Teacher, "id" | "full_name">[] = [];
+  if (teacherIds.length > 0) {
+    const { data } = await supabase
+      .from("teachers")
+      .select("id, full_name")
+      .in("id", teacherIds)
+      .order("full_name", { ascending: true });
+    teachers = data ?? [];
+  }
 
   // Alumnos de las matrículas.
   const studentIds = [...new Set(enrollmentRows.map((e) => e.student_id))];
@@ -210,7 +223,7 @@ export async function getCourseDetail(id: string): Promise<CourseDetail | null> 
     course,
     modalidadNombre: modalidad.data?.nombre ?? null,
     nivelNombre: nivel.data?.nombre ?? null,
-    teacher: teacher.data ?? null,
+    teachers,
     enrollments: enrollmentRows.map((e) => ({
       ...e,
       student: studentById.get(e.student_id) ?? null,
@@ -275,15 +288,19 @@ export async function getTeacherForUser(
 export async function getTeacherCourses(teacherId: string): Promise<CourseListItem[]> {
   const supabase = await createClient();
 
-  const [ownRes, subRes] = await Promise.all([
-    supabase.from("courses").select("*").eq("teacher_id", teacherId),
+  const [ownCourseIds, subRes] = await Promise.all([
+    getCourseIdsForTeacher(teacherId),
     supabase
       .from("class_sessions")
       .select("course_id")
       .eq("substitute_teacher_id", teacherId),
   ]);
 
-  const own = ownRes.data ?? [];
+  let own: Course[] = [];
+  if (ownCourseIds.length > 0) {
+    const { data } = await supabase.from("courses").select("*").in("id", ownCourseIds);
+    own = data ?? [];
+  }
   const ownIds = new Set(own.map((c) => c.id));
   const subIds = [
     ...new Set((subRes.data ?? []).map((s) => s.course_id).filter((id) => !ownIds.has(id))),

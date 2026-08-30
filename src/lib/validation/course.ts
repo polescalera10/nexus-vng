@@ -26,7 +26,8 @@ export const courseSchema = z
       .max(120, "Nombre demasiado largo"),
     modalidad_id: z.string().uuid("Elige una modalidad"),
     nivel_id: optionalUuid,
-    teacher_id: optionalUuid,
+    /** Profes titulares. Vacío = curso sin asignar. */
+    teacher_ids: z.array(z.string().uuid("Selección no válida")).default([]),
     weekday: z.coerce
       .number({ invalid_type_error: "Elige un día" })
       .int("Elige un día")

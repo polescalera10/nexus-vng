@@ -34,16 +34,23 @@ on conflict (id) do nothing;
 update public.students set partner_id = 'b0000000-0000-4000-8000-000000000002' where id = 'b0000000-0000-4000-8000-000000000001' and partner_id is null;
 update public.students set partner_id = 'b0000000-0000-4000-8000-000000000001' where id = 'b0000000-0000-4000-8000-000000000002' and partner_id is null;
 
-insert into public.courses (id, name, modalidad_id, nivel_id, teacher_id, weekday, start_time, duration_min, capacity_leaders, capacity_followers, cycle_type, start_date, active) values
+insert into public.courses (id, name, modalidad_id, nivel_id, weekday, start_time, duration_min, capacity_leaders, capacity_followers, cycle_type, start_date, active) values
   ('c0000000-0000-4000-8000-000000000001', 'Salsa Empiezo — Martes 20h',
    (select id from public.modalidades where slug = 'salsa-cubana'),
    (select id from public.niveles where nombre = 'Empiezo'),
-   'a0000000-0000-4000-8000-000000000001', 2, '20:00', 60, 8, 8, 'curso', date_trunc('month', current_date)::date, true),
+   2, '20:00', 60, 8, 8, 'curso', date_trunc('month', current_date)::date, true),
   ('c0000000-0000-4000-8000-000000000002', 'Bachata Intermedio — Miércoles 21h',
    (select id from public.modalidades where slug = 'bachata'),
    (select id from public.niveles where nombre = 'Intermedio'),
-   'a0000000-0000-4000-8000-000000000002', 3, '21:00', 60, 6, 6, 'curso', date_trunc('month', current_date)::date, true)
+   3, '21:00', 60, 6, 6, 'curso', date_trunc('month', current_date)::date, true)
 on conflict (id) do nothing;
+
+-- Los profes van en `course_teachers` desde 0032. El segundo curso lo dan dos.
+insert into public.course_teachers (course_id, teacher_id) values
+  ('c0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001'),
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000002'),
+  ('c0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001')
+on conflict do nothing;
 
 insert into public.enrollments (id, student_id, course_id, role_in_course, status) values
   ('d0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001', 'follower', 'activa'),

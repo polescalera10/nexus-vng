@@ -1,3 +1,4 @@
+import { getCourseIdsForTeacher } from "@/lib/queries/course-teachers";
 import { createClient } from "@/lib/supabase/server";
 import type { Attendance, ClassSession, Course, Student } from "@/types/database";
 
@@ -46,11 +47,7 @@ export async function getTeacherAgenda(teacherId: string): Promise<TeacherAgenda
   horizon.setDate(horizon.getDate() + 7);
   const horizonIso = toISODate(horizon);
 
-  const { data: ownCourses } = await supabase
-    .from("courses")
-    .select("id")
-    .eq("teacher_id", teacherId);
-  const ownCourseIds = (ownCourses ?? []).map((c) => c.id);
+  const ownCourseIds = await getCourseIdsForTeacher(teacherId);
 
   // Titular y sustituto en dos consultas planas; dedupe por id de sesión.
   const bySessionId = new Map<string, ClassSession>();

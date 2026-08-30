@@ -29,11 +29,14 @@ function SubmitButton({ isEdit }: { isEdit: boolean }) {
  */
 export function CourseForm({
   course,
+  teacherIds = [],
   modalidades: modalidadesIniciales,
   niveles,
   teachers,
 }: {
   course?: Course;
+  /** Profes ya asignados al curso (0032: pueden ser varios). */
+  teacherIds?: string[];
   modalidades: ModalidadOption[];
   niveles: NivelOption[];
   teachers: { id: string; full_name: string }[];
@@ -108,20 +111,48 @@ export function CourseForm({
         ))}
       </Select>
 
-      <Select
-        label="Profesor titular"
-        name="teacher_id"
-        defaultValue={course?.teacher_id ?? ""}
-        error={err("teacher_id")}
-        hint="Solo profes activos."
-      >
-        <option value="">Sin asignar</option>
-        {teachers.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.full_name}
-          </option>
-        ))}
-      </Select>
+      {/*
+        Casillas y no un `<select multiple>`: una clase la pueden dar dos profes
+        (Bachata 2 es de Martina y Davide) y con cinco nombres el multiselect
+        nativo es peor en móvil que cinco casillas de 44px.
+      */}
+      <fieldset className="flex flex-col gap-1.5 sm:col-span-2">
+        <legend className="font-body text-[13px] font-semibold text-text-strong">
+          Profes titulares
+        </legend>
+        {teachers.length === 0 ? (
+          <p className="font-body text-xs text-text-muted">
+            No hay profes activos todavía.
+          </p>
+        ) : (
+          <div className="mt-1 flex flex-wrap gap-2">
+            {teachers.map((t) => (
+              <label
+                key={t.id}
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-sm border border-text-strong/15 bg-bg-elevated px-3.5 font-body text-sm text-text-strong transition-colors has-[:checked]:border-accent has-[:checked]:text-accent"
+              >
+                <input
+                  type="checkbox"
+                  name="teacher_ids"
+                  value={t.id}
+                  defaultChecked={teacherIds.includes(t.id)}
+                  className="size-4 accent-[var(--color-accent)]"
+                />
+                {t.full_name}
+              </label>
+            ))}
+          </div>
+        )}
+        {err("teacher_ids") ? (
+          <p className="font-body text-xs font-semibold text-danger">
+            {err("teacher_ids")}
+          </p>
+        ) : (
+          <p className="font-body text-xs text-text-muted">
+            Puedes marcar varios. Sin marcar ninguno, el curso queda sin asignar.
+          </p>
+        )}
+      </fieldset>
 
       <Select
         label="Día de la semana"

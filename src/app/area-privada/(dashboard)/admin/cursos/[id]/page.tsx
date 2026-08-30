@@ -37,7 +37,7 @@ export default async function AdminCursoDetailPage({
   ]);
   if (!detail) notFound();
 
-  const { course, modalidadNombre, nivelNombre, teacher, enrollments, sessions } = detail;
+  const { course, modalidadNombre, nivelNombre, teachers, enrollments, sessions } = detail;
 
   const enrolled = enrollments.filter(
     (e) => e.status === "activa" || e.status === "pausada",
@@ -56,7 +56,9 @@ export default async function AdminCursoDetailPage({
         ? `faltan ${diff} follower${diff === 1 ? "" : "s"}`
         : `faltan ${-diff} leader${diff === -1 ? "" : "s"}`;
 
-  const substitutes = catalogs.teachers.filter((t) => t.id !== course.teacher_id);
+  // Un titular del curso no se ofrece como sustituto de sus propias sesiones.
+  const titularIds = new Set(teachers.map((t) => t.id));
+  const substitutes = catalogs.teachers.filter((t) => !titularIds.has(t.id));
 
   return (
     <>
@@ -76,7 +78,10 @@ export default async function AdminCursoDetailPage({
             {[modalidadNombre, nivelNombre].filter(Boolean).join(" · ")}
             {" · "}
             {WEEKDAYS[course.weekday]} {formatTime(course.start_time)} ·{" "}
-            {course.duration_min} min · {teacher?.full_name ?? "Sin profe"}
+            {course.duration_min} min ·{" "}
+            {teachers.length > 0
+              ? teachers.map((t) => t.full_name).join(" y ")
+              : "Sin profe"}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge variant={course.active ? "success" : "neutral"}>

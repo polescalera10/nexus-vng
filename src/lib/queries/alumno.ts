@@ -1,3 +1,4 @@
+import { getTeacherIdsByCourse } from "@/lib/queries/course-teachers";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, Enrollment, Student, Teacher } from "@/types/database";
 
@@ -14,7 +15,8 @@ import type { Course, Enrollment, Student, Teacher } from "@/types/database";
 
 export type MyCourse = Pick<Enrollment, "id" | "status" | "role_in_course"> & {
   course: Pick<Course, "id" | "name" | "weekday" | "start_time" | "duration_min"> | null;
-  teacherName: string | null;
+  /** Profes titulares del curso (0032: pueden ser varios). */
+  teacherNames: string[];
 };
 
 /** Ficha del alumno enlazada al usuario de la sesión. */
@@ -51,12 +53,11 @@ export async function getMyCourses(studentId: string): Promise<MyCourse[]> {
 
   const { data: courses } = await supabase
     .from("courses")
-    .select("id, name, weekday, start_time, duration_min, teacher_id")
+    .select("id, name, weekday, start_time, duration_min")
     .in("id", [...new Set(enrollments.map((e) => e.course_id))]);
 
-  const teacherIds = [
-    ...new Set((courses ?? []).map((c) => c.teacher_id).filter((id): id is string => !!id)),
-  ];
+  const teacherIdsByCourse = await getTeacherIdsByCourse((courses ?? []).map((c) => c.id));
+  const teacherIds = [...new Set([...teacherIdsByCourse.values()].flat())];
 
   const teacherName = new Map<string, string>();
   if (teacherIds.length > 0) {
@@ -87,7 +88,11 @@ export async function getMyCourses(studentId: string): Promise<MyCourse[]> {
               duration_min: c.duration_min,
             }
           : null,
-        teacherName: c?.teacher_id ? (teacherName.get(c.teacher_id) ?? null) : null,
+        teacherNames: c
+          ? (teacherIdsByCourse.get(c.id) ?? [])
+              .map((id) => teacherName.get(id))
+              .filter((name): name is string => !!name)
+          : [],
       };
     })
     .sort((a, b) => {

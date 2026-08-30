@@ -61,7 +61,14 @@ export default async function ProfesorCursosPage() {
             </THead>
             <TBody>
               {items.map(
-                ({ course, modalidadNombre, nivelNombre, leadersCount, followersCount }) => (
+                ({
+                  course,
+                  modalidadNombre,
+                  nivelNombre,
+                  teacherIds,
+                  leadersCount,
+                  followersCount,
+                }) => (
                   <Tr key={course.id} className="hover:bg-bg-elevated/60">
                     <Td>
                       <Link
@@ -72,7 +79,7 @@ export default async function ProfesorCursosPage() {
                       </Link>
                       <p className="mt-0.5 text-xs text-text-muted">
                         {[modalidadNombre, nivelNombre].filter(Boolean).join(" · ") || "—"}
-                        {course.teacher_id !== teacher.id && " · Sustitución"}
+                        {!teacherIds.includes(teacher.id) && " · Sustitución"}
                       </p>
                     </Td>
                     <Td>
