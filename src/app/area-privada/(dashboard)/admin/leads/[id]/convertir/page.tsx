@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { getLeadById } from "@/lib/queries/activity";
+import { matchLeadCourses } from "@/lib/leads/course-match";
 import { getCourseOptions } from "@/lib/queries/courses";
 import { toE164 } from "@/lib/phone";
 import { LEAD_ORIGEN_LABELS } from "@/lib/format";
@@ -9,35 +10,6 @@ import { ConvertLeadForm } from "./ConvertLeadForm";
 
 export const metadata = { title: "Convertir lead · NEXUS VNG" };
 export const dynamic = "force-dynamic";
-
-/**
- * Sugerencia de curso a partir de lo que el lead pidió.
- *
- * Los formularios de la web guardan textos legibles ("Salsa 1 · Miércoles
- * 20:30") en `modalidad_interes`/`intereses`; los cursos del panel tienen su
- * propio `name`. Se busca la primera coincidencia por nombre normalizado y, si
- * no hay ninguna, no se sugiere nada: preseleccionar el curso equivocado es
- * peor que no preseleccionar.
- */
-function sugerirCurso(
-  textos: string[],
-  courses: { id: string; name: string }[],
-): string | undefined {
-  const limpiar = (v: string) =>
-    v
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-
-  const pistas = textos.filter(Boolean).map(limpiar);
-  if (pistas.length === 0) return undefined;
-
-  const match = courses.find((c) => {
-    const nombre = limpiar(c.name);
-    return pistas.some((p) => p.includes(nombre) || nombre.includes(p));
-  });
-  return match?.id;
-}
 
 export default async function ConvertirLeadPage({
   params,
@@ -51,10 +23,10 @@ export default async function ConvertirLeadPage({
   if (!lead) notFound();
 
   const phoneE164 = toE164(lead.telefono) ?? "";
-  const suggestedCourseId = sugerirCurso(
-    [lead.modalidad_interes ?? "", ...(lead.intereses ?? [])],
-    courses,
-  );
+  // Aquí solo cabe un curso, así que se preselecciona el primero que pidió;
+  // el resto se añade desde Editar alumno. `modalidad_interes` no entra: es la
+  // campaña ("Curso regular"), no una clase.
+  const [suggestedCourseId] = matchLeadCourses(lead.intereses, courses).courseIds;
 
   const pedido = [lead.modalidad_interes, ...(lead.intereses ?? [])]
     .filter(Boolean)

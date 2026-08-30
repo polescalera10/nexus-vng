@@ -8,7 +8,7 @@ import { quickConvertLead } from "@/lib/actions/lead-conversion";
 import { updateLeadEstado } from "@/lib/actions/leads";
 import { LEAD_ESTADO_LABELS, LEAD_ORIGEN_LABELS, formatRelative } from "@/lib/format";
 import { buildLeadWaLink } from "@/lib/whatsapp";
-import type { Lead, LeadEstado } from "@/types/database";
+import type { EnrollmentRole, Lead, LeadEstado } from "@/types/database";
 
 /**
  * Fila de lead con acciones rápidas: responder por WhatsApp (con el mensaje ya
@@ -38,6 +38,7 @@ export function LeadCard({ lead }: { lead: Lead }) {
   const [isPending, startTransition] = useTransition();
   const [estado, setEstado] = useOptimistic(lead.estado);
   const [convertError, setConvertError] = useState<string | null>(null);
+  const [askingRole, setAskingRole] = useState(false);
 
   function move(next: LeadEstado) {
     startTransition(async () => {
@@ -48,15 +49,20 @@ export function LeadCard({ lead }: { lead: Lead }) {
   }
 
   /**
-   * Un clic = ficha creada. Solo se cae a la pantalla de conversión cuando
-   * falta algo que hay que escribir (teléfono raro, email ya usado).
+   * Dos clics y está: uno para convertir, otro para decir con qué rol baila.
+   * El rol es el único dato que el formulario público nunca preguntó y
+   * `enrollments.role_in_course` no admite nulos, así que sin él no se puede
+   * matricular en las clases que pidió — que es el motivo por el que escribió.
+   *
+   * Solo se cae a la pantalla de conversión cuando falta algo que hay que
+   * escribir a mano (teléfono raro, email ya usado).
    */
-  function convert() {
+  function convert(role: EnrollmentRole) {
     setConvertError(null);
     startTransition(async () => {
-      const res = await quickConvertLead(lead.id);
+      const res = await quickConvertLead(lead.id, role);
       if (res.ok) {
-        router.push(`/area-privada/admin/alumnos/${res.studentId}`);
+        router.push(`/area-privada/admin/alumnos/${res.studentId}${res.query}`);
         return;
       }
       console.error("[LeadCard] convertir:", res.message);
@@ -64,6 +70,7 @@ export function LeadCard({ lead }: { lead: Lead }) {
         router.push(`/area-privada/admin/leads/${lead.id}/convertir`);
         return;
       }
+      setAskingRole(false);
       setConvertError(res.message);
     });
   }
@@ -79,6 +86,8 @@ export function LeadCard({ lead }: { lead: Lead }) {
 
   const action =
     "inline-flex min-h-11 items-center justify-center rounded-sm border border-text-strong/15 px-3 font-body text-[13px] font-semibold text-text-body transition-colors hover:bg-bg-elevated disabled:pointer-events-none disabled:opacity-55 sm:min-h-9";
+  const convertAction =
+    "inline-flex min-h-11 items-center justify-center rounded-sm border border-accent/50 px-3 font-body text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 disabled:pointer-events-none disabled:opacity-55 sm:min-h-9";
 
   return (
     <li className="px-4 py-4">
@@ -149,13 +158,28 @@ export function LeadCard({ lead }: { lead: Lead }) {
           <Link href={`/area-privada/admin/alumnos/${lead.student_id}`} className={action}>
             Ver alumno
           </Link>
+        ) : askingRole ? (
+          <>
+            <span className="inline-flex min-h-11 items-center font-body text-[13px] text-text-muted sm:min-h-9">
+              Baila como
+            </span>
+            <button type="button" onClick={() => convert("leader")} disabled={isPending} className={convertAction}>
+              Leader
+            </button>
+            <button type="button" onClick={() => convert("follower")} disabled={isPending} className={convertAction}>
+              Follower
+            </button>
+            <button
+              type="button"
+              onClick={() => setAskingRole(false)}
+              disabled={isPending}
+              className={action}
+            >
+              Cancelar
+            </button>
+          </>
         ) : (
-          <button
-            type="button"
-            onClick={convert}
-            disabled={isPending}
-            className="inline-flex min-h-11 items-center justify-center rounded-sm border border-accent/50 px-3 font-body text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 disabled:pointer-events-none disabled:opacity-55 sm:min-h-9"
-          >
+          <button type="button" onClick={() => setAskingRole(true)} className={convertAction}>
             Convertir a alumno
           </button>
         )}

@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdminSession } from "@/lib/auth";
+import { buildConversionQuery } from "@/lib/leads/conversion-notice";
+import { matchLeadCourses } from "@/lib/leads/course-match";
 import { toE164 } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
 import { leadConversionSchema } from "@/lib/validation/lead-conversion";
@@ -34,7 +36,7 @@ export type LeadConversionState = {
  * pantalla de conversión en vez de dejar al admin con un error seco.
  */
 export type QuickConversionResult =
-  | { ok: true; studentId: string }
+  | { ok: true; studentId: string; query: string }
   | { ok: false; message: string; needsForm?: boolean };
 
 /** Motivo legible de por qué la BD ha rechazado la ficha. */
@@ -46,6 +48,55 @@ function studentInsertMessage(error: { code?: string; message?: string } | null)
   return error?.message
     ? `No se ha podido crear la ficha de alumno: ${error.message}`
     : "No se ha podido crear la ficha de alumno.";
+}
+
+/**
+ * Matricula al alumno en todo lo que pidió el lead, con el rol que ha dicho el
+ * admin. Un aforo lleno no cancela nada: entra en lista de espera, igual que
+ * en la pantalla larga. Devuelve el resumen para poder contárselo al admin —
+ * una matrícula silenciosa que no ha pasado es peor que no matricular.
+ */
+async function enrollFromLead(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  studentId: string,
+  courseIds: string[],
+  role: EnrollmentRole,
+): Promise<{ enrolled: number; waitlisted: number; failed: number }> {
+  let enrolled = 0;
+  let waitlisted = 0;
+  let failed = 0;
+
+  for (const courseId of courseIds) {
+    const { data: course } = await supabase
+      .from("courses")
+      .select("capacity_leaders, capacity_followers")
+      .eq("id", courseId)
+      .maybeSingle();
+
+    // Aforo 0 = sin límite, que es como está el catálogo hoy.
+    const capacity =
+      role === "leader" ? (course?.capacity_leaders ?? 0) : (course?.capacity_followers ?? 0);
+    const taken = await countActive(supabase, courseId, role);
+    const full = capacity > 0 && taken >= capacity;
+
+    const { error } = await supabase.from("enrollments").insert({
+      student_id: studentId,
+      course_id: courseId,
+      role_in_course: role,
+      status: full ? "lista_espera" : "activa",
+    });
+
+    if (error) {
+      console.error("[enrollFromLead]", courseId, error.message);
+      failed += 1;
+    } else if (full) {
+      waitlisted += 1;
+    } else {
+      enrolled += 1;
+    }
+  }
+
+  return { enrolled, waitlisted, failed };
 }
 
 /** Matrículas `activa` de ese rol en el curso (las pausadas no ocupan plaza). */
@@ -176,9 +227,15 @@ export async function convertLeadToStudent(
   revalidatePath("/area-privada/admin/alumnos");
   if (data.course_id) revalidatePath(`/area-privada/admin/cursos/${data.course_id}`);
 
-  redirect(
-    `/area-privada/admin/alumnos/${student.id}${waitlisted ? "?aviso=lista_espera" : ""}`,
-  );
+  // Mismo parte que la conversión rápida: la ficha ya sabe pintarlo y así el
+  // aviso de lista de espera deja de depender de un parámetro que nadie leía.
+  const query = buildConversionQuery({
+    enrolled: data.course_id && !waitlisted ? 1 : 0,
+    waitlisted: waitlisted ? 1 : 0,
+    failed: 0,
+    unmatched: [],
+  });
+  redirect(`/area-privada/admin/alumnos/${student.id}${query}`);
 }
 
 /**
@@ -186,23 +243,33 @@ export async function convertLeadToStudent(
  *
  * El caso normal es que el lead ya traiga todo lo que la ficha necesita
  * (nombre, teléfono y, casi siempre, email): abrir un formulario para
- * confirmar tres campos que nadie toca era un paso de más. Aquí se crea la
- * ficha con lo que hay y se deja el resto —cumpleaños, nivel, pareja, curso—
- * para la ficha del alumno, que es donde se rellena de verdad.
+ * confirmar tres campos que nadie toca era un paso de más. Además se
+ * matricula en las clases que pidió — que es el motivo por el que escribió.
+ *
+ * `role` lo elige el admin en la propia tarjeta: es el único dato que el
+ * formulario público nunca preguntó y `enrollments.role_in_course` no admite
+ * nulos. Se guarda también como `dance_role` del alumno, porque es lo que el
+ * admin acaba de afirmar y así las matrículas siguientes cuadran solas.
  *
  * Solo se delega en la pantalla larga cuando falta algo que hay que escribir a
  * mano: teléfono no convertible a E.164 o nombre inservible.
  */
-export async function quickConvertLead(leadId: string): Promise<QuickConversionResult> {
+export async function quickConvertLead(
+  leadId: string,
+  role: EnrollmentRole,
+): Promise<QuickConversionResult> {
   if (!(await isAdminSession())) {
     return { ok: false, message: "No tienes permiso para convertir leads." };
+  }
+  if (role !== "leader" && role !== "follower") {
+    return { ok: false, message: "Rol no válido." };
   }
 
   const supabase = await createClient();
 
   const { data: lead, error: leadError } = await supabase
     .from("leads")
-    .select("id, nombre, telefono, email, student_id")
+    .select("id, nombre, telefono, email, intereses, student_id")
     .eq("id", leadId)
     .maybeSingle();
 
@@ -211,7 +278,7 @@ export async function quickConvertLead(leadId: string): Promise<QuickConversionR
   }
   if (lead.student_id) {
     // Doble clic o dos pestañas: no es un error, ya está hecho.
-    return { ok: true, studentId: lead.student_id };
+    return { ok: true, studentId: lead.student_id, query: "" };
   }
 
   const fullName = (lead.nombre ?? "").trim();
@@ -242,7 +309,7 @@ export async function quickConvertLead(leadId: string): Promise<QuickConversionR
       full_name: fullName,
       phone,
       email,
-      dance_role: "both" as DanceRole,
+      dance_role: role as DanceRole,
       payment_status: "pendiente",
       active: true,
     })
@@ -258,6 +325,16 @@ export async function quickConvertLead(leadId: string): Promise<QuickConversionR
       message: studentInsertMessage(studentError),
     };
   }
+
+  // Las clases que pidió. Solo cursos activos: matricular en uno retirado
+  // dejaría una matrícula que no aparece por ningún lado.
+  const { data: courses } = await supabase
+    .from("courses")
+    .select("id, name, weekday, start_time")
+    .eq("active", true);
+
+  const { courseIds, unmatched } = matchLeadCourses(lead.intereses, courses ?? []);
+  const summary = await enrollFromLead(supabase, student.id, courseIds, role);
 
   const { error: linkError } = await supabase
     .from("leads")
@@ -275,6 +352,14 @@ export async function quickConvertLead(leadId: string): Promise<QuickConversionR
   revalidatePath("/area-privada/admin");
   revalidatePath("/area-privada/admin/leads");
   revalidatePath("/area-privada/admin/alumnos");
+  revalidatePath("/area-privada/admin/cursos");
+  for (const courseId of courseIds) {
+    revalidatePath(`/area-privada/admin/cursos/${courseId}`);
+  }
 
-  return { ok: true, studentId: student.id };
+  return {
+    ok: true,
+    studentId: student.id,
+    query: buildConversionQuery({ ...summary, unmatched }),
+  };
 }

@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { updateStudent } from "@/lib/actions/students";
-import { getNiveles, getPartnerOptions, getStudent } from "@/lib/queries/students";
+import { getCourseOptions } from "@/lib/queries/courses";
+import { getNiveles, getPartnerOptions, getStudentDetail } from "@/lib/queries/students";
 import { Card } from "@/components/ui/Card";
 import { StudentForm } from "../../StudentForm";
+import { EnrollmentsEditor } from "./EnrollmentsEditor";
 
 export default async function EditarAlumnoPage({
   params,
@@ -14,12 +16,16 @@ export default async function EditarAlumnoPage({
   await requireRole("admin");
   const { id } = await params;
 
-  const student = await getStudent(id);
-  if (!student) notFound();
+  // La ficha completa y no `getStudent`: aquí también se editan sus clases, y
+  // las matrículas vienen ya cruzadas con el curso.
+  const detail = await getStudentDetail(id);
+  if (!detail) notFound();
+  const { student, enrollments } = detail;
 
-  const [niveles, partners] = await Promise.all([
+  const [niveles, partners, courses] = await Promise.all([
     getNiveles(),
     getPartnerOptions(student.id),
+    getCourseOptions(),
   ]);
 
   return (
@@ -43,6 +49,15 @@ export default async function EditarAlumnoPage({
           student={student}
           submitLabel="Guardar cambios"
           cancelHref={`/area-privada/admin/alumnos/${student.id}`}
+        />
+      </Card>
+
+      <Card title="Clases" className="mt-4 max-w-3xl">
+        <EnrollmentsEditor
+          studentId={student.id}
+          danceRole={student.dance_role}
+          enrollments={enrollments}
+          courses={courses}
         />
       </Card>
     </>

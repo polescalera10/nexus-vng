@@ -9,6 +9,7 @@ import {
   PAYMENT_STATUS_LABELS,
   WEEKDAYS_SHORT,
 } from "@/lib/format";
+import { readConversionNotice } from "@/lib/leads/conversion-notice";
 import { getStudentDetail } from "@/lib/queries/students";
 import { getPointRules, getStudentPoints } from "@/lib/queries/gamificacion";
 import { Badge } from "@/components/ui/Badge";
@@ -42,14 +43,20 @@ function DataRow({ label, children }: { label: string; children: React.ReactNode
 
 export default async function AlumnoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireRole("admin");
-  const { id } = await params;
+  const [{ id }, query] = await Promise.all([params, searchParams]);
 
   const detail = await getStudentDetail(id);
   if (!detail) notFound();
+
+  // Solo aparece si se llega desde una conversión: dice qué se matriculó de
+  // verdad y qué se quedó fuera.
+  const notice = readConversionNotice(query);
 
   const [puntos, reglas] = await Promise.all([
     getStudentPoints(id, 20),
@@ -92,6 +99,21 @@ export default async function AlumnoPage({
           />
         </div>
       </div>
+
+      {notice && (
+        <div
+          role="status"
+          className={`mt-6 rounded-sm border px-4 py-3 font-body text-sm ${
+            notice.tone === "success"
+              ? "border-accent/30 bg-accent/10 text-text-body"
+              : "border-warning/30 bg-warning/10 text-warning"
+          }`}
+        >
+          {notice.lines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
+      )}
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         <Card title="Datos">
