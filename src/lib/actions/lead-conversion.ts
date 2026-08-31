@@ -162,7 +162,7 @@ export async function convertLeadToStudent(
   // 1) El lead debe existir y no estar ya convertido (doble clic, dos pestañas).
   const { data: lead, error: leadError } = await supabase
     .from("leads")
-    .select("id, student_id")
+    .select("id, student_id, origen")
     .eq("id", data.lead_id)
     .maybeSingle();
 
@@ -186,6 +186,7 @@ export async function convertLeadToStudent(
       dance_role: data.dance_role,
       payment_status: "pendiente",
       active: true,
+      is_founding_member: lead.origen === "socio-fundador",
     })
     .select("id")
     .single();
@@ -295,7 +296,7 @@ export async function quickConvertLead(
 
   const { data: lead, error: leadError } = await supabase
     .from("leads")
-    .select("id, nombre, telefono, email, intereses, student_id")
+    .select("id, nombre, telefono, email, intereses, student_id, origen")
     .eq("id", leadId)
     .maybeSingle();
 
@@ -338,6 +339,7 @@ export async function quickConvertLead(
       dance_role: role as DanceRole,
       payment_status: "pendiente",
       active: true,
+      is_founding_member: lead.origen === "socio-fundador",
     })
     .select("id")
     .single();

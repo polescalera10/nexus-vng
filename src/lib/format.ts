@@ -134,6 +134,7 @@ export const LEAD_ORIGEN_LABELS: Record<string, string> = {
   campana: "Campaña",
   intensivos: "Intensivos",
   "curso-regular": "Curso regular",
+  "socio-fundador": "Socio fundador",
 };
 
 export const CYCLE_TYPE_LABELS: Record<string, string> = {
