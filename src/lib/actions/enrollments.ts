@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { formatTime, WEEKDAYS } from "@/lib/format";
 import { isAdminSession } from "@/lib/auth";
-import { closedRoleMessage, roleCapacity } from "@/lib/enrollment-capacity";
+import {
+  closedRoleMessage,
+  effectiveCapacity,
+  overbookedMessage,
+} from "@/lib/enrollment-capacity";
+import { aboveLevelMessage, checkLevel } from "@/lib/level-access";
 import { createClient } from "@/lib/supabase/server";
 import { enrollmentSchema } from "@/lib/validation/enrollment";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -42,6 +47,32 @@ function revalidateCourse(courseId: string, studentId?: string) {
     revalidatePath(`/area-privada/admin/alumnos/${studentId}`);
     revalidatePath(`/area-privada/admin/alumnos/${studentId}/editar`);
   }
+}
+
+/**
+ * Aviso si el curso va por encima del nivel del alumno ("se puede bajar, no
+ * saltar"). Nunca bloquea: quien decide si alguien está listo es el profe.
+ * Devuelve null cuando no hay nada que comparar o el nivel encaja.
+ */
+async function levelNotice(
+  studentNivelId: string | null,
+  courseNivelId: string | null,
+): Promise<string | null> {
+  if (!courseNivelId) return null;
+
+  const supabase = await createClient();
+  const ids = [courseNivelId, ...(studentNivelId ? [studentNivelId] : [])];
+  const { data } = await supabase
+    .from("niveles")
+    .select("id, nombre, orden")
+    .in("id", ids);
+
+  const byId = new Map((data ?? []).map((n) => [n.id, n]));
+  const check = checkLevel(
+    studentNivelId ? (byId.get(studentNivelId) ?? null) : null,
+    byId.get(courseNivelId) ?? null,
+  );
+  return check.kind === "above" ? aboveLevelMessage(check) : null;
 }
 
 /** Matrículas `activa` del rol en el curso (las pausadas no cuentan). */
@@ -93,7 +124,7 @@ export async function enrollStudent(
   // Alumno: debe existir, estar activo y ser compatible con el rol elegido.
   const { data: student } = await supabase
     .from("students")
-    .select("id, full_name, dance_role, active")
+    .select("id, full_name, dance_role, active, is_founding_member, nivel_id")
     .eq("id", student_id)
     .maybeSingle();
   if (!student || !student.active) {
@@ -112,7 +143,7 @@ export async function enrollStudent(
 
   const { data: course } = await supabase
     .from("courses")
-    .select("id, name, capacity_leaders, capacity_followers")
+    .select("id, name, nivel_id, capacity_leaders, capacity_followers")
     .eq("id", course_id)
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
@@ -131,9 +162,15 @@ export async function enrollStudent(
     };
   }
 
-  // Aforo del rol.
+  // Aforo del rol. El socio fundador entra aunque esté lleno: la plaza se
+  // vendió como acceso, no como cupo (ver FOUNDING_BYPASSES_CAPACITY).
   const current = await countActive(course_id, role_in_course);
-  const capacity = roleCapacity(course, role_in_course, current);
+  const capacity = effectiveCapacity(
+    course,
+    role_in_course,
+    current,
+    student.is_founding_member,
+  );
 
   // Rol cerrado: no hay lista de espera que valga, la plaza no existe.
   if (capacity.kind === "closed") {
@@ -172,13 +209,18 @@ export async function enrollStudent(
   }
 
   revalidateCourse(course_id, student_id);
-  return {
-    status: "success",
-    message:
-      newStatus === "activa"
-        ? `${student.full_name} matriculado/a como ${role_in_course}.`
-        : `${student.full_name} apuntado/a a la lista de espera.`,
-  };
+
+  const avisos = [
+    newStatus === "activa"
+      ? `${student.full_name} matriculado/a como ${role_in_course}.`
+      : `${student.full_name} apuntado/a a la lista de espera.`,
+    capacity.kind === "overbooked"
+      ? overbookedMessage(course.name, role_in_course, capacity.over)
+      : null,
+    await levelNotice(student.nivel_id, course.nivel_id),
+  ].filter((m): m is string => m !== null);
+
+  return { status: "success", message: avisos.join(" ") };
 }
 
 /**
@@ -250,6 +292,12 @@ export async function promoteFromWaitlist(
     return { status: "error", message: "Esta matrícula ya no está en lista de espera." };
   }
 
+  const { data: waiting } = await supabase
+    .from("students")
+    .select("is_founding_member")
+    .eq("id", enrollment.student_id)
+    .maybeSingle();
+
   const { data: course } = await supabase
     .from("courses")
     .select("name, weekday, start_time, capacity_leaders, capacity_followers")
@@ -258,7 +306,12 @@ export async function promoteFromWaitlist(
   if (!course) return { status: "error", message: "Curso no encontrado." };
 
   const current = await countActive(enrollment.course_id, enrollment.role_in_course);
-  const capacity = roleCapacity(course, enrollment.role_in_course, current);
+  const capacity = effectiveCapacity(
+    course,
+    enrollment.role_in_course,
+    current,
+    waiting?.is_founding_member ?? false,
+  );
 
   if (capacity.kind === "closed") {
     return {
@@ -304,7 +357,13 @@ export async function promoteFromWaitlist(
   }
 
   revalidateCourse(enrollment.course_id, enrollment.student_id);
-  return { status: "success", message: "Matrícula pasada a activa." };
+  return {
+    status: "success",
+    message:
+      capacity.kind === "overbooked"
+        ? overbookedMessage(course.name, enrollment.role_in_course, capacity.over)
+        : "Matrícula pasada a activa.",
+  };
 }
 
 /**
@@ -343,10 +402,17 @@ export async function setEnrollmentRole(
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
 
-  const capacity = roleCapacity(
+  const { data: moving } = await supabase
+    .from("students")
+    .select("is_founding_member")
+    .eq("id", enrollment.student_id)
+    .maybeSingle();
+
+  const capacity = effectiveCapacity(
     course,
     role,
     await countActive(enrollment.course_id, role),
+    moving?.is_founding_member ?? false,
   );
 
   // Pasar a un rol que la clase no admite dejaría una matrícula imposible.
@@ -403,7 +469,7 @@ export async function addStudentEnrollment(
 
   const { data: student } = await supabase
     .from("students")
-    .select("id, active")
+    .select("id, active, is_founding_member, nivel_id")
     .eq("id", studentId)
     .maybeSingle();
   if (!student || !student.active) {
@@ -412,7 +478,7 @@ export async function addStudentEnrollment(
 
   const { data: course } = await supabase
     .from("courses")
-    .select("id, name, capacity_leaders, capacity_followers")
+    .select("id, name, nivel_id, capacity_leaders, capacity_followers")
     .eq("id", courseId)
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
@@ -427,7 +493,12 @@ export async function addStudentEnrollment(
     return { status: "error", message: "Ya está matriculado en ese curso." };
   }
 
-  const capacity = roleCapacity(course, role, await countActive(courseId, role));
+  const capacity = effectiveCapacity(
+    course,
+    role,
+    await countActive(courseId, role),
+    student.is_founding_member,
+  );
   if (capacity.kind === "closed") {
     return { status: "error", message: closedRoleMessage(course.name, role) };
   }
@@ -453,10 +524,17 @@ export async function addStudentEnrollment(
   }
 
   revalidateCourse(courseId, studentId);
+
+  const avisos = [
+    full ? `Aforo de ${ROLE_LABEL[role]} completo: entra en lista de espera.` : null,
+    capacity.kind === "overbooked"
+      ? overbookedMessage(course.name, role, capacity.over)
+      : null,
+    await levelNotice(student.nivel_id, course.nivel_id),
+  ].filter((m): m is string => m !== null);
+
   return {
     status: "success",
-    message: full
-      ? `Aforo de ${ROLE_LABEL[role]} completo: entra en lista de espera.`
-      : undefined,
+    message: avisos.length > 0 ? avisos.join(" ") : undefined,
   };
 }

@@ -118,3 +118,46 @@ export async function submitAttendance(input: AttendanceInput): Promise<Attendan
     message: `Lista guardada: ${presentCount}/${entries.length} presentes.`,
   };
 }
+
+/**
+ * Quita de la sesión el apunte de un alumno que vino de suelto.
+ *
+ * Solo llega aquí el fundador sin matrícula: la política de DELETE de 0038b
+ * exige justamente eso (a un matriculado se le corrige marcándolo ausente, no
+ * borrándolo de la lista del curso). El profe tiene que ser titular de la
+ * sesión o su sustituto; si no, la RLS devuelve 0 filas y se avisa.
+ */
+export async function removeDropIn(
+  sessionId: string,
+  studentId: string,
+): Promise<AttendanceResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { status: "error", message: "Tu sesión ha caducado. Vuelve a entrar." };
+  }
+
+  const { data: deleted, error } = await supabase
+    .from("attendance")
+    .delete()
+    .eq("class_session_id", sessionId)
+    .eq("student_id", studentId)
+    .select("id");
+
+  if (error) {
+    console.error("[removeDropIn] error:", error.message);
+    return { status: "error", message: "No se ha podido quitar de la lista." };
+  }
+  if ((deleted ?? []).length === 0) {
+    return {
+      status: "error",
+      message: "No se puede quitar: o está matriculado en el curso, o no es tu sesión.",
+    };
+  }
+
+  revalidatePath(`/area-privada/profesor/asistencia/${sessionId}`);
+  revalidatePath("/area-privada/profesor");
+  return { status: "success", message: "Quitado de la lista." };
+}

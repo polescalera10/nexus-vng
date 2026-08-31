@@ -34,7 +34,7 @@ export default async function AsistenciaPage({
   const sheet = await getAttendanceSheet(sessionId);
   if (!sheet) notFound();
 
-  const { session, course, students, records } = sheet;
+  const { session, course, students, records, dropInCandidates } = sheet;
   const attendanceTaken = records.length > 0;
   const presentByStudent = new Map(records.map((r) => [r.student_id, r.present]));
 
@@ -83,7 +83,7 @@ export default async function AsistenciaPage({
             title="Esta sesión está cancelada"
             description="No se pasa lista en sesiones canceladas. Si es un error, pide al admin que la reprograme."
           />
-        ) : students.length === 0 ? (
+        ) : students.length === 0 && dropInCandidates.length === 0 ? (
           <EmptyState
             title="Sin alumnos activos en este curso"
             description="Cuando haya matrículas activas, aparecerán aquí para pasar lista."
@@ -92,6 +92,7 @@ export default async function AsistenciaPage({
           <AttendanceSheet
             sessionId={session.id}
             students={students}
+            candidates={dropInCandidates}
             initialPresent={initialPresent}
             isEdit={attendanceTaken}
           />

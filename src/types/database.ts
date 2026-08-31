@@ -453,6 +453,14 @@ export interface Database {
         Args: Record<string, never>;
         Returns: number;
       };
+      /**
+       * Socios fundadores que el profe puede añadir de suelto a una sesión
+       * (migración 0038c). SECURITY DEFINER: devuelve solo id y nombre.
+       */
+      founding_drop_in_candidates: {
+        Args: { p_session_id: string };
+        Returns: { id: string; full_name: string }[];
+      };
     };
     CompositeTypes: Record<never, never>;
     Enums: {

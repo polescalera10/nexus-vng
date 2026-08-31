@@ -52,3 +52,51 @@ const ROLE_LABEL: Record<EnrollmentRole, string> = {
 export function closedRoleMessage(courseName: string, role: EnrollmentRole): string {
   return `${courseName} no admite ${ROLE_LABEL[role]}.`;
 }
+
+// ── Plaza fundadora ─────────────────────────────────────────────────────────
+
+/**
+ * ¿La plaza de socio fundador se salta el aforo?
+ *
+ * Decisión de Pol (31-08-2026): **sí, avisa pero no bloquea**. La plaza se
+ * vendió como acceso a todas las disciplinas del nivel, y mandar a lista de
+ * espera a quien paga la tarifa alta es justo lo contrario de lo prometido.
+ * El aviso queda para que el admin sepa que esa clase va sobre aforo.
+ *
+ * Para endurecerlo (fundador a lista de espera como cualquiera) basta con
+ * poner esto en false: `effectiveCapacity` vuelve a devolver `full`.
+ */
+export const FOUNDING_BYPASSES_CAPACITY = true;
+
+export type EffectiveCapacity =
+  | RoleCapacity
+  /** Cabe porque es fundador, pero la clase queda por encima de su aforo. */
+  | { kind: "overbooked"; over: number };
+
+/**
+ * Aforo tal y como aplica a un alumno concreto.
+ *
+ * `closed` no se levanta nunca: que una clase no admita leaders no es una
+ * cuestión de cupo, es que la plaza no existe (0033). Ni la tarifa fundadora
+ * mete a un leader en Heels.
+ */
+export function effectiveCapacity(
+  course: CourseCapacity,
+  role: EnrollmentRole,
+  activeCount: number,
+  isFoundingMember: boolean,
+): EffectiveCapacity {
+  const base = roleCapacity(course, role, activeCount);
+  if (base.kind !== "full") return base;
+  if (!isFoundingMember || !FOUNDING_BYPASSES_CAPACITY) return base;
+  return { kind: "overbooked", over: activeCount + 1 - capacityFor(course, role) };
+}
+
+/** Aviso para el admin cuando un fundador entra en una clase llena. */
+export function overbookedMessage(
+  courseName: string,
+  role: EnrollmentRole,
+  over: number,
+): string {
+  return `${courseName} estaba al completo de ${ROLE_LABEL[role]}: entra por plaza fundadora y la clase queda ${over} por encima del aforo.`;
+}

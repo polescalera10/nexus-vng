@@ -123,13 +123,27 @@ export async function getTeacherAgenda(teacherId: string): Promise<TeacherAgenda
   };
 }
 
+/** Una fila de la hoja: matriculado del curso o socio fundador de suelto. */
+export type RosterStudent = Pick<Student, "id" | "full_name"> & {
+  /** false = viene de suelto por su plaza fundadora, sin matrícula. */
+  enrolled: boolean;
+};
+
 export type AttendanceSheetData = {
   session: ClassSession;
   course: Course;
-  /** Alumnos con matrícula `activa` en el curso (pausada y lista_espera fuera). */
-  students: Pick<Student, "id" | "full_name">[];
+  /**
+   * Matrículas `activa` del curso (pausada y lista_espera fuera) más los
+   * fundadores que ya tienen apunte en esta sesión.
+   */
+  students: RosterStudent[];
   /** Asistencia ya registrada (vacío si aún no se ha pasado lista). */
   records: Attendance[];
+  /**
+   * Fundadores que el profe puede añadir a esta sesión (RPC
+   * `founding_drop_in_candidates`, 0038c). Vacío en compañías.
+   */
+  dropInCandidates: Pick<Student, "id" | "full_name">[];
 };
 
 /**
@@ -160,21 +174,32 @@ export async function getAttendanceSheet(
   ]);
   if (!courseRes.data) return null;
 
-  const studentIds = [...new Set((enrollmentsRes.data ?? []).map((e) => e.student_id))];
-  let students: Pick<Student, "id" | "full_name">[] = [];
+  // El roster son las matrículas activas MÁS los sueltos ya apuntados: si solo
+  // se leyeran las matrículas, el fundador añadido a mano desaparecería de la
+  // hoja al recargar y su fila de `attendance` quedaría huérfana en pantalla.
+  const enrolledIds = new Set((enrollmentsRes.data ?? []).map((e) => e.student_id));
+  const recordedIds = (attendanceRes.data ?? []).map((a) => a.student_id);
+  const studentIds = [...new Set([...enrolledIds, ...recordedIds])];
+
+  let students: RosterStudent[] = [];
   if (studentIds.length > 0) {
     const { data } = await supabase
       .from("students")
       .select("id, full_name")
       .in("id", studentIds)
       .order("full_name", { ascending: true });
-    students = data ?? [];
+    students = (data ?? []).map((s) => ({ ...s, enrolled: enrolledIds.has(s.id) }));
   }
+
+  const { data: candidates } = await supabase.rpc("founding_drop_in_candidates", {
+    p_session_id: sessionId,
+  });
 
   return {
     session,
     course: courseRes.data,
     students,
     records: attendanceRes.data ?? [],
+    dropInCandidates: candidates ?? [],
   };
 }
