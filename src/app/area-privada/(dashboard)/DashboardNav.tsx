@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 export type NavIconName =
   | "home"
+  | "negocio"
   | "leads"
   | "intensivos"
   | "students"
@@ -38,6 +39,12 @@ function NavIcon({ name }: { name: NavIconName }) {
       </>
     ),
     intensivos: <path d="M13 3 5 13.5h5.5L11 21l8-10.5h-5.5L13 3Z" />,
+    negocio: (
+      <>
+        <path d="M4 20h16M7 20v-6M12 20V8M17 20v-9" />
+        <path d="m5 9 5-4 4 3 5-5" />
+      </>
+    ),
     students: (
       <>
         <circle cx="9" cy="8" r="3.2" />

@@ -14,13 +14,8 @@ import { SidebarNav, TabBar, type NavItem } from "./DashboardNav";
 const NAV: Record<"admin" | "profesor", NavItem[]> = {
   admin: [
     { href: "/area-privada/admin", label: "Novedades", icon: "home", short: "Inicio", exact: true },
+    { href: "/area-privada/admin/dashboard", label: "Dashboard", icon: "negocio", short: "Datos" },
     { href: "/area-privada/admin/leads", label: "Leads", icon: "leads" },
-    {
-      href: "/area-privada/admin/intensivos",
-      label: "Intensivos",
-      icon: "intensivos",
-      short: "Intens.",
-    },
     { href: "/area-privada/admin/alumnos", label: "Alumnos", icon: "students" },
     { href: "/area-privada/admin/cursos", label: "Cursos", icon: "courses" },
     {
@@ -30,6 +25,12 @@ const NAV: Record<"admin" | "profesor", NavItem[]> = {
       short: "Profes",
     },
     { href: "/area-privada/admin/eventos", label: "Eventos", icon: "eventos" },
+    {
+      href: "/area-privada/admin/intensivos",
+      label: "Intensivos",
+      icon: "intensivos",
+      short: "Intens.",
+    },
     {
       href: "/area-privada/admin/gamificacion",
       label: "Gamificación",

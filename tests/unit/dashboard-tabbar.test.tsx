@@ -13,15 +13,16 @@ beforeEach(() => {
   pathname.current = "/area-privada/admin";
 });
 
-/** Las nueve secciones reales del panel de admin. */
+/** Las diez secciones reales del panel de admin (espejo de layout.tsx). */
 const ADMIN: NavItem[] = [
   { href: "/area-privada/admin", label: "Novedades", icon: "home", short: "Inicio", exact: true },
+  { href: "/area-privada/admin/dashboard", label: "Dashboard", icon: "negocio", short: "Datos" },
   { href: "/area-privada/admin/leads", label: "Leads", icon: "leads" },
-  { href: "/area-privada/admin/intensivos", label: "Intensivos", icon: "intensivos", short: "Intens." },
   { href: "/area-privada/admin/alumnos", label: "Alumnos", icon: "students" },
   { href: "/area-privada/admin/cursos", label: "Cursos", icon: "courses" },
   { href: "/area-privada/admin/profesores", label: "Profesores", icon: "teachers", short: "Profes" },
   { href: "/area-privada/admin/eventos", label: "Eventos", icon: "eventos" },
+  { href: "/area-privada/admin/intensivos", label: "Intensivos", icon: "intensivos", short: "Intens." },
   { href: "/area-privada/admin/gamificacion", label: "Gamificación", icon: "puntos", short: "Puntos" },
   { href: "/area-privada/admin/whatsapp", label: "WhatsApp", icon: "whatsapp", short: "WA" },
 ];
@@ -33,7 +34,7 @@ const PROFESOR: NavItem[] = [
 
 /**
  * La barra de pestañas es la única navegación del panel por debajo de 768px.
- * Con nueve secciones no caben nueve pestañas a 320px sin bajar de los 44px de
+ * Con diez secciones no caben diez pestañas a 320px sin bajar de los 44px de
  * objetivo táctil, así que las que sobran viven detrás de "Más" — y si ese
  * botón no funciona, la mitad del panel deja de existir en móvil.
  */
@@ -45,7 +46,7 @@ describe("TabBar del panel", () => {
     expect(screen.queryByRole("button", { name: /Más/ })).not.toBeInTheDocument();
   });
 
-  it("con las nueve secciones deja cuatro pestañas y esconde el resto", () => {
+  it("con las diez secciones deja cuatro pestañas y esconde el resto", () => {
     render(<TabBar items={ADMIN} />);
     expect(screen.getAllByRole("link")).toHaveLength(4);
     expect(screen.getByRole("button", { name: /Más/ })).toHaveAttribute(
@@ -53,6 +54,8 @@ describe("TabBar del panel", () => {
       "false",
     );
     expect(screen.queryByRole("link", { name: /WA/ })).not.toBeInTheDocument();
+    // Dashboard va en las visibles: es la vista de negocio, no una sección más.
+    expect(screen.getByRole("link", { name: /Datos/ })).toBeInTheDocument();
   });
 
   it("Más despliega las secciones restantes y todas son alcanzables", async () => {
@@ -61,7 +64,7 @@ describe("TabBar del panel", () => {
 
     await user.click(screen.getByRole("button", { name: /Más/ }));
 
-    for (const label of ["Cursos", "Profes", "Eventos", "Puntos", "WA"]) {
+    for (const label of ["Cursos", "Profes", "Eventos", "Intens.", "Puntos", "WA"]) {
       expect(screen.getByRole("link", { name: new RegExp(label) })).toBeInTheDocument();
     }
     // Ningún enlace del panel se queda sin ruta que abrir.
