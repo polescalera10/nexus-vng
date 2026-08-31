@@ -3,21 +3,19 @@ import { Reveal } from "@/components/ui/Reveal";
 import { Countdown } from "@/components/ui/Countdown";
 import { WaLink } from "@/components/ui/WaLink";
 import { founding } from "@/content/landing";
+import { barraPct, tieneAforo, type FoundingSpots } from "@/lib/founding-spots";
 
 /**
  * Bloque de oferta fundadora — dos columnas: tarjeta de la oferta + qué incluye.
  * Es EL bloque premium del sitio: titular con el degradado NEXUS, bordes y
  * detalles en neon-lime y glow menta sobre panel oscuro.
  * Urgencia honesta: la cuenta atrás y la barra de plazas SOLO se pintan si hay
- * datos reales en content/landing.ts (deadline / spotsLeft / spotsTotal).
+ * datos reales — la fecha en content/landing.ts y las plazas en `leads`
+ * (`getFoundingSpots()`). Sin recuento fiable, el bloque de plazas desaparece.
  */
-export function Founding() {
-  const { price, priceOld, spotsLeft, spotsTotal, deadline } = founding;
-
-  const hasSpots = spotsLeft !== null && spotsTotal !== null && spotsTotal > 0;
-  const takenPct = hasSpots
-    ? Math.max(6, Math.round(((spotsTotal - spotsLeft) / spotsTotal) * 100))
-    : 0;
+export function Founding({ spots }: { spots: FoundingSpots }) {
+  const { price, priceOld, deadline } = founding;
+  const hasSpots = tieneAforo(spots);
 
   return (
     <section className="bg-bg-base relative overflow-hidden py-[clamp(70px,10vw,130px)] text-white">
@@ -76,13 +74,17 @@ export function Founding() {
                 <div className="font-body mb-2 flex justify-between text-xs text-white/65">
                   <span>Plazas fundadoras</span>
                   <span>
-                    Quedan {spotsLeft} / {spotsTotal}
+                    Quedan {spots.left} / {spots.total}
                   </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-white/8">
+                <div
+                  className="h-2 overflow-hidden rounded-full bg-white/8"
+                  role="img"
+                  aria-label={`Quedan ${spots.left} de ${spots.total} plazas fundadoras`}
+                >
                   <div
                     className="from-neon-lime via-neon-mint to-neon h-full rounded-full bg-linear-to-r"
-                    style={{ width: `${takenPct}%` }}
+                    style={{ width: `${barraPct(spots.total - spots.left, spots.total)}%` }}
                   />
                 </div>
               </div>

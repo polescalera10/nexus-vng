@@ -14,13 +14,14 @@ import { Faq } from "@/components/landing/Faq";
 import { CtaFinal } from "@/components/landing/CtaFinal";
 import { JsonLd, faqLd } from "@/components/seo/JsonLd";
 import { getModalidades } from "@/lib/queries/modalidades";
+import { getFoundingSpots } from "@/lib/queries/founding";
 import { faqs } from "@/content/landing";
 
 // ISR: la landing es estática y se revalida cada hora (modalidades editables).
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const modalidades = await getModalidades();
+  const [modalidades, spots] = await Promise.all([getModalidades(), getFoundingSpots()]);
 
   return (
     <main>
@@ -31,7 +32,7 @@ export default async function HomePage() {
       <Modalidades modalidades={modalidades} />
       {/* Oculta hasta tener contenido real (fotos + reseñas): <Comunidad /> */}
       <Profesores />
-      <Founding />
+      <Founding spots={spots} />
       {/* Precios "estándar": debajo del founding a propósito — cuando la promo
           fundadora se retire y se borre <Founding />, esta sección queda como
           el bloque de precios de referencia de la home. */}

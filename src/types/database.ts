@@ -5,12 +5,7 @@
  */
 
 export type UserRole = "alumno" | "profesor" | "admin";
-export type LeadEstado =
-  | "nuevo"
-  | "contactado"
-  | "prueba_agendada"
-  | "convertido"
-  | "descartado";
+export type LeadEstado = "nuevo" | "contactado" | "prueba_agendada" | "convertido" | "descartado";
 export type InscripcionEstado = "activa" | "pausada" | "baja" | "lista_espera";
 export type ContenidoTipo = "video" | "comentario" | "fiesta" | "evento";
 export type EventoTipo =
@@ -58,13 +53,13 @@ export type Modalidad = {
   categoria: ModalidadCategoria;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type Nivel = {
   id: string;
   nombre: string;
   orden: number;
-}
+};
 
 export type Profile = {
   id: string;
@@ -74,7 +69,7 @@ export type Profile = {
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type Lead = {
   id: string;
@@ -91,7 +86,7 @@ export type Lead = {
   student_id: string | null;
   converted_at: string | null;
   created_at: string;
-}
+};
 
 export type Evento = {
   id: string;
@@ -115,7 +110,7 @@ export type Evento = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type Student = {
   id: string;
@@ -134,7 +129,7 @@ export type Student = {
   birthday: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type Teacher = {
   id: string;
@@ -149,7 +144,7 @@ export type Teacher = {
   active: boolean;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type Course = {
   id: string;
@@ -168,7 +163,7 @@ export type Course = {
   active: boolean;
   created_at: string;
   updated_at: string;
-}
+};
 
 /**
  * Profes titulares de un curso (N:N). Sustituye a `courses.teacher_id`, que
@@ -179,7 +174,7 @@ export type CourseTeacher = {
   course_id: string;
   teacher_id: string;
   created_at: string;
-}
+};
 
 export type Enrollment = {
   id: string;
@@ -188,7 +183,7 @@ export type Enrollment = {
   role_in_course: EnrollmentRole;
   status: InscripcionEstado;
   enrolled_at: string;
-}
+};
 
 export type ClassSession = {
   id: string;
@@ -198,7 +193,7 @@ export type ClassSession = {
   substitute_teacher_id: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type Attendance = {
   id: string;
@@ -207,7 +202,7 @@ export type Attendance = {
   present: boolean;
   recorded_by: string | null;
   recorded_at: string;
-}
+};
 
 export type WhatsappEvent = {
   id: string;
@@ -217,7 +212,7 @@ export type WhatsappEvent = {
   status: WhatsappEventStatus;
   sent_at: string | null;
   created_at: string;
-}
+};
 
 /**
  * Marca de asistencia y cobro de una sesión de intensivo (migración 0024).
@@ -239,7 +234,7 @@ export type IntensivoRegistro = {
   nota: string | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 // ── Gamificación (migración 0027) ────────────────────────────────────────────
 
@@ -254,7 +249,7 @@ export type PointRule = {
   orden: number;
   created_at: string;
   updated_at: string;
-}
+};
 
 /**
  * Apunte del libro mayor de puntos. El saldo NUNCA se materializa: es la suma
@@ -272,7 +267,7 @@ export type PointEvent = {
   occurred_on: string;
   created_by: string | null;
   created_at: string;
-}
+};
 
 export type Reward = {
   id: string;
@@ -285,7 +280,7 @@ export type Reward = {
   orden: number;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type RewardRedemption = {
   id: string;
@@ -298,7 +293,7 @@ export type RewardRedemption = {
   requested_at: string;
   resolved_at: string | null;
   resolved_by: string | null;
-}
+};
 
 export type PointMilestone = {
   id: string;
@@ -306,13 +301,13 @@ export type PointMilestone = {
   label: string;
   active: boolean;
   created_at: string;
-}
+};
 
 /** Vista `student_point_balances` (security_invoker). */
 export type StudentPointBalance = {
   student_id: string;
   balance: number;
-}
+};
 
 /**
  * Forma mínima que esperan los clientes `@supabase/ssr`.
@@ -411,8 +406,7 @@ export interface Database {
       };
       point_events: {
         Row: PointEvent;
-        Insert: Pick<PointEvent, "student_id" | "points" | "concept"> &
-          Partial<PointEvent>;
+        Insert: Pick<PointEvent, "student_id" | "points" | "concept"> & Partial<PointEvent>;
         Update: Partial<PointEvent>;
         Relationships: [];
       };
@@ -439,8 +433,7 @@ export interface Database {
         Row: IntensivoRegistro;
         // Casi todas las columnas tienen default en Postgres (migración 0024):
         // obligatorias solo `sesion` y `nombre`.
-        Insert: Pick<IntensivoRegistro, "sesion" | "nombre"> &
-          Partial<IntensivoRegistro>;
+        Insert: Pick<IntensivoRegistro, "sesion" | "nombre"> & Partial<IntensivoRegistro>;
         Update: Partial<IntensivoRegistro>;
         Relationships: [];
       };
@@ -451,7 +444,16 @@ export interface Database {
         Relationships: [];
       };
     };
-    Functions: Record<never, never>;
+    Functions: {
+      /**
+       * Plazas fundadoras ocupadas (migración 0036). SECURITY DEFINER: devuelve
+       * solo el recuento, nunca filas de `leads`.
+       */
+      founding_spots_taken: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+    };
     CompositeTypes: Record<never, never>;
     Enums: {
       user_role: UserRole;

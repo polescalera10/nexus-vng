@@ -39,10 +39,7 @@ async function leadsWriteClient() {
  * POST al webhook n8n → feedback.
  * El webhook n8n NUNCA se expone al cliente: se llama desde aquí, en el servidor.
  */
-export async function submitLead(
-  _prev: LeadFormState,
-  formData: FormData,
-): Promise<LeadFormState> {
+export async function submitLead(_prev: LeadFormState, formData: FormData): Promise<LeadFormState> {
   const raw = {
     nombre: formData.get("nombre"),
     telefono: formData.get("telefono"),
@@ -102,6 +99,17 @@ export async function submitLead(
     status: "success",
     message: "¡Gracias! Te escribimos por WhatsApp enseguida.",
   };
+}
+
+/**
+ * El contador público de plazas fundadoras se calcula sobre `leads`, así que
+ * cualquier alta o cambio de estado de un lead `socio-fundador` deja obsoletas
+ * la home y la landing. Sin esto habría que esperar a la revalidación horaria
+ * para que "Quedan N / 10" reflejara la realidad.
+ */
+function revalidarPlazasFundadoras() {
+  revalidatePath("/");
+  revalidatePath("/socio-fundador");
 }
 
 /** Etiqueta legible en el CRM de la landing que convirtió al lead. */
@@ -169,6 +177,8 @@ export async function submitInterestLead(
     };
   }
 
+  if (lead.origen === "socio-fundador") revalidarPlazasFundadoras();
+
   await postToN8n({
     ...lead,
     intereses_texto: lead.intereses.join(", "),
@@ -197,10 +207,7 @@ export async function updateLeadEstado(
   if (!parsed.success) return { ok: false, message: "Estado no válido." };
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("leads")
-    .update({ estado: parsed.data })
-    .eq("id", leadId);
+  const { error } = await supabase.from("leads").update({ estado: parsed.data }).eq("id", leadId);
 
   if (error) {
     console.error("[updateLeadEstado] error:", error.message);
@@ -209,5 +216,7 @@ export async function updateLeadEstado(
 
   revalidatePath("/area-privada/admin");
   revalidatePath("/area-privada/admin/leads");
+  // Descartar (o recuperar) un lead fundador mueve el contador público.
+  revalidarPlazasFundadoras();
   return { ok: true };
 }

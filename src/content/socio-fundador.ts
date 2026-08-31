@@ -25,13 +25,24 @@ import { precios, precioEstilos } from "@/content/precios";
 import { disciplinasRegulares, gruposCompania } from "@/content/horario-regular";
 
 /**
- * Aforo de la promoción. `founding.spots*` son `number | null` (null = dato sin
- * confirmar); aquí se normalizan para poder interpolarlos en el copy sin que
+ * Aforo de la promoción. `founding.spotsTotal` es `number | null` (null = dato
+ * sin confirmar); aquí se normaliza para poder interpolarlo en el copy sin que
  * salga un "null" impreso en pantalla.
+ *
+ * Solo el TOTAL es estático: las plazas que quedan salen de `leads` en cada
+ * render (`getFoundingSpots()`), así que el copy que dependa de ellas se compone
+ * con `kickerPlazas()` en lugar de fijarse aquí.
  */
 const SPOTS_TOTAL = founding.spotsTotal ?? 10;
-const SPOTS_LEFT = founding.spotsLeft ?? SPOTS_TOTAL;
-export const plazas = { total: SPOTS_TOTAL, left: SPOTS_LEFT } as const;
+export const plazas = { total: SPOTS_TOTAL } as const;
+
+/**
+ * Kicker del formulario. Con dato vivo dice cuántas quedan; sin él (Supabase
+ * caído) cae a un titular sin cifras en vez de inventarse una.
+ */
+export function kickerPlazas(left: number | null): string {
+  return left === null ? "Plaza de socio fundador" : `Quedan ${left} de ${SPOTS_TOTAL} plazas`;
+}
 
 /** Cuota fundadora en número, para poder hacer cuentas con ella. */
 const CUOTA = Number(founding.price.replace(/\D/g, ""));
@@ -244,7 +255,6 @@ export const socioFundador = {
   ],
 
   form: {
-    kicker: `Quedan ${plazas.left} de ${plazas.total} plazas`,
     title: "Reserva tu plaza fundadora",
     subtitle:
       "No hace falta que elijas clases: la plaza las incluye todas. Solo dinos quién eres y por dónde andas, y te escribimos por WhatsApp el mismo día para montar tu semana.",

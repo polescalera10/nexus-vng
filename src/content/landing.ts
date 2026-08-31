@@ -82,14 +82,12 @@ export const modalidadesFallback = [
   {
     slug: "lady-style-salsa",
     nombre: "Lady Style Salsa",
-    descripcion:
-      "Estilo femenino aplicado a la salsa cubana: brazos, cadera y presencia propia.",
+    descripcion: "Estilo femenino aplicado a la salsa cubana: brazos, cadera y presencia propia.",
   },
   {
     slug: "lady-style-bachata",
     nombre: "Lady Style Bachata",
-    descripcion:
-      "El lenguaje corporal de la bachata en solitario: ondas, giros y musicalidad.",
+    descripcion: "El lenguaje corporal de la bachata en solitario: ondas, giros y musicalidad.",
   },
   {
     slug: "sexy-style",
@@ -222,10 +220,13 @@ export const founding = {
   priceOld: "100 €" as string | null,
   /**
    * Plazas fundadoras REALES: la promoción está limitada a 10 plazas (Pol, 26-07-2026).
-   * `spotsLeft` debe reflejar las que quedan de verdad — actualízalo a mano (o desde BD)
-   * conforme se ocupen; arranca en 10 (ninguna vendida todavía).
+   *
+   * Aquí solo vive el TOTAL, que es una decisión de negocio. Las que quedan ya
+   * no se escriben a mano: salen de `leads` vía `getFoundingSpots()`
+   * (src/lib/queries/founding.ts) — cada solicitud con origen `socio-fundador`
+   * que no esté descartada ocupa una plaza. Poner `spotsTotal` a null retira el
+   * contador de toda la web.
    */
-  spotsLeft: 10 as number | null,
   spotsTotal: 10 as number | null,
   /**
    * Fecha límite REAL de la tarifa fundadora (fin del periodo de apertura).

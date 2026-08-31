@@ -11,7 +11,9 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ogImages } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { founding } from "@/content/landing";
-import { disciplinas, numeros, plazas, socioFundador as c } from "@/content/socio-fundador";
+import { disciplinas, kickerPlazas, numeros, socioFundador as c } from "@/content/socio-fundador";
+import { getFoundingSpots } from "@/lib/queries/founding";
+import { barraPct, tieneAforo, type FoundingSpots } from "@/lib/founding-spots";
 
 export const metadata: Metadata = {
   title: "Socio Fundador · 10 plazas a 85 €/mes",
@@ -28,8 +30,10 @@ export const metadata: Metadata = {
   },
 };
 
-/** Barra de plazas: mínimo visual del 6 % para que la barra se vea aunque esté a 0. */
-const tomadasPct = Math.max(6, Math.round(((plazas.total - plazas.left) / plazas.total) * 100));
+// ISR: la página es estática, pero el contador de plazas sale de `leads` y hay
+// que refrescarlo. La Server Action que guarda un lead fundador ya revalida esta
+// ruta al instante (src/lib/actions/leads.ts); esto es solo la red de seguridad.
+export const revalidate = 3600;
 
 /**
  * `Offer` de la plaza fundadora: el precio (85 €/mes) y la disponibilidad que
@@ -37,7 +41,7 @@ const tomadasPct = Math.max(6, Math.round(((plazas.total - plazas.left) / plazas
  * valores salen de `founding`/`precios`, no se escriben a mano: si mañana
  * cambia la cuota o se agotan las plazas, el schema cambia solo.
  */
-function ofertaFundadoraLd() {
+function ofertaFundadoraLd(spots: FoundingSpots) {
   return {
     "@context": "https://schema.org",
     "@type": "Offer",
@@ -54,15 +58,30 @@ function ofertaFundadoraLd() {
       // Cuota mensual: una unidad de referencia = 1 mes (unitCode UN/CEFACT "MON").
       referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
     },
-    availability: plazas.left > 0 ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
-    inventoryLevel: { "@type": "QuantitativeValue", value: plazas.left, maxValue: plazas.total },
+    // Sin recuento fiable se declara solo la oferta, sin inventario: un
+    // `inventoryLevel` inventado en el schema es la misma afirmación falsa que
+    // en pantalla, y encima legible por máquinas.
+    ...(tieneAforo(spots)
+      ? {
+          availability:
+            spots.left > 0 ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+          inventoryLevel: {
+            "@type": "QuantitativeValue",
+            value: spots.left,
+            maxValue: spots.total,
+          },
+        }
+      : {}),
     areaServed: { "@type": "City", name: site.locality },
     // Referencia al nodo de la escuela del layout raíz: una entidad, no dos.
     offeredBy: orgRef(),
   };
 }
 
-export default function SocioFundadorPage() {
+export default async function SocioFundadorPage() {
+  const spots = await getFoundingSpots();
+  const hasSpots = tieneAforo(spots);
+
   return (
     <>
       <SiteHeader />
@@ -155,24 +174,26 @@ export default function SocioFundadorPage() {
                 </>
               )}
 
-              <div className="mt-6">
-                <div className="font-body mb-2 flex justify-between text-xs text-white/65">
-                  <span>Plazas fundadoras</span>
-                  <span>
-                    Quedan {plazas.left} / {plazas.total}
-                  </span>
-                </div>
-                <div
-                  className="h-2 overflow-hidden rounded-full bg-white/8"
-                  role="img"
-                  aria-label={`Quedan ${plazas.left} de ${plazas.total} plazas fundadoras`}
-                >
+              {hasSpots && (
+                <div className="mt-6">
+                  <div className="font-body mb-2 flex justify-between text-xs text-white/65">
+                    <span>Plazas fundadoras</span>
+                    <span>
+                      Quedan {spots.left} / {spots.total}
+                    </span>
+                  </div>
                   <div
-                    className="from-neon-lime via-neon-mint to-neon h-full rounded-full bg-linear-to-r"
-                    style={{ width: `${tomadasPct}%` }}
-                  />
+                    className="h-2 overflow-hidden rounded-full bg-white/8"
+                    role="img"
+                    aria-label={`Quedan ${spots.left} de ${spots.total} plazas fundadoras`}
+                  >
+                    <div
+                      className="from-neon-lime via-neon-mint to-neon h-full rounded-full bg-linear-to-r"
+                      style={{ width: `${barraPct(spots.total - spots.left, spots.total)}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <p className="font-body mt-6 text-center text-sm leading-relaxed text-white/70">
                 {founding.urgencyNote}
@@ -481,7 +502,7 @@ export default function SocioFundadorPage() {
                 as="span"
                 className="border-neon-lime/40 bg-neon-lime/10 font-body text-neon-lime inline-block rounded-full border px-3.5 py-[7px] text-[11px] font-extrabold tracking-[0.14em] uppercase"
               >
-                {c.form.kicker}
+                {kickerPlazas(spots.left)}
               </Reveal>
               <Reveal delay={0.06}>
                 <h2 className="font-display text-text-strong text-[clamp(30px,4.5vw,48px)] leading-tight">
@@ -535,7 +556,7 @@ export default function SocioFundadorPage() {
         </section>
 
         <JsonLd data={faqLd([...c.faqs])} />
-        <JsonLd data={ofertaFundadoraLd()} />
+        <JsonLd data={ofertaFundadoraLd(spots)} />
       </main>
     </>
   );
