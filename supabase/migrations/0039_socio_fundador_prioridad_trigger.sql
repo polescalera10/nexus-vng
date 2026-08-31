@@ -104,45 +104,6 @@ create trigger leads_socio_fundador_prioridad
 -- Función de trigger: nadie debe poder llamarla a mano por REST (ver 0030).
 revoke all on function public.leads_socio_fundador_prioridad() from public, anon, authenticated;
 
--- ── La misma regla, aplicada a lo que ya hay ────────────────────────────────
--- Sin ids a mano: se resuelve por clave de identidad, así que es idempotente.
-
--- 1) Arrastrar las clases ANTES de descartar (el filtro de abajo usa `estado`).
-update public.leads f
-set intereses = sub.merged
-from (
-  select fu.id,
-         (
-           select array_agg(distinct x)
-           from unnest(
-             coalesce(fu.intereses, '{}'::text[]) || coalesce(re.acumulados, '{}'::text[])
-           ) as x
-         ) as merged
-  from public.leads fu
-  join lateral (
-    select array_agg(distinct i) as acumulados
-    from public.leads r, unnest(coalesce(r.intereses, '{}'::text[])) as i
-    where r.origen = 'curso-regular'
-      and r.estado in ('nuevo', 'contactado', 'prueba_agendada')
-      and public.lead_identity_key(r.telefono, r.nombre)
-          = public.lead_identity_key(fu.telefono, fu.nombre)
-  ) re on true
-  where fu.origen = 'socio-fundador'
-    and fu.estado <> 'descartado'::lead_estado
-    and re.acumulados is not null
-) sub
-where f.id = sub.id;
-
--- 2) Descartar las filas de curso regular superadas por una de fundador.
-update public.leads r
-set estado = 'descartado'::lead_estado,
-    modalidad_interes = 'Curso regular → Socio fundador'
-where r.origen = 'curso-regular'
-  and r.estado in ('nuevo', 'contactado', 'prueba_agendada')
-  and exists (
-    select 1 from public.leads f
-    where f.origen = 'socio-fundador'
-      and f.estado <> 'descartado'::lead_estado
-      and public.lead_identity_key(f.telefono, f.nombre)
-          = public.lead_identity_key(r.telefono, r.nombre)
-  );
+-- La misma regla aplicada a las filas que YA existen va aparte, en 0040:
+-- tocar datos reales de `leads` es una operación distinta de instalar la
+-- regla, y conviene poder revisarla y revertirla por separado.
