@@ -28,8 +28,10 @@ export type ClaseRegular = {
    */
   nivel?: string;
   /**
-   * Grupo de COMPAÑÍA: no cuenta como clase regular y NO entra en la tarifa
-   * plana ni en la plaza de socio fundador (Pol, 01-08-2026).
+   * Grupo de COMPAÑÍA: etiqueta descriptiva del formato (proyecto coreográfico
+   * de temporada, acceso por audición). A efectos de tarifa cuenta como una
+   * clase regular más — entra en la tarifa plana y en la plaza de socio
+   * fundador igual que el resto (Pol, 31-08-2026).
    */
   compania?: boolean;
 };
@@ -131,17 +133,15 @@ export const sesionesRegulares: SesionRegular[] = diasSemana.flatMap((dia, diaId
 
 /**
  * Las DISCIPLINAS regulares de la escuela: el estilo sin el número de nivel
- * (Salsa 0/1/2 → "Salsa") y sin los grupos de compañía. Son exactamente las que
- * cubre la tarifa plana y la plaza de socio fundador, así que la landing de
+ * (Salsa 0/1/2 → "Salsa"), grupos de compañía incluidos. Son exactamente las
+ * que cubre la tarifa plana y la plaza de socio fundador, así que la landing de
  * fundador cuenta desde aquí en vez de repetir la lista a mano.
  */
 export const disciplinasRegulares: string[] = [
-  ...new Set(
-    sesionesRegulares.filter((s) => !s.compania).map((s) => s.estilo.replace(/\s+\d+$/, "").trim()),
-  ),
+  ...new Set(sesionesRegulares.map((s) => s.estilo.replace(/\s+\d+$/, "").trim())),
 ];
 
-/** Grupos de compañía (fuera de la tarifa plana). */
+/** Grupos de compañía. Etiqueta de formato: tarifan como el resto de clases. */
 export const gruposCompania: string[] = [
   ...new Set(sesionesRegulares.filter((s) => s.compania).map((s) => s.estilo)),
 ];

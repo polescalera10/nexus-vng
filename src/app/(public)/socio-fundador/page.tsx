@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Socio Fundador de NEXUS VNG · 10 plazas a 85 €/mes",
     description:
-      "Baila todos los días: las 8 disciplinas regulares de tu nivel o inferior por 85 €/mes, con la cuota bloqueada. Solo 10 plazas.",
+      "Baila todos los días: todas las disciplinas regulares de tu nivel o inferior por 85 €/mes, con la cuota bloqueada. Solo 10 plazas.",
     url: "/socio-fundador",
     images: ogImages,
   },
@@ -233,7 +233,7 @@ export default async function SocioFundadorPage() {
           </div>
         </section>
 
-        {/* ── Las 8 disciplinas incluidas ────────────────────────────── */}
+        {/* ── Las disciplinas incluidas ──────────────────────────────── */}
         <section className="bg-bg-panel py-[clamp(48px,8vw,88px)]">
           <div className="container-nexus max-w-[900px] space-y-8">
             <Reveal>
@@ -265,7 +265,7 @@ export default async function SocioFundadorPage() {
                 {c.incluye.nivelNota}
               </p>
               <p className="font-body text-text-faint text-[13px] leading-relaxed">
-                {c.incluye.fuera}
+                {c.incluye.compania}
               </p>
               <p className="font-body text-text-faint text-[13px]">
                 ¿Quieres ver a qué hora es cada una?{" "}

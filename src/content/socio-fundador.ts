@@ -4,13 +4,13 @@
  * POSICIONAMIENTO (Pol, 01-08-2026). El punto diferencial NO es el descuento:
  * es que puedes hacer **todas las disciplinas que quieras, siempre que sean de
  * tu nivel o inferior**. Es la tarifa de quien quiere bailar mucho — venir
- * todos los días de la semana y tocar hasta las 8 disciplinas regulares. Quien
+ * todos los días de la semana y tocar todas las disciplinas regulares. Quien
  * solo vaya a una o dos clases a la semana NO debe cogerla: le sale mejor la
  * mensualidad de 35 € (1 clase) o 55 € (2 clases). Decirlo así, en la propia
  * landing, cualifica y evita bajas al segundo mes.
  *
- * NO entran los grupos de COMPAÑÍA (Cía Salsa, Cía Lady Bachata): no se
- * consideran clases regulares.
+ * Los grupos de COMPAÑÍA (Cía Salsa, Cía Lady Bachata) cuentan como una clase
+ * regular más y entran en la plaza igual que el resto (Pol, 31-08-2026).
  *
  * Precios y aforo NO se escriben a mano aquí: se leen de `precios.ts` y de
  * `founding` en `landing.ts` para que no existan dos verdades. La lista de
@@ -22,7 +22,7 @@
 
 import { founding } from "@/content/landing";
 import { precios, precioEstilos } from "@/content/precios";
-import { disciplinasRegulares, gruposCompania } from "@/content/horario-regular";
+import { disciplinasRegulares } from "@/content/horario-regular";
 
 /**
  * Aforo de la promoción. `founding.spotsTotal` es `number | null` (null = dato
@@ -47,9 +47,8 @@ export function kickerPlazas(left: number | null): string {
 /** Cuota fundadora en número, para poder hacer cuentas con ella. */
 const CUOTA = Number(founding.price.replace(/\D/g, ""));
 
-/** Las 8 disciplinas regulares que cubre la plaza (derivadas del horario). */
+/** Las disciplinas regulares que cubre la plaza (derivadas del horario). */
 export const disciplinas = disciplinasRegulares;
-export const companias = gruposCompania;
 
 /** Precio por clase suelta según cuántas veces vengas a la semana. */
 function porClase(clasesSemana: number) {
@@ -90,12 +89,12 @@ export const socioFundador = {
     body2: `Por eso la plaza fundadora no es para todo el mundo. Si vas a venir una o dos veces por semana, la mensualidad normal (${numeros.una} € o ${numeros.dos} €) te sale mejor y te lo decimos nosotros. Esto es para quien quiere bailar mucho: a partir de cuatro clases semanales, la plaza fundadora sale a ${numeros.porClase4} € por clase.`,
   },
 
-  /** Las 8 disciplinas incluidas, con lo que queda fuera dicho sin letra pequeña. */
+  /** Las disciplinas incluidas. Entran todas, compañías incluidas. */
   incluye: {
     title: `Las ${numeros.disciplinas} disciplinas que entran`,
     intro:
       "De lunes a viernes, de 18:30 a 21:30. Puedes venir a todas las que estén abiertas a tu nivel o por debajo — y sí, se puede repetir estilo en distintos días.",
-    fuera: `Los grupos de compañía (${companias.join(" y ")}) no son clases regulares y quedan fuera de la plaza fundadora.`,
+    compania: `Los grupos de compañía (${disciplinas.filter((d) => d.startsWith("Cía")).join(" y ")}) entran en la plaza como una clase más. La única diferencia es la puerta: se accede por audición o invitación del equipo docente, no por nivel.`,
     nivelNota:
       "«De tu nivel o inferior» significa que si estás en Salsa 2 puedes bajar a Salsa 1 o Salsa 0 cuando quieras repasar, pero no saltar a un grupo por encima hasta que el profe te vea listo.",
   },
@@ -192,7 +191,6 @@ export const socioFundador = {
       title: "No, si…",
       items: [
         `Solo vas a venir una o dos veces por semana: la mensualidad de ${numeros.una} € o ${numeros.dos} € te sale más barata y te la recomendamos nosotros.`,
-        "Buscas únicamente el grupo de compañía: no entra en la plaza fundadora.",
         "No puedes venir de forma regular entre semana de 18:30 a 21:30.",
       ],
     },
@@ -222,7 +220,7 @@ export const socioFundador = {
   faqs: [
     {
       q: "¿De verdad puedo ir a todas las clases que quiera?",
-      a: `Sí, siempre que sean de tu nivel o inferior. Puedes venir los cinco días y combinar las ${numeros.disciplinas} disciplinas regulares: ${disciplinas.join(", ")}. Lo único que queda fuera son los grupos de compañía (${companias.join(" y ")}), que no se consideran clases regulares.`,
+      a: `Sí, siempre que sean de tu nivel o inferior. Puedes venir los cinco días y combinar las ${numeros.disciplinas} disciplinas regulares: ${disciplinas.join(", ")}.`,
     },
     {
       q: "¿Qué significa «de tu nivel o inferior»?",

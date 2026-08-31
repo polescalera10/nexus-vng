@@ -12,6 +12,8 @@
  *   · Reseñas reales de Google (array `reviews` — NUNCA inventarlas, Directiva Omnibus).
  */
 
+import { disciplinasRegulares } from "@/content/horario-regular";
+
 /** Hero — primer impacto + CTA principal a WhatsApp. */
 export const hero = {
   // El kicker va DENTRO del <h1> (ver components/landing/Hero.tsx): es la única
@@ -209,7 +211,7 @@ export const founding = {
   kicker: "Plazas fundadoras",
   title: "Baila todos los días",
   subtitle:
-    "La plaza fundadora abre las 8 disciplinas regulares de la escuela —de tu nivel o inferior— de lunes a viernes, con la cuota bloqueada mientras sigas de alta. Es la tarifa de quien viene a bailar mucho.",
+    `La plaza fundadora abre las ${disciplinasRegulares.length} disciplinas regulares de la escuela —de tu nivel o inferior— de lunes a viernes, con la cuota bloqueada mientras sigas de alta. Es la tarifa de quien viene a bailar mucho.`,
   badge: "Cuota bloqueada mientras sigas de alta",
   /** Cuota fundadora confirmada por Pol (26-07-2026): 85 €/mes, tarifa plana con todo incluido. */
   price: "85 €",
@@ -243,16 +245,16 @@ export const founding = {
   /**
    * Columna "qué incluye" — condiciones confirmadas por Pol (01-08-2026):
    * 85 €/mes con acceso a TODAS las disciplinas regulares de tu nivel o
-   * inferior (las compañías quedan fuera), cuota bloqueada y prioridad en
-   * eventos. El detalle largo vive en `/socio-fundador`.
+   * inferior, grupos de compañía incluidos (Pol, 31-08-2026), cuota bloqueada
+   * y prioridad en eventos. El detalle largo vive en `/socio-fundador`.
    */
   benefitsTitle: "¿Qué incluye la plaza fundadora?",
   benefitsIntro:
     "No compras un estilo: compras la semana entera. Es la tarifa de quien quiere venir tres, cuatro o cinco días. Si solo vas a venir una o dos veces, te sale mejor la mensualidad normal y te lo diremos nosotros.",
   benefits: [
     {
-      title: "Las 8 disciplinas, de tu nivel o inferior",
-      text: "Salsa, bachata, lady salsa, bachata lady, reparto, reggaetón, sexy style y heels: todas las clases regulares abiertas a tu nivel o por debajo, de lunes a viernes. Los grupos de compañía quedan fuera.",
+      title: `Las ${disciplinasRegulares.length} disciplinas, de tu nivel o inferior`,
+      text: "Salsa, bachata, lady salsa, bachata lady, reparto, reggaetón, sexy style, heels y los dos grupos de compañía: todas las clases regulares abiertas a tu nivel o por debajo, de lunes a viernes. A la compañía se entra por audición, pero sin coste aparte.",
     },
     {
       title: "Cuota bloqueada (con condiciones)",

@@ -66,7 +66,7 @@ export default function ProfesoresPage() {
     <SupportPage
       eyebrow="Quién te acompaña"
       title="Los profesores con los que vas a bailar"
-      intro="Cinco personas, ocho disciplinas y grupos por nivel real. Mira quién da qué, qué día lo da, y escribe directamente a quien te encaje."
+      intro="Cinco personas, diez disciplinas y grupos por nivel real. Mira quién da qué, qué día lo da, y escribe directamente a quien te encaje."
     >
       <div className="mb-8">
         <Breadcrumbs

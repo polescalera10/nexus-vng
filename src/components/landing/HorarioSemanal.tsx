@@ -83,8 +83,9 @@ export function HorarioSemanal({ leyenda = true }: { leyenda?: boolean }) {
             El número indica el nivel: <strong className="text-text-muted">0</strong> desde cero
             absoluto, <strong className="text-text-muted">1</strong> iniciación,{" "}
             <strong className="text-text-muted">2</strong> intermedio. Los grupos{" "}
-            <strong className="text-text-muted">Cía</strong> son de compañía y van aparte de la
-            tarifa regular. ¿No ves tu hueco? Escríbenos y lo encontramos.
+            <strong className="text-text-muted">Cía</strong> son de compañía: montaje coreográfico
+            y actuaciones, con la misma tarifa que el resto. ¿No ves tu hueco? Escríbenos y lo
+            encontramos.
           </p>
         </Reveal>
       )}

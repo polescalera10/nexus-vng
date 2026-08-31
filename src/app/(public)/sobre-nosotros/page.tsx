@@ -15,7 +15,7 @@ import { precios } from "@/content/precios";
 export const metadata: Metadata = {
   title: "Sobre nosotros",
   description:
-    "La escuela de baile del gimnasio Aranha en Vilanova i la Geltrú: ocho disciplinas, grupos por nivel real y una comunidad que sigue fuera de clase.",
+    "La escuela de baile del gimnasio Aranha en Vilanova i la Geltrú: diez disciplinas, grupos por nivel real y una comunidad que sigue fuera de clase.",
   alternates: { canonical: "/sobre-nosotros" },
 };
 
@@ -81,9 +81,9 @@ export default function SobreNosotrosPage() {
           <p className="font-body text-text-body text-base leading-relaxed">
             Salsa cubana y bachata son la columna vertebral de la escuela —son las que más grupos
             y más niveles abiertos tienen— y alrededor crecen el estilo urbano y el trabajo de
-            estilo individual. Además hay{" "}
-            {gruposCompania.length} grupos de compañía para quien quiera llevar el baile un paso
-            más allá; esos van aparte de la tarifa regular.
+            estilo individual. Entre ellas hay{" "}
+            {gruposCompania.length} grupos de compañía para quien quiera llevar el baile al
+            escenario: se entra por audición, pero cuentan como una clase más de la semana.
           </p>
           <p className="font-body text-text-muted text-[15px] leading-relaxed">
             <Link href="/clases" className="text-neon font-semibold no-underline hover:underline">

@@ -531,7 +531,7 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
       "La compañía de salsa es el grupo que prepara y lleva a escena las coreografías de la escuela: festivales, fiestas, congresos y todo lo que surja durante la temporada.",
       "No funciona como una clase abierta. Se entra por audición o invitación del equipo docente, hay un nivel técnico de partida y se pide compromiso con los ensayos: una coreografía de grupo solo funciona si están todos.",
       "El trabajo es distinto al de una clase regular: se limpia hasta el detalle, se cuentan tiempos, se trabaja la sincronía y se ensaya con formaciones, entradas y salidas. Se aprende muchísimo, pero exige.",
-      "Importante y sin letra pequeña: los grupos de compañía quedan FUERA de la tarifa plana y de la plaza de socio fundador. Las condiciones se acuerdan aparte con la escuela.",
+      "En cuota, cuenta como una clase regular más: entra en la tarifa plana y en la plaza de socio fundador igual que el resto del horario. Lo que la distingue no es el precio, es la puerta de entrada y el compromiso con los ensayos.",
     ],
     aprenderas: [
       "Montaje coreográfico completo: bloques, transiciones, entradas y salidas.",
@@ -591,7 +591,7 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
       "Es el grupo que prepara y lleva a escena las coreografías de bachata lady de la escuela: festivales, fiestas y congresos a lo largo de la temporada.",
       "Se entra por audición o invitación del equipo docente. Hay un nivel técnico de partida — ondas, aislamientos y giros ya resueltos — y se pide compromiso con los ensayos.",
       "El trabajo va del detalle: sincronía, limpieza, formaciones y calidad de movimiento. Una coreografía de bachata lady se sostiene sobre la precisión de las ondas y los remates, y eso solo sale repitiendo.",
-      "Como el resto de grupos de compañía, queda FUERA de la tarifa plana y de la plaza de socio fundador. Las condiciones se acuerdan aparte con la escuela.",
+      "En cuota, cuenta como una clase regular más: entra en la tarifa plana y en la plaza de socio fundador igual que el resto del horario. Lo que la distingue es la puerta de entrada y el compromiso con los ensayos, no el precio.",
     ],
     aprenderas: [
       "Montaje coreográfico completo, con transiciones y formaciones.",

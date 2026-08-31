@@ -18,8 +18,8 @@ import { diasSemana, horarioRegular, sesionesRegulares } from "@/content/horario
 const disciplinasConHorario = modalidadesFallback
   .map((m) => {
     const estilos = modalidadesContenido[m.slug]?.estilos ?? [];
-    const sesiones = sesionesRegulares.filter(
-      (s) => !s.compania && estilos.includes(s.estilo.replace(/\s+\d+$/, "").trim()),
+    const sesiones = sesionesRegulares.filter((s) =>
+      estilos.includes(s.estilo.replace(/\s+\d+$/, "").trim()),
     );
     return {
       slug: m.slug,

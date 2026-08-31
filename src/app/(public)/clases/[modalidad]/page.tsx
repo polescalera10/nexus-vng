@@ -56,12 +56,10 @@ export default async function ModalidadPage({ params }: Params) {
   const otras = todas.filter((o) => o.slug !== m.slug);
   const nombrePorSlug = new Map(todas.map((o) => [o.slug, o.nombre]));
 
-  // Clases REALES de esta disciplina en el cartel semanal. Los grupos de
-  // compañía no son clase regular, así que no cuentan.
+  // Clases REALES de esta disciplina en el cartel semanal, grupos de compañía
+  // incluidos: cuentan como una clase regular más.
   const sesiones = contenido
-    ? sesionesRegulares.filter(
-        (s) => !s.compania && contenido.estilos.includes(baseEstilo(s.estilo)),
-      )
+    ? sesionesRegulares.filter((s) => contenido.estilos.includes(baseEstilo(s.estilo)))
     : [];
 
   // Profesores que la imparten, derivados del cartel (content/profesores.ts).
