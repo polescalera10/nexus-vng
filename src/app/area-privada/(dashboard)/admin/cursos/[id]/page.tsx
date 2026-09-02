@@ -17,6 +17,7 @@ import {
   formatTime,
   WEEKDAYS,
 } from "@/lib/format";
+import { StudentMiniCard } from "../../_components/StudentMiniCard";
 import { EnrollForm } from "./EnrollForm";
 import { PromoteButton, UnenrollButton } from "./EnrollmentActions";
 import { GenerateSessionsButton, SessionList } from "./SessionList";
@@ -128,23 +129,24 @@ export default async function AdminCursoDetailPage({
         ) : (
           <ul className="divide-y divide-text-strong/6">
             {waitlist.map((e) => (
-              <li
-                key={e.id}
-                className="flex flex-wrap items-center justify-between gap-3 py-3"
-              >
-                <div className="flex items-center gap-2.5">
-                  <StudentName enrollment={e} />
-                  <Badge variant="neutral">
-                    {e.role_in_course === "leader" ? "Leader" : "Follower"}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <PromoteButton enrollmentId={e.id} />
-                  <UnenrollButton
-                    enrollmentId={e.id}
-                    studentName={e.student?.full_name ?? "este alumno"}
-                  />
-                </div>
+              <li key={e.id}>
+                <StudentMiniCard
+                  student={e.student}
+                  badges={
+                    <Badge variant="neutral">
+                      {e.role_in_course === "leader" ? "Leader" : "Follower"}
+                    </Badge>
+                  }
+                  actions={
+                    <>
+                      <PromoteButton enrollmentId={e.id} />
+                      <UnenrollButton
+                        enrollmentId={e.id}
+                        studentName={e.student?.full_name ?? "este alumno"}
+                      />
+                    </>
+                  }
+                />
               </li>
             ))}
           </ul>
@@ -177,20 +179,6 @@ export default async function AdminCursoDetailPage({
   );
 }
 
-function StudentName({ enrollment }: { enrollment: EnrollmentWithStudent }) {
-  if (!enrollment.student) {
-    return <span className="font-body text-sm text-text-faint">Alumno no disponible</span>;
-  }
-  return (
-    <Link
-      href={`/area-privada/admin/alumnos/${enrollment.student.id}`}
-      className="font-body text-sm font-semibold text-text-strong hover:text-accent"
-    >
-      {enrollment.student.full_name}
-    </Link>
-  );
-}
-
 function EnrollmentColumn({
   title,
   rows,
@@ -207,19 +195,20 @@ function EnrollmentColumn({
       ) : (
         <ul className="divide-y divide-text-strong/6">
           {rows.map((e) => (
-            <li
-              key={e.id}
-              className="flex flex-wrap items-center justify-between gap-2 py-3"
-            >
-              <div className="flex items-center gap-2.5">
-                <StudentName enrollment={e} />
-                <Badge variant={e.status === "activa" ? "success" : "warning"}>
-                  {ENROLLMENT_STATUS_LABELS[e.status]}
-                </Badge>
-              </div>
-              <UnenrollButton
-                enrollmentId={e.id}
-                studentName={e.student?.full_name ?? "este alumno"}
+            <li key={e.id}>
+              <StudentMiniCard
+                student={e.student}
+                badges={
+                  e.status === "activa" ? null : (
+                    <Badge variant="warning">{ENROLLMENT_STATUS_LABELS[e.status]}</Badge>
+                  )
+                }
+                actions={
+                  <UnenrollButton
+                    enrollmentId={e.id}
+                    studentName={e.student?.full_name ?? "este alumno"}
+                  />
+                }
               />
             </li>
           ))}

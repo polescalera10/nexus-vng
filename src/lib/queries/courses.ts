@@ -33,8 +33,18 @@ export type CourseListItem = {
   followersCount: number;
 };
 
+/**
+ * Campos del alumno que necesita la lista de matriculados. Teléfono, cuota y
+ * socio fundador van aquí porque la ficha mínima del panel los pinta sin
+ * abrir el detalle (ver `_components/StudentMiniCard`).
+ */
+export type EnrollmentStudent = Pick<
+  Student,
+  "id" | "full_name" | "dance_role" | "phone" | "payment_status" | "is_founding_member"
+>;
+
 export type EnrollmentWithStudent = Enrollment & {
-  student: Pick<Student, "id" | "full_name" | "dance_role"> | null;
+  student: EnrollmentStudent | null;
 };
 
 export type SessionWithSubstitute = ClassSession & {
@@ -193,11 +203,11 @@ export async function getCourseDetail(id: string): Promise<CourseDetail | null> 
 
   // Alumnos de las matrículas.
   const studentIds = [...new Set(enrollmentRows.map((e) => e.student_id))];
-  const studentById = new Map<string, Pick<Student, "id" | "full_name" | "dance_role">>();
+  const studentById = new Map<string, EnrollmentStudent>();
   if (studentIds.length > 0) {
     const { data: students } = await supabase
       .from("students")
-      .select("id, full_name, dance_role")
+      .select("id, full_name, dance_role, phone, payment_status, is_founding_member")
       .in("id", studentIds);
     for (const s of students ?? []) studentById.set(s.id, s);
   }

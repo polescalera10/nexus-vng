@@ -65,6 +65,18 @@ export function buildLeadWaLink(phone: string, nombre?: string): string | null {
   return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
 }
 
+/**
+ * Enlace de WhatsApp AL ALUMNO. Igual que el del lead pero sin hablar de una
+ * consulta: aquí ya es alguien de la escuela y el mensaje lo escribe el admin
+ * (aviso de clase, cambio de horario, cuota). Solo abre el chat con el saludo.
+ */
+export function buildStudentWaLink(phone: string, nombre?: string): string | null {
+  const number = normalizePhone(phone);
+  if (!number) return null;
+  const saludo = nombre ? `¡Hola ${nombre.split(" ")[0]}!` : "¡Hola!";
+  return `https://wa.me/${number}?text=${encodeURIComponent(`${saludo} Te escribo desde NEXUS VNG 🙂`)}`;
+}
+
 export function buildWaLink(origin: WaOrigin, extra?: string): string {
   const base = MESSAGES[origin];
   const text = extra ? (base ? `${base} ${extra} 💃` : extra) : base;

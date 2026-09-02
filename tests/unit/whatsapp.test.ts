@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildLeadWaLink, buildWaLink, normalizePhone } from "@/lib/whatsapp";
+import {
+  buildLeadWaLink,
+  buildStudentWaLink,
+  buildWaLink,
+  normalizePhone,
+} from "@/lib/whatsapp";
 import { WHATSAPP_NUMBER } from "@/lib/site";
 
 /**
@@ -83,5 +88,25 @@ describe("buildLeadWaLink", () => {
 
   it("no inventa un enlace si el teléfono no sirve", () => {
     expect(buildLeadWaLink("123", "Marta")).toBeNull();
+  });
+});
+
+describe("buildStudentWaLink", () => {
+  it("abre el chat del alumno saludando por su nombre", () => {
+    const href = buildStudentWaLink("600 123 456", "Marta Gil");
+    expect(href).toContain("https://wa.me/34600123456?text=");
+    expect(decodeURIComponent(href!)).toContain("¡Hola Marta!");
+  });
+
+  it("no habla de consultas: el alumno ya está en la escuela", () => {
+    expect(decodeURIComponent(buildStudentWaLink("600123456")!)).not.toContain("consulta");
+  });
+
+  it("aguanta los teléfonos en formato libre (0042)", () => {
+    expect(buildStudentWaLink("0033 6 12 34 56 78")).toContain("https://wa.me/33612345678");
+  });
+
+  it("no inventa un enlace si el teléfono no sirve", () => {
+    expect(buildStudentWaLink("123", "Marta")).toBeNull();
   });
 });
