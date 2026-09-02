@@ -90,8 +90,8 @@ export function StudentForm({
         name="phone"
         inputMode="tel"
         defaultValue={student?.phone ?? ""}
-        placeholder="+34600000000"
-        hint="Formato internacional: +34600000000"
+        placeholder="+34 600 00 00 00"
+        hint="Formato libre. Si es de fuera, ponle el prefijo del país."
         error={err("phone")}
       />
 

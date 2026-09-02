@@ -181,7 +181,7 @@ export async function convertLeadToStudent(
     .from("students")
     .insert({
       full_name: data.full_name,
-      phone: data.phone,
+      phone: toE164(data.phone) ?? data.phone,
       email: data.email,
       dance_role: data.dance_role,
       payment_status: "pendiente",
@@ -317,12 +317,16 @@ export async function quickConvertLead(
     };
   }
 
-  const phone = toE164(lead.telefono ?? "");
+  // El teléfono se guarda en E.164 si se puede deducir el prefijo, y si no tal
+  // cual lo escribió el lead: hay alumnos de fuera con formatos de todo tipo y
+  // bloquear la conversión por eso era peor que guardar el número raro.
+  const rawPhone = (lead.telefono ?? "").trim();
+  const phone = toE164(rawPhone) ?? rawPhone;
   if (!phone) {
     return {
       ok: false,
       needsForm: true,
-      message: `El teléfono (${lead.telefono}) no es un número internacional válido.`,
+      message: "El lead no tiene teléfono. Escríbelo a mano antes de crear la ficha.",
     };
   }
 

@@ -111,10 +111,11 @@ describe("leadConversionSchema", () => {
     expect(leadConversionSchema.safeParse(base).success).toBe(true);
   });
 
-  it("exige teléfono en E.164 (lo que pide students_phone_e164)", () => {
-    expect(leadConversionSchema.safeParse({ ...base, phone: "600111222" }).success).toBe(
-      false,
-    );
+  it("acepta el teléfono en formato libre (lo que pide students_phone_chars)", () => {
+    for (const phone of ["600111222", "600 11 12 22", "+33 6 12 34 56 78"]) {
+      expect(leadConversionSchema.safeParse({ ...base, phone }).success).toBe(true);
+    }
+    expect(leadConversionSchema.safeParse({ ...base, phone: "no tengo" }).success).toBe(false);
   });
 
   it("si se elige curso, hay que decir con qué rol entra", () => {

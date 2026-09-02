@@ -22,7 +22,7 @@ export default async function ConvertirLeadPage({
   const [lead, courses] = await Promise.all([getLeadById(id), getCourseOptions()]);
   if (!lead) notFound();
 
-  const phoneE164 = toE164(lead.telefono) ?? "";
+  const phone = toE164(lead.telefono) ?? (lead.telefono ?? "").trim();
   // Aquí solo cabe un curso, así que se preselecciona el primero que pidió;
   // el resto se añade desde Editar alumno. `modalidad_interes` no entra: es la
   // campaña ("Curso regular"), no una clase.
@@ -65,13 +65,12 @@ export default async function ConvertirLeadPage({
         </p>
       )}
 
-      {!phoneE164 && (
+      {!phone && (
         <p
           role="alert"
           className="mt-6 rounded-sm border border-warning/30 bg-warning/10 px-4 py-3 font-body text-sm text-warning"
         >
-          El teléfono del lead ({lead.telefono}) no se ha podido convertir a formato
-          internacional. Escríbelo a mano antes de crear la ficha.
+          Este lead no ha dejado teléfono. Escríbelo a mano antes de crear la ficha.
         </p>
       )}
 
@@ -84,7 +83,7 @@ export default async function ConvertirLeadPage({
       <div className="mt-8">
         <ConvertLeadForm
           lead={lead}
-          phoneE164={phoneE164}
+          phone={phone}
           courses={courses}
           suggestedCourseId={suggestedCourseId}
         />

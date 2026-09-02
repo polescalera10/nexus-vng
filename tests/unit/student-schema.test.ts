@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { E164_REGEX, studentSchema, studentNotesSchema } from "@/lib/validation/student";
+import { phoneSchema, studentSchema, studentNotesSchema } from "@/lib/validation/student";
 
 const UUID = "3f2504e0-4f89-41d3-9a0c-0305e82c3301";
 
@@ -17,23 +17,29 @@ const validStudent = {
   active: true,
 };
 
-describe("E164_REGEX", () => {
-  it("acepta teléfonos internacionales válidos", () => {
-    for (const phone of ["+34600000000", "+491701234567", "+15551234567"]) {
-      expect(E164_REGEX.test(phone)).toBe(true);
+describe("phoneSchema", () => {
+  it("acepta los formatos con los que se apunta la gente", () => {
+    for (const phone of [
+      "+34600000000",
+      "600 11 22 33",
+      "+34 600 00 00 00",
+      "0033 6 12 34 56 78",
+      "+1 (555) 123-4567",
+      "+491701234567",
+    ]) {
+      expect(phoneSchema.safeParse(phone).success).toBe(true);
     }
   });
 
-  it("rechaza formatos que no son E.164", () => {
+  it("solo rechaza lo que no es un teléfono", () => {
     for (const phone of [
-      "600000000", // sin prefijo
-      "+0600000000", // no puede empezar por 0
-      "34600000000", // sin '+'
-      "+34 600 000 000", // con espacios
-      "+341234", // demasiado corto
-      "+3460000000000000", // demasiado largo
+      "", // vacío
+      "600", // demasiado corto
+      "seis cero cero", // letras
+      "+34600000000 ext. 12", // letras
+      "+3460000000000000000000000", // demasiado largo
     ]) {
-      expect(E164_REGEX.test(phone)).toBe(false);
+      expect(phoneSchema.safeParse(phone).success).toBe(false);
     }
   });
 });
@@ -43,11 +49,17 @@ describe("studentSchema", () => {
     expect(studentSchema.safeParse(validStudent).success).toBe(true);
   });
 
-  it("exige teléfono en formato internacional", () => {
-    const parsed = studentSchema.safeParse({ ...validStudent, phone: "600000000" });
+  it("acepta el teléfono en formato libre", () => {
+    for (const phone of ["600000000", "600 11 22 33", "+33 6 12 34 56 78"]) {
+      expect(studentSchema.safeParse({ ...validStudent, phone }).success).toBe(true);
+    }
+  });
+
+  it("sigue rechazando lo que no es un teléfono", () => {
+    const parsed = studentSchema.safeParse({ ...validStudent, phone: "no tengo" });
     expect(parsed.success).toBe(false);
     expect(parsed.error?.flatten().fieldErrors.phone?.[0]).toBe(
-      "Formato internacional, p. ej. +34600000000",
+      "El teléfono solo puede tener números y símbolos",
     );
   });
 

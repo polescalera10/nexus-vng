@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSessionRole } from "@/lib/auth";
+import { toE164 } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
 import {
   paymentStatuses,
@@ -57,11 +58,17 @@ function readStudentForm(formData: FormData) {
   };
 }
 
-/** Normaliza el input validado a la fila de `students` ("" → null). */
+/**
+ * Normaliza el input validado a la fila de `students` ("" → null).
+ *
+ * El teléfono se guarda en E.164 siempre que se pueda deducir el prefijo
+ * (es lo que espera el módulo de WhatsApp); si el número es raro se guarda
+ * tal cual lo escribió el admin en vez de rechazar el alta.
+ */
 function toRow(data: StudentInput) {
   return {
     full_name: data.full_name,
-    phone: data.phone,
+    phone: toE164(data.phone) ?? data.phone,
     email: data.email,
     birthday: data.birthday || null,
     dance_role: data.dance_role,

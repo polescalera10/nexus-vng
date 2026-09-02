@@ -35,17 +35,17 @@ function plazas(course: CourseOption): string {
  * Aceptar un lead como alumno. Llega con los datos del formulario de la web ya
  * puestos: en el caso bueno es leer, elegir clase y darle a crear.
  *
- * El teléfono viene normalizado a E.164 desde el servidor porque el formulario
- * público lo acepta en texto libre y `students.phone` no.
+ * El teléfono viene normalizado a E.164 desde el servidor cuando se ha podido
+ * deducir el prefijo; si no, llega tal cual lo escribió el lead.
  */
 export function ConvertLeadForm({
   lead,
-  phoneE164,
+  phone,
   courses,
   suggestedCourseId,
 }: {
   lead: Lead;
-  phoneE164: string;
+  phone: string;
   courses: CourseOption[];
   /** Curso que casa con lo que pidió el lead, si se ha podido deducir. */
   suggestedCourseId?: string;
@@ -75,8 +75,8 @@ export function ConvertLeadForm({
         name="phone"
         inputMode="tel"
         required
-        defaultValue={phoneE164}
-        hint="Formato internacional: +34600000000"
+        defaultValue={phone}
+        hint="Formato libre. Si es de fuera, ponle el prefijo del país."
         error={err("phone")}
       />
 

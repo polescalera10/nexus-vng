@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { danceRoles, E164_REGEX } from "@/lib/validation/student";
+import { danceRoles, phoneSchema } from "@/lib/validation/student";
 
 /**
  * Validación de "aceptar un lead como alumno".
@@ -19,10 +19,7 @@ export const leadConversionSchema = z
       .trim()
       .min(2, "Dinos el nombre del alumno")
       .max(120, "Nombre demasiado largo"),
-    phone: z
-      .string()
-      .trim()
-      .regex(E164_REGEX, "Formato internacional, p. ej. +34600000000"),
+    phone: phoneSchema,
     email: z
       .string()
       .trim()
