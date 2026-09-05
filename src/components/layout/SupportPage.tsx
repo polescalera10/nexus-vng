@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { HeroFondo } from "@/components/ui/HeroFondo";
 import { Reveal } from "@/components/ui/Reveal";
 
 /**
@@ -21,6 +22,7 @@ export function SupportPage({
       <SiteHeader />
       <main>
         <section className="relative overflow-hidden border-b border-white/6 bg-bg-panel pb-[clamp(40px,7vw,80px)] pt-[clamp(40px,7vw,72px)] text-white">
+          <HeroFondo />
           {/* Luz cian lateral, muy tenue: separa la banda de título del fondo negro. */}
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_80%_at_0%_100%,rgba(48,228,236,.08),transparent_70%)]" />
           <div className="container-nexus relative z-[1]">

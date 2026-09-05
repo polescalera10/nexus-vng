@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { HeroFondo } from "@/components/ui/HeroFondo";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
 import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
@@ -153,6 +154,7 @@ export default function IntensivosPage() {
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden border-b border-white/6 bg-bg-panel pb-[clamp(48px,8vw,88px)] pt-[clamp(48px,8vw,80px)]">
+          <HeroFondo />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_100%_0%,rgba(48,228,236,.12),transparent_70%)]" />
           <div className="container-nexus relative z-[1]">
             <Breadcrumbs

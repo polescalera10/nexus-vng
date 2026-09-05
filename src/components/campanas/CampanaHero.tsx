@@ -1,16 +1,14 @@
-import Image from "next/image";
+import { HeroFondo } from "@/components/ui/HeroFondo";
 import { RevealEager } from "@/components/ui/RevealEager";
 import { WaLink } from "@/components/ui/WaLink";
-import { heroVideo } from "@/content/media";
 
 /**
  * Hero de landing de campaña: una columna, foco total en el CTA de WhatsApp.
  * El headline nombra el dolor en las primeras palabras (contenido por props).
  *
- * De fondo va la MISMA foto de clase que el hero de la home, pero solo la foto:
- * aquí no se monta el vídeo. Son 30 landings de tráfico pagado y el trabajo del
- * bloque es que el titular y el botón se pinten cuanto antes; un MP4 de fondo
- * juega en contra de eso sin aportar nada al mensaje.
+ * De fondo, el mismo vídeo de clase que el resto de cabeceras (`HeroFondo`).
+ * El póster se pinta primero y el MP4 se monta después, así que el titular
+ * —que es el LCP de la campaña— no espera a ningún vídeo.
  */
 export function CampanaHero({
   headline,
@@ -25,19 +23,7 @@ export function CampanaHero({
 }) {
   return (
     <section className="relative overflow-hidden bg-ink text-white">
-      <Image
-        src={heroVideo.desktop.poster}
-        alt=""
-        width={heroVideo.desktop.ancho}
-        height={heroVideo.desktop.alto}
-        sizes="100vw"
-        priority
-        aria-hidden
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      {/* Velo: el titular es el LCP y tiene que mantener el contraste AA sobre
-          una foto con suelo blanco y focos. */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,.82)_0%,rgba(10,10,10,.66)_50%,rgba(10,10,10,.9)_100%)]" />
+      <HeroFondo />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_18%_100%,rgba(48,228,236,.16),transparent_70%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_45%_35%_at_85%_0%,rgba(113,233,201,.08),transparent_70%)]" />
 

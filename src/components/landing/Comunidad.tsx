@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
-import { mediaComunidad } from "@/content/media";
+import { mediaMosaico } from "@/content/media";
 import { reviews, googleRating } from "@/content/landing";
 
 /**
@@ -45,27 +45,22 @@ export function Comunidad() {
           </Reveal>
         )}
 
-        {/* Mosaico. En escritorio: 3 columnas × 2 filas; la primera imagen es
-            el ancla vertical de la izquierda (ocupa las dos filas) y las otras
-            cuatro rellenan el 2×2 de la derecha — de ahí que `mediaComunidad`
-            tenga que traer exactamente cinco. En móvil, dos columnas a secas. */}
-        <Reveal delay={0.14} className="mt-[30px] grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {mediaComunidad.map((img, i) => (
+        {/* Mosaico: 15 teselas cuadradas y pequeñas. Antes eran 5 grandes y la
+            sección se comía media pantalla; con muchas caras a la vez se dice
+            lo mismo en un tercio de alto. 3 columnas en móvil, 5 desde `sm`. */}
+        <Reveal delay={0.14} className="mt-[30px] grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {mediaMosaico.map((img) => (
             <div
               key={img.src}
-              className={`bg-bg-elevated overflow-hidden rounded-lg border border-white/8 ${
-                i === 0 ? "col-span-2 sm:col-span-1 sm:row-span-2" : ""
-              }`}
+              className="bg-bg-elevated overflow-hidden rounded-md border border-white/8"
             >
               <Image
                 src={img.src}
                 alt={img.alt}
                 width={img.ancho}
                 height={img.alto}
-                sizes="(max-width: 640px) 50vw, 33vw"
-                className={`w-full object-cover transition-transform duration-500 hover:scale-[1.04] ${
-                  i === 0 ? "aspect-[16/10] sm:aspect-auto sm:h-full" : "aspect-[4/5]"
-                }`}
+                sizes="(max-width: 640px) 33vw, 20vw"
+                className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-[1.06]"
               />
             </div>
           ))}

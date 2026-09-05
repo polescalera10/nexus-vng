@@ -4,6 +4,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
+import { HeroFondo } from "@/components/ui/HeroFondo";
 import { HorarioSemanal } from "@/components/landing/HorarioSemanal";
 import { Precios } from "@/components/landing/Precios";
 import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
@@ -54,6 +55,7 @@ export default async function ClasesPage() {
       <main>
         {/* Hero de ventas */}
         <section className="bg-bg-panel relative overflow-hidden border-b border-white/6 pt-[clamp(48px,8vw,80px)] pb-[clamp(48px,8vw,88px)]">
+          <HeroFondo />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_0%_0%,rgba(113,233,201,.12),transparent_70%)]" />
           <div className="container-nexus relative z-[1]">
             <Reveal

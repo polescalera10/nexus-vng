@@ -6,6 +6,13 @@ import { portadaModalidad } from "@/content/media";
 type Modalidad = { slug: string; nombre: string; descripcion: string | null };
 
 export function Modalidades({ modalidades }: { modalidades: Modalidad[] }) {
+  /* La home enseña SOLO las disciplinas de las que hay foto. Una tarjeta de
+     degradado entre tarjetas con foto se lee como un hueco, no como una
+     modalidad más. Las que faltan no desaparecen del sitio: el enlace de abajo
+     lleva a /clases, donde están las diez con su ficha. */
+  const conFoto = modalidades.filter((m) => portadaModalidad(m.slug));
+  const sinFoto = modalidades.length - conFoto.length;
+
   return (
     <section className="bg-bg-panel pb-[clamp(64px,9vw,120px)]">
       <div className="container-nexus">
@@ -14,10 +21,7 @@ export function Modalidades({ modalidades }: { modalidades: Modalidad[] }) {
         </Reveal>
 
         <div className="mt-[26px] grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-[18px]">
-          {modalidades.map((m, i) => {
-            /* Solo hay foto de las disciplinas que se grabaron en los
-               intensivos. Las demás conservan el degradado de marca: mejor una
-               tarjeta sin foto que la foto de otra clase. */
+          {conFoto.map((m, i) => {
             const portada = portadaModalidad(m.slug);
 
             return (
@@ -33,7 +37,11 @@ export function Modalidades({ modalidades }: { modalidades: Modalidad[] }) {
                       width={portada.ancho}
                       height={portada.alto}
                       sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                      /* La tarjeta es casi cuadrada y la foto es 3:4, así que
+                         `object-cover` se queda con una banda del vertical. Sin
+                         `object-position` esa banda cae a la altura de la
+                         cintura; anclada al 22% coge las caras. */
+                      className="absolute inset-0 h-full w-full object-cover object-[center_22%] transition-transform duration-500 group-hover:scale-[1.05]"
                     />
                   )}
                   {/* Velo: sobre foto hace falta más carga abajo para que el
@@ -61,6 +69,18 @@ export function Modalidades({ modalidades }: { modalidades: Modalidad[] }) {
             );
           })}
         </div>
+
+        <Reveal delay={0.1} className="mt-8">
+          <Link
+            href="/clases"
+            className="border-neon/35 font-body text-neon hover:bg-neon/10 inline-flex min-h-12 items-center justify-center rounded-md border px-7 py-[14px] text-[15px] font-bold no-underline transition-colors"
+          >
+            {sinFoto > 0
+              ? `Ver las ${modalidades.length} disciplinas`
+              : "Ver todas las disciplinas"}{" "}
+            &rarr;
+          </Link>
+        </Reveal>
       </div>
     </section>
   );

@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { Accordion } from "@/components/ui/Accordion";
 import { Galeria } from "@/components/ui/Galeria";
+import { HeroFondo } from "@/components/ui/HeroFondo";
 import { Countdown } from "@/components/ui/Countdown";
 import { WaLink } from "@/components/ui/WaLink";
 import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
@@ -90,6 +91,7 @@ export default async function SocioFundadorPage() {
       <main>
         {/* ── Hero de venta: promesa + tarjeta de precio ─────────────── */}
         <section className="bg-bg-panel relative overflow-hidden border-b border-white/6 pt-[clamp(40px,7vw,76px)] pb-[clamp(48px,8vw,88px)]">
+          <HeroFondo />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_90%_at_20%_0%,rgba(113,233,201,.16),transparent_70%)]" />
           <div className="container-nexus relative z-[1]">
             <Breadcrumbs

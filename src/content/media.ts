@@ -16,10 +16,9 @@
  * peso, evita el problema de derechos de la música que sonaba en la sala: un
  * loop mudo no reproduce nada de nadie.
  *
- * Disciplinas sin material: reggaetón, sexy style y los dos grupos de compañía
- * (`cia-salsa`, `cia-bachata-lady`). Sus tarjetas se pintan con el degradado de
- * marca, como hasta ahora. En cuanto haya grabación de esas clases, basta con
- * añadir la entrada aquí.
+ * Disciplinas sin material: reggaetón y sexy style. En la home no aparecen (ver
+ * `Modalidades`) y en /clases llevan el degradado de marca en el hueco de la
+ * foto. En cuanto haya grabación suya, basta con añadir la entrada aquí.
  */
 
 export type MediaImagen = {
@@ -58,7 +57,30 @@ export const heroVideo = {
     ancho: 720,
     alto: 1280,
   },
-  alt: "Alumnos de NEXUS VNG bailando bachata, reparto y heels en la sala de Vilanova i la Geltrú",
+  alt: "Alumnos de NEXUS VNG bailando bachata, reparto y lady style en la sala de Vilanova i la Geltrú",
+} satisfies { desktop: MediaVideo; movil: MediaVideo; alt: string };
+
+/**
+ * Misma imagen, en franja baja, para las cabeceras del resto de páginas.
+ *
+ * Existe por peso: la banda de título mide unos 250 px de alto y servir ahí el
+ * hero completo (2,4 MB) sería pagar por píxeles que se recortan. Estos pesan
+ * ~0,9 MB y ~0,4 MB. Ver `HeroFondo`.
+ */
+export const heroBanda = {
+  desktop: {
+    src: "/media/hero/banda-desktop.mp4",
+    poster: "/media/hero/banda-desktop.jpg",
+    ancho: 1440,
+    alto: 480,
+  },
+  movil: {
+    src: "/media/hero/banda-mobile.mp4",
+    poster: "/media/hero/banda-mobile.jpg",
+    ancho: 720,
+    alto: 540,
+  },
+  alt: heroVideo.alt,
 } satisfies { desktop: MediaVideo; movil: MediaVideo; alt: string };
 
 /* ── Disciplinas ──────────────────────────────────────────────────────────
@@ -136,6 +158,25 @@ export const mediaModalidades: Record<string, MediaModalidad> = {
       "Clase de lady style bachata en NEXUS VNG",
     ],
   ),
+  /* Las dos compañías no se grabaron aparte. Se ilustran con material de su
+     propia disciplina —salsa cubana y bachata lady—, con clips distintos de los
+     que usan esas fichas para que no se repita la misma foto. Decisión de Pol
+     (05-09-2026): el estilo que se baila es el mismo; lo que las distingue es
+     la audición y el compromiso con los ensayos, no la estética de la clase. */
+  "cia-salsa": modalidad("cia-salsa", "Pareja bailando salsa cubana en NEXUS VNG", [
+    "Alumnos practicando salsa cubana en la sala",
+    "Grupo de salsa cubana durante la clase",
+    "Parejas bailando salsa cubana",
+  ]),
+  "cia-bachata-lady": modalidad(
+    "cia-bachata-lady",
+    "Alumnas bailando bachata lady en NEXUS VNG",
+    [
+      "Alumna de bachata lady frente al espejo",
+      "Grupo de bachata lady durante la clase",
+      "Alumnas practicando bachata lady",
+    ],
+  ),
 };
 
 /** Portada vertical (3:4) de una disciplina, o `null` si no hay material suyo. */
@@ -148,42 +189,33 @@ export function portadaAnchaModalidad(slug: string): MediaImagen | null {
   return mediaModalidades[slug]?.portadaAncha ?? null;
 }
 
-/* ── Mosaico de comunidad (home) ──────────────────────────────────────────
-   Cinco imágenes: la primera hace de ancla (ocupa dos filas) y las otras
-   cuatro rellenan la cuadrícula de 2×2 que queda a su derecha. Si se añade o
-   se quita una, hay que revisar el hueco en `Comunidad.tsx`. */
-export const mediaComunidad: MediaImagen[] = [
-  {
-    src: "/media/comunidad/sala-llena.jpg",
-    alt: "Sala llena de alumnos durante una clase de NEXUS VNG",
-    ancho: 1000,
-    alto: 1250,
-  },
-  {
-    src: "/media/comunidad/pareja-bachata.jpg",
-    alt: "Pareja bailando bachata en clase",
-    ancho: 1000,
-    alto: 1250,
-  },
-  {
-    src: "/media/comunidad/grupo-heels.jpg",
-    alt: "Grupo de alumnas en la clase de heels",
-    ancho: 1000,
-    alto: 1250,
-  },
-  {
-    src: "/media/comunidad/rueda-salsa.jpg",
-    alt: "Alumnos bailando salsa cubana en parejas",
-    ancho: 1000,
-    alto: 1250,
-  },
-  {
-    src: "/media/comunidad/pareja-salsa.jpg",
-    alt: "Dos alumnas practicando salsa cubana en clase",
-    ancho: 1000,
-    alto: 1250,
-  },
-];
+/* ── Mosaico de «El corazón son las personas» (home) ─────────────────────
+   Quince teselas cuadradas y pequeñas, no cinco grandes: la sección estaba
+   ocupando media pantalla para decir algo que se dice mejor con muchas caras
+   a la vez. Cuadradas porque a este tamaño un 3:4 se lee como una tira de
+   piernas; el recorte 1:1 va anclado arriba, en el script.
+
+   El orden es el de la rejilla y alterna disciplina y tipo de plano a
+   propósito. Los nombres van numerados para que `sort` respete ese orden. */
+export const mediaMosaico: MediaImagen[] = (
+  [
+    ["01-reparto-sala", "Sala llena durante una clase de reparto"],
+    ["02-bachata-pareja", "Pareja bailando bachata en clase"],
+    ["03-heels-grupo", "Grupo de alumnas en la clase de heels"],
+    ["04-salsa-rueda", "Alumnos bailando salsa cubana en parejas"],
+    ["05-lady-salsa-profe", "Clase de lady style salsa en la sala"],
+    ["06-reparto-fila", "Alumnas de reparto siguiendo la coreografía"],
+    ["07-bachata-abrazo", "Pareja abrazada bailando bachata"],
+    ["08-lady-bachata-grupo", "Grupo de lady style bachata bailando"],
+    ["09-salsa-pareja", "Pareja practicando salsa cubana"],
+    ["10-heels-coreo", "Alumnas de heels marcando la coreografía"],
+    ["11-reparto-grupo", "Grupo de reparto durante la clase"],
+    ["12-bachata-parejas", "Parejas bailando bachata en la sala"],
+    ["13-lady-salsa-grupo", "Alumnas de lady style salsa en clase"],
+    ["14-salsa-pareja-2", "Dos alumnos bailando salsa cubana"],
+    ["15-lady-bachata-espejo", "Alumnas de bachata lady frente al espejo"],
+  ] as const
+).map(([slug, alt]) => ({ src: `/media/mosaico/${slug}.jpg`, alt, ancho: 800, alto: 800 }));
 
 /* Tira de /socio-fundador: tres disciplinas distintas, porque lo que vende esa
    página es justamente el acceso a todas. */
