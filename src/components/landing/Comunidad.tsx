@@ -1,7 +1,20 @@
+import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
-import { PhotoPlaceholder } from "@/components/ui/PhotoPlaceholder";
+import { mediaComunidad } from "@/content/media";
 import { reviews, googleRating } from "@/content/landing";
 
+/**
+ * "El corazón son las personas": mosaico de fotos reales de clase.
+ *
+ * Estuvo desactivada de la home desde el rebrand porque el mosaico eran cuatro
+ * placeholders a rayas. Vuelve con fotografía real de los intensivos de agosto
+ * de 2026 (`content/media.ts`).
+ *
+ * Las reseñas siguen su propia regla: solo se pintan si `content/landing.ts`
+ * trae reseñas REALES de Google. Mientras la lista esté vacía, la sección
+ * enseña el mosaico y nada más — sin marcador visible y sin nota media
+ * inventada (Directiva Omnibus).
+ */
 export function Comunidad() {
   return (
     <section className="bg-bg-base py-[clamp(64px,9vw,120px)]">
@@ -14,10 +27,16 @@ export function Comunidad() {
             El corazón son las personas
           </h2>
         </Reveal>
+        <Reveal delay={0.1}>
+          <p className="mt-4 max-w-[58ch] font-body text-base leading-relaxed text-text-muted">
+            Fotos de clases reales de la escuela, en la sala de Vilanova. Ni banco de imágenes ni
+            modelos: es la gente que viene cada semana.
+          </p>
+        </Reveal>
 
         {/* Badge de valoración: solo se pinta con la nota REAL de Google (ver content/landing.ts). */}
         {googleRating && (
-          <Reveal delay={0.1} className="mt-[18px] inline-flex items-center gap-3 rounded-full border border-white/10 bg-bg-panel px-[18px] py-2.5 shadow-soft">
+          <Reveal delay={0.12} className="mt-[18px] inline-flex items-center gap-3 rounded-full border border-white/10 bg-bg-panel px-[18px] py-2.5 shadow-soft">
             <span className="font-display text-[26px] leading-none text-text-strong">{googleRating}</span>
             <span className="text-base tracking-[1px] text-star">★★★★★</span>
             <span className="font-body text-[13px] font-semibold text-text-muted">
@@ -26,21 +45,31 @@ export function Comunidad() {
           </Reveal>
         )}
 
-        {/* Mosaico de fotos. PLACEHOLDER: fotografía real de fiestas/eventos/caras. */}
-        <Reveal delay={0.12} className="mt-[30px] grid grid-cols-[repeat(auto-fit,minmax(min(170px,100%),1fr))] gap-3">
-          <PhotoPlaceholder label="[ fiesta ]" tint="warm" className="row-span-2 min-h-[300px] rounded-lg p-3" />
-          <PhotoPlaceholder label="[ masterclass ]" tint="red" className="min-h-[144px] rounded-lg p-3" />
-          <PhotoPlaceholder label="[ caras ]" tint="warm" className="min-h-[144px] rounded-lg p-3" />
-          <PhotoPlaceholder label="[ noche social · directo ]" tint="mix" className="col-span-full min-h-[130px] rounded-lg p-3" />
+        {/* Mosaico. En escritorio: 3 columnas × 2 filas; la primera imagen es
+            el ancla vertical de la izquierda (ocupa las dos filas) y las otras
+            cuatro rellenan el 2×2 de la derecha — de ahí que `mediaComunidad`
+            tenga que traer exactamente cinco. En móvil, dos columnas a secas. */}
+        <Reveal delay={0.14} className="mt-[30px] grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {mediaComunidad.map((img, i) => (
+            <div
+              key={img.src}
+              className={`bg-bg-elevated overflow-hidden rounded-lg border border-white/8 ${
+                i === 0 ? "col-span-2 sm:col-span-1 sm:row-span-2" : ""
+              }`}
+            >
+              <Image
+                src={img.src}
+                alt={img.alt}
+                width={img.ancho}
+                height={img.alto}
+                sizes="(max-width: 640px) 50vw, 33vw"
+                className={`w-full object-cover transition-transform duration-500 hover:scale-[1.04] ${
+                  i === 0 ? "aspect-[16/10] sm:aspect-auto sm:h-full" : "aspect-[4/5]"
+                }`}
+              />
+            </div>
+          ))}
         </Reveal>
-
-        {/* Reseñas: SOLO reales de Google. Mientras no haya, placeholder visible (Directiva Omnibus). */}
-        {reviews.length === 0 && (
-          <div className="mt-4 rounded-lg border border-dashed border-white/15 bg-bg-elevated/60 p-8 font-body text-sm text-text-muted">
-            [ TODO: reseñas reales de Google — texto literal y con permiso. No publicar esta sección
-            sin reseñas verificadas. ]
-          </div>
-        )}
 
         <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-4">
           {reviews.map((r, i) => (

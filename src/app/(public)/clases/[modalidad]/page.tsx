@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SupportPage } from "@/components/layout/SupportPage";
+import { Galeria } from "@/components/ui/Galeria";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
 import { SetWaPageContext } from "@/components/ui/WaPageContext";
@@ -10,6 +11,7 @@ import { waContextModalidad } from "@/lib/wa-page-context";
 import { JsonLd, courseLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { getModalidades, getModalidadBySlug, getModalidadSlugs } from "@/lib/queries/modalidades";
+import { mediaModalidades } from "@/content/media";
 import { modalidadesContenido } from "@/content/modalidades";
 import { sesionesRegulares } from "@/content/horario-regular";
 import { precios } from "@/content/precios";
@@ -67,6 +69,10 @@ export default async function ModalidadPage({ params }: Params) {
 
   // Enlaces cruzados: solo a disciplinas que existen y están activas.
   const relacionadas = (contenido?.relacionadas ?? []).filter((r) => nombrePorSlug.has(r.slug));
+
+  // Material audiovisual de ESTA disciplina, si se llegó a grabar. Puede no
+  // haberlo: ver la cabecera de content/media.ts.
+  const media = mediaModalidades[m.slug];
 
   return (
     <SupportPage
@@ -292,13 +298,36 @@ export default async function ModalidadPage({ params }: Params) {
             </p>
           )}
 
-          {/*
-            TODO: galería / vídeo de la modalidad — pendiente de fotografía real a color.
-            <PlaceholderNote>Galería / vídeo de la modalidad.</PlaceholderNote>
-          */}
+          {/* Galería de la disciplina: fotogramas de clases reales de este
+              estilo. Solo aparece si hay material grabado (content/media.ts). */}
+          {media && (
+            <Reveal as="section" className="space-y-5">
+              <h2 className="font-display text-3xl text-text-strong">
+                Una clase de {m.nombre.toLowerCase()}, por dentro
+              </h2>
+              <p className="max-w-[65ch] font-body text-[15px] leading-relaxed text-text-muted">
+                Vídeo y fotos de clases reales en la sala de {site.locality}. Ni banco de imágenes
+                ni montajes: es lo que te vas a encontrar.
+              </p>
+              <Galeria imagenes={media.galeria} video={media.loop} altVideo={media.portada.alt} />
+            </Reveal>
+          )}
         </div>
 
         <aside className="h-fit space-y-4 lg:sticky lg:top-24">
+          {/* Foto de la disciplina sobre la tarjeta de CTA. Apaisada a
+              propósito: la columna es `sticky` y un 3:4 la dejaría más alta
+              que la pantalla, con la mitad inferior imposible de ver. */}
+          {media && (
+            <Image
+              src={media.portadaAncha.src}
+              alt={media.portadaAncha.alt}
+              width={media.portadaAncha.ancho}
+              height={media.portadaAncha.alto}
+              sizes="(max-width: 1024px) 100vw, 380px"
+              className="bg-bg-elevated aspect-[4/3] w-full rounded-lg border border-white/8 object-cover"
+            />
+          )}
           <div className="rounded-lg border border-white/8 bg-bg-panel p-6 shadow-card">
             <h2 className="font-display text-2xl text-text-strong">¿Te animas?</h2>
             <p className="mt-2 font-body text-[15px] text-text-muted">

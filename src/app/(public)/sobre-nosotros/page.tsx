@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { SupportPage } from "@/components/layout/SupportPage";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
@@ -10,6 +11,7 @@ import {
   horarioRegular,
   sesionesRegulares,
 } from "@/content/horario-regular";
+import { mediaSobreNosotros } from "@/content/media";
 import { precios } from "@/content/precios";
 
 export const metadata: Metadata = {
@@ -52,6 +54,18 @@ export default function SobreNosotrosPage() {
             techo, pero no público ni forma de trabajar — de ahí que la escuela tenga nombre, marca
             y horario propios.
           </p>
+          {/* Foto real de la sala. Ver content/media.ts: todo el material sale
+              de grabaciones de clases de la escuela. */}
+          <figure className="bg-bg-elevated overflow-hidden rounded-lg border border-white/8">
+            <Image
+              src={mediaSobreNosotros.sala.src}
+              alt={mediaSobreNosotros.sala.alt}
+              width={mediaSobreNosotros.sala.ancho}
+              height={mediaSobreNosotros.sala.alto}
+              sizes="(max-width: 768px) 100vw, 68ch"
+              className="aspect-[16/10] w-full object-cover"
+            />
+          </figure>
           <p className="font-body text-text-body text-base leading-relaxed">
             Nacer dentro de un gimnasio también marca el carácter de la escuela: aquí se viene a
             entrenar algo, con constancia y progresión, no a pasar una tarde suelta. Solo que lo
@@ -128,6 +142,16 @@ export default function SobreNosotrosPage() {
             cuadrilla, las fiestas donde todo lo aprendido cobra sentido. Por eso cuidamos el
             ambiente tanto como la técnica.
           </p>
+          <figure className="bg-bg-elevated overflow-hidden rounded-lg border border-white/8">
+            <Image
+              src={mediaSobreNosotros.clase.src}
+              alt={mediaSobreNosotros.clase.alt}
+              width={mediaSobreNosotros.clase.ancho}
+              height={mediaSobreNosotros.clase.alto}
+              sizes="(max-width: 768px) 100vw, 68ch"
+              className="aspect-[16/10] w-full object-cover"
+            />
+          </figure>
           <p className="font-body text-text-body text-base leading-relaxed">
             Se queda gente charlando al acabar y hay salidas informales fuera de horario. No es
             entrar, bailar y salir. Es un grupo normal, centrado en pasarlo bien, donde nadie te va

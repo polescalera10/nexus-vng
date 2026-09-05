@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
@@ -8,6 +9,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { site } from "@/lib/site";
 import Link from "next/link";
 import { intensivos, intensivosGrupos, intensivoFinalizado } from "@/content/intensivos";
+import { mediaIntensivos } from "@/content/media";
 import { todayInMadrid } from "@/lib/format";
 
 /**
@@ -257,42 +259,60 @@ export default function IntensivosPage() {
                   <span className="font-body text-sm text-text-muted">{semana.rango}</span>
                 </Reveal>
                 <div className="grid gap-5 sm:grid-cols-2">
-                  {semana.sesiones.map((s, idx) => (
-                    <Reveal
-                      key={s.value}
-                      /* El id es el destino del `url` de cada Event en el
-                         JSON-LD: sin ancla propia, las ocho sesiones apuntaban
-                         a la misma URL. */
-                      id={s.value}
-                      delay={idx * 0.05}
-                      className="flex scroll-mt-24 gap-4 rounded-lg border border-white/8 bg-bg-base p-5 shadow-soft transition-colors hover:border-neon/30"
-                    >
-                      <div className="flex w-14 shrink-0 flex-col items-center rounded-sm bg-bg-elevated px-2 py-2 text-center">
-                        <span className="font-body text-[11px] font-bold uppercase tracking-wide text-neon-mint">
-                          {s.dia.split(" ")[0]}
-                        </span>
-                        <span className="font-display text-2xl leading-none text-text-strong">
-                          {s.dia.split(" ")[1]}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="font-display text-xl text-text-strong">{s.estilo}</h4>
-                          {s.nivel && (
-                            <span className="rounded-full border border-neon/40 px-2 py-0.5 font-body text-[11px] font-bold text-neon">
-                              {s.nivel}
+                  {semana.sesiones.map((s, idx) => {
+                    /* Foto de ESA sesión, no de otra: la página funciona como
+                       archivo de lo que se hizo cada día (content/media.ts). */
+                    const foto = mediaIntensivos[s.value];
+
+                    return (
+                      <Reveal
+                        key={s.value}
+                        /* El id es el destino del `url` de cada Event en el
+                           JSON-LD: sin ancla propia, las ocho sesiones apuntaban
+                           a la misma URL. */
+                        id={s.value}
+                        delay={idx * 0.05}
+                        className="flex scroll-mt-24 flex-col overflow-hidden rounded-lg border border-white/8 bg-bg-base shadow-soft transition-colors hover:border-neon/30"
+                      >
+                        {foto && (
+                          <Image
+                            src={foto.src}
+                            alt={foto.alt}
+                            width={foto.ancho}
+                            height={foto.alto}
+                            sizes="(max-width: 640px) 100vw, 50vw"
+                            className="aspect-[16/10] w-full object-cover"
+                          />
+                        )}
+                        <div className="flex gap-4 p-5">
+                          <div className="flex w-14 shrink-0 flex-col items-center rounded-sm bg-bg-elevated px-2 py-2 text-center">
+                            <span className="font-body text-[11px] font-bold uppercase tracking-wide text-neon-mint">
+                              {s.dia.split(" ")[0]}
                             </span>
-                          )}
+                            <span className="font-display text-2xl leading-none text-text-strong">
+                              {s.dia.split(" ")[1]}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h4 className="font-display text-xl text-text-strong">{s.estilo}</h4>
+                              {s.nivel && (
+                                <span className="rounded-full border border-neon/40 px-2 py-0.5 font-body text-[11px] font-bold text-neon">
+                                  {s.nivel}
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-0.5 font-body text-[13px] text-text-muted">
+                              {s.profes} · {s.hora}
+                            </p>
+                            <p className="mt-2 font-body text-[14px] leading-relaxed text-text-body">
+                              {s.desc}
+                            </p>
+                          </div>
                         </div>
-                        <p className="mt-0.5 font-body text-[13px] text-text-muted">
-                          {s.profes} · {s.hora}
-                        </p>
-                        <p className="mt-2 font-body text-[14px] leading-relaxed text-text-body">
-                          {s.desc}
-                        </p>
-                      </div>
-                    </Reveal>
-                  ))}
+                      </Reveal>
+                    );
+                  })}
                 </div>
               </div>
             ))}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Reveal } from "@/components/ui/Reveal";
@@ -9,6 +10,7 @@ import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd, courseListLd } from "@/components/seo/JsonLd";
 import { cursoRegularGrupos } from "@/content/horario-regular";
+import { portadaAnchaModalidad } from "@/content/media";
 import { getModalidades } from "@/lib/queries/modalidades";
 
 export const metadata: Metadata = {
@@ -141,28 +143,52 @@ export default async function ClasesPage() {
             </Reveal>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {modalidades.map((m, idx) => (
-                <Reveal
-                  key={m.slug}
-                  delay={idx * 0.05}
-                  className="bg-bg-base shadow-soft hover:border-neon/30 hover:shadow-card flex flex-col justify-between rounded-lg border border-white/8 p-6 transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div>
-                    <h3 className="font-display text-text-strong mb-2 text-2xl">{m.nombre}</h3>
-                    <p className="font-body text-text-muted mb-6 text-[14px] leading-relaxed">
-                      {m.descripcion}
-                    </p>
-                  </div>
-                  {/* Anchor descriptivo, no "Ver más": el texto del enlace es
-                      de lo poco que le dice a Google de qué va el destino. */}
-                  <Link
-                    href={`/clases/${m.slug}`}
-                    className="font-body text-neon mt-auto inline-flex items-center text-sm font-bold no-underline hover:underline"
+              {modalidades.map((m, idx) => {
+                /* Foto solo de las disciplinas grabadas (content/media.ts). Las
+                   demás se quedan con el degradado de marca en el mismo hueco:
+                   así todas las tarjetas miden igual y la rejilla no cojea. */
+                const portada = portadaAnchaModalidad(m.slug);
+
+                return (
+                  <Reveal
+                    key={m.slug}
+                    delay={idx * 0.05}
+                    className="bg-bg-base shadow-soft hover:border-neon/30 hover:shadow-card flex flex-col justify-between overflow-hidden rounded-lg border border-white/8 transition-all duration-300 hover:-translate-y-1"
                   >
-                    Clases de {m.nombre.toLowerCase()} &rarr;
-                  </Link>
-                </Reveal>
-              ))}
+                    {portada ? (
+                      <Image
+                        src={portada.src}
+                        alt={portada.alt}
+                        width={portada.ancho}
+                        height={portada.alto}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="aspect-[4/3] w-full object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="bg-bg-elevated aspect-[4/3] w-full bg-[repeating-linear-gradient(135deg,rgba(48,228,236,.10)_0_14px,rgba(48,228,236,.03)_14px_28px)]"
+                        aria-hidden
+                      />
+                    )}
+                    <div className="flex flex-1 flex-col justify-between p-6">
+                      <div>
+                        <h3 className="font-display text-text-strong mb-2 text-2xl">{m.nombre}</h3>
+                        <p className="font-body text-text-muted mb-6 text-[14px] leading-relaxed">
+                          {m.descripcion}
+                        </p>
+                      </div>
+                      {/* Anchor descriptivo, no "Ver más": el texto del enlace es
+                          de lo poco que le dice a Google de qué va el destino. */}
+                      <Link
+                        href={`/clases/${m.slug}`}
+                        className="font-body text-neon mt-auto inline-flex items-center text-sm font-bold no-underline hover:underline"
+                      >
+                        Clases de {m.nombre.toLowerCase()} &rarr;
+                      </Link>
+                    </div>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         </section>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Reveal } from "@/components/ui/Reveal";
 import { Accordion } from "@/components/ui/Accordion";
+import { Galeria } from "@/components/ui/Galeria";
 import { Countdown } from "@/components/ui/Countdown";
 import { WaLink } from "@/components/ui/WaLink";
 import { InterestLeadForm } from "@/components/forms/InterestLeadForm";
@@ -11,6 +12,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ogImages } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { founding } from "@/content/landing";
+import { mediaSocioFundador } from "@/content/media";
 import { disciplinas, kickerPlazas, numeros, socioFundador as c } from "@/content/socio-fundador";
 import { getFoundingSpots } from "@/lib/queries/founding";
 import { barraPct, tieneAforo, type FoundingSpots } from "@/lib/founding-spots";
@@ -307,6 +309,13 @@ export default async function SocioFundadorPage() {
                 </Reveal>
               ))}
             </div>
+
+            {/* Fotos de clases reales: "todas las disciplinas de tu nivel" se
+                entiende antes viéndolas que leyéndolas. Ver content/media.ts. */}
+            <Galeria imagenes={mediaSocioFundador} className="mt-10" />
+            <p className="font-body text-text-faint mt-3 text-[13px]">
+              Clases reales de la escuela, en la sala de {site.locality}.
+            </p>
           </div>
         </section>
 

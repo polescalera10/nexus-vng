@@ -1,7 +1,9 @@
 import { Header } from "@/components/layout/Header";
 import { RevealEager } from "@/components/ui/RevealEager";
+import { VideoLoop } from "@/components/ui/VideoLoop";
 import { WaLink } from "@/components/ui/WaLink";
 import { hero } from "@/content/landing";
+import { heroVideo } from "@/content/media";
 
 /** Divide el titular en la última frase para destacarla con el degradado NEXUS. */
 function splitTitle(title: string): [string, string | null] {
@@ -15,17 +17,29 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-ink text-white">
-      {/* Fondo texturizado oscuro con zoom lento (decorativo). PLACEHOLDER: vídeo real. */}
-      <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,#131318_0_18px,#0c0c10_18px_36px)] motion-safe:animate-[slowzoom_22s_ease-in-out_infinite_alternate]" />
+      {/* Fondo: imagen real de clase y, encima, su vídeo en bucle en cuanto el
+          cliente decide que procede (ver VideoLoop). El zoom lento lo aplica el
+          propio componente a las dos capas. */}
+      <VideoLoop
+        fuente={{
+          movil: { src: heroVideo.movil.src, poster: heroVideo.movil.poster },
+          desktop: { src: heroVideo.desktop.src, poster: heroVideo.desktop.poster },
+        }}
+        alt={heroVideo.alt}
+        ancho={heroVideo.movil.ancho}
+        alto={heroVideo.movil.alto}
+        sizes="100vw"
+        prioridad
+        zoom
+        className="absolute inset-0"
+      />
       {/* Luces de club: glow cian abajo + destello menta arriba, muy sutiles. */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_18%_100%,rgba(48,228,236,.16),transparent_70%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_45%_35%_at_85%_0%,rgba(113,233,201,.08),transparent_70%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,.6)_0%,rgba(10,10,10,.15)_35%,rgba(10,10,10,.45)_70%,rgba(10,10,10,.95)_100%)]" />
-      {/* Marcador del vídeo pendiente (oculto en producción; reactivar como referencia si hace falta):
-      <div className="absolute right-3.5 top-3.5 z-[5] rounded-md border border-white/25 px-2 py-1 font-mono text-[10px] tracking-[0.04em] text-white/55">
-        [ vídeo · gente bailando ]
-      </div>
-      */}
+      {/* Velo oscuro. Más denso que cuando el fondo era un degradado plano: por
+          debajo hay ahora una foto con mucho detalle claro (suelo blanco, focos)
+          y el titular tiene que mantener el contraste AA. */}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,.72)_0%,rgba(10,10,10,.45)_35%,rgba(10,10,10,.7)_70%,rgba(10,10,10,.97)_100%)]" />
 
       <Header />
 

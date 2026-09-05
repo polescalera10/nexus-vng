@@ -4,8 +4,7 @@ import { ParaTi } from "@/components/landing/ParaTi";
 import { PuntoDePartida } from "@/components/landing/PuntoDePartida";
 import { Experiencia } from "@/components/landing/Experiencia";
 import { Modalidades } from "@/components/landing/Modalidades";
-// TODO: reactivar <Comunidad /> cuando haya fotos reales, reseñas de Google y nota media.
-// import { Comunidad } from "@/components/landing/Comunidad";
+import { Comunidad } from "@/components/landing/Comunidad";
 import { Profesores } from "@/components/landing/Profesores";
 import { Founding } from "@/components/landing/Founding";
 import { Precios } from "@/components/landing/Precios";
@@ -30,7 +29,9 @@ export default async function HomePage() {
       <ParaTi />
       <Experiencia />
       <Modalidades modalidades={modalidades} />
-      {/* Oculta hasta tener contenido real (fotos + reseñas): <Comunidad /> */}
+      {/* Fotos reales desde 05-09-2026. El bloque de reseñas sigue condicionado
+          a que existan reseñas verificadas de Google (content/landing.ts). */}
+      <Comunidad />
       <Profesores />
       <Founding spots={spots} />
       {/* Precios "estándar": debajo del founding a propósito — cuando la promo
