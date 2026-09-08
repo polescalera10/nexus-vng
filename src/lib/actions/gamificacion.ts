@@ -30,6 +30,10 @@ export type GamificacionFormState = {
 export type GamificacionResult = { ok: boolean; message?: string };
 
 const ADMIN_PATHS = [
+  // Novedades enseña los canjes pendientes en su sección de notificaciones y
+  // permite resolverlos desde ahí: sin revalidarla, el canje resuelto seguiría
+  // en la lista hasta recargar a mano.
+  "/area-privada/admin",
   "/area-privada/admin/gamificacion",
   "/area-privada/admin/gamificacion/premios",
   "/area-privada/admin/gamificacion/reglas",

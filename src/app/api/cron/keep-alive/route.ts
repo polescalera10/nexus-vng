@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { cronRequestIsAuthorized } from "@/lib/cron-auth";
+import { todayInMadrid } from "@/lib/format";
+import { currentMonthInMadrid } from "@/lib/sessions";
+import { generateMonthSessions } from "@/lib/sessions-write";
 import { createServiceClient } from "@/lib/supabase/server";
 
 /**
@@ -13,6 +16,17 @@ import { createServiceClient } from "@/lib/supabase/server";
  *
  * Vercel añade automáticamente `Authorization: Bearer $CRON_SECRET` en las
  * llamadas de sus Cron Jobs cuando la env var CRON_SECRET existe.
+ *
+ * **El día 1 de cada mes genera además las sesiones de todos los cursos.**
+ * Va colgado aquí y no en su propio cron porque el plan Hobby admite solo dos
+ * cron jobs y los dos están ocupados (este y `cumpleanos`); el mismo motivo
+ * por el que `cumpleanos` hace dos cosas. La lógica está en
+ * `/api/cron/sesiones-mes`, que se puede disparar a mano, y el día que el
+ * proyecto pase a Pro basta con darle su propia entrada en vercel.json y
+ * quitar este bloque.
+ *
+ * Sin las sesiones generadas, el profe no encuentra su clase para pasar lista
+ * y el alumno no ve ni su próxima clase ni el diario.
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -33,5 +47,23 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, at: new Date().toISOString() });
+  // El día del mes se mira en Madrid: en UTC, a las 01:30 del día 1 el
+  // servidor todavía va por el último día del mes anterior.
+  const hoy = todayInMadrid();
+  const esDiaUno = hoy.endsWith("-01");
+
+  const sesiones = esDiaUno
+    ? await generateMonthSessions(supabase, currentMonthInMadrid())
+    : null;
+
+  if (sesiones?.error) {
+    console.error("[keep-alive] sesiones del mes:", sesiones.error);
+  }
+
+  return NextResponse.json({
+    ok: true,
+    at: new Date().toISOString(),
+    fecha: hoy,
+    sesiones_del_mes: sesiones ?? "solo el día 1",
+  });
 }

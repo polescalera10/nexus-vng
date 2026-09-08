@@ -10,6 +10,7 @@ import {
   formatMonth,
   sessionDatesForMonth,
 } from "@/lib/sessions";
+import { generateMonthSessions } from "@/lib/sessions-write";
 import { createClient } from "@/lib/supabase/server";
 import { courseSchema } from "@/lib/validation/course";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -206,6 +207,7 @@ export async function generateSessions(
  *
  * Es el gesto real de principio de mes: quince cursos, quince clics. Los
  * cursos inactivos se quedan fuera — si no se imparten, no tienen sesiones.
+ * La escritura la hace `generateMonthSessions`, compartida con el cron.
  */
 export async function generateSessionsForAllCourses(
   month?: string,
@@ -214,55 +216,17 @@ export async function generateSessionsForAllCourses(
     return { status: "error", message: "No tienes permisos para generar sesiones." };
   }
 
-  const mes = month ?? currentMonthInMadrid();
-
   const supabase = await createClient();
-  const { data: courses, error: coursesError } = await supabase
-    .from("courses")
-    .select("id, weekday, start_date, end_date")
-    .eq("active", true);
+  const res = await generateMonthSessions(supabase, month ?? currentMonthInMadrid());
 
-  if (coursesError) {
-    console.error("[generateSessionsForAllCourses] cursos:", coursesError.message);
-    return { status: "error", message: "No se han podido leer los cursos." };
-  }
-  if (!courses || courses.length === 0) {
-    return { status: "error", message: "No hay cursos activos." };
-  }
-
-  const rows = courses.flatMap((c) =>
-    sessionDatesForMonth(c.weekday, mes, c.start_date, c.end_date).map(
-      (session_date) => ({
-        course_id: c.id,
-        session_date,
-        status: "programada" as const,
-        substitute_teacher_id: null,
-      }),
-    ),
-  );
-
-  if (rows.length === 0) {
-    return {
-      status: "error",
-      message: `Ningún curso activo tiene sesiones en ${formatMonth(mes)}.`,
-    };
-  }
-
-  const { error } = await supabase
-    .from("class_sessions")
-    .upsert(rows, { onConflict: "course_id,session_date", ignoreDuplicates: true });
-
-  if (error) {
-    console.error("[generateSessionsForAllCourses] upsert:", error.message);
-    return { status: "error", message: "No se han podido generar las sesiones." };
-  }
+  if (res.error) return { status: "error", message: res.error };
 
   revalidateCourse();
   revalidatePath("/area-privada/admin");
   revalidatePath("/area-privada/profesor");
   return {
     status: "success",
-    message: `${rows.length} sesiones de ${formatMonth(mes)} repartidas entre ${courses.length} cursos (las que ya existían se conservan).`,
+    message: `${res.sesiones} sesiones de ${formatMonth(res.month)} repartidas entre ${res.cursos} cursos (las que ya existían se conservan).`,
   };
 }
 
