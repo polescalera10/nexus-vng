@@ -6,6 +6,7 @@ import {
   type ModalidadOption,
   type NivelOption,
 } from "@/lib/queries/catalogo";
+import { currentMonthInMadrid } from "@/lib/sessions";
 import type {
   ClassSession,
   Course,
@@ -390,4 +391,48 @@ export async function getCourseOptions(): Promise<CourseOption[]> {
       admits_followers: c.capacity_followers > 0,
     };
   });
+}
+
+export type CoberturaDelMes = {
+  /** "YYYY-MM" del mes consultado. */
+  month: string;
+  cursosActivos: number;
+  /** Cursos activos que ya tienen al menos una sesión ese mes. */
+  cursosConSesiones: number;
+  sesiones: number;
+};
+
+/**
+ * ¿Están generadas las sesiones del mes? Alimenta el aviso de Novedades.
+ *
+ * Sin esto el admin no tiene forma de saber que le faltan sesiones hasta que
+ * un profe no encuentra su clase para pasar lista.
+ */
+export async function getCoberturaDelMes(
+  month: string = currentMonthInMadrid(),
+): Promise<CoberturaDelMes> {
+  const supabase = await createClient();
+
+  const [{ data: courses }, { data: sessions }] = await Promise.all([
+    supabase.from("courses").select("id").eq("active", true),
+    supabase
+      .from("class_sessions")
+      .select("course_id")
+      .gte("session_date", `${month}-01`)
+      // El día 32 no existe, y `lt` con él cubre cualquier longitud de mes sin
+      // tener que calcular el último día.
+      .lt("session_date", `${month}-32`),
+  ]);
+
+  const activos = new Set((courses ?? []).map((c) => c.id));
+  const conSesiones = new Set(
+    (sessions ?? []).map((s) => s.course_id).filter((id) => activos.has(id)),
+  );
+
+  return {
+    month,
+    cursosActivos: activos.size,
+    cursosConSesiones: conSesiones.size,
+    sesiones: (sessions ?? []).filter((s) => activos.has(s.course_id)).length,
+  };
 }

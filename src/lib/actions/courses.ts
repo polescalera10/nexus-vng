@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { formatTime, WEEKDAYS } from "@/lib/format";
 import { isAdminSession } from "@/lib/auth";
 import { syncCourseTeachers } from "@/lib/queries/course-teachers";
+import {
+  currentMonthInMadrid,
+  formatMonth,
+  sessionDatesForMonth,
+} from "@/lib/sessions";
 import { createClient } from "@/lib/supabase/server";
 import { courseSchema } from "@/lib/validation/course";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
@@ -130,57 +135,47 @@ export async function saveCourse(
   redirect(`/area-privada/admin/cursos/${courseId}`);
 }
 
-/** Date local → "YYYY-MM-DD" (sin sorpresas de zona horaria). */
-function toISODate(d: Date): string {
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-
 /**
- * Genera las próximas sesiones del curso según su `weekday` (1=Lun … 7=Dom):
- * desde hoy (o `start_date` si es futura), `weeks` ocurrencias, sin rebasar
- * `end_date`. Las fechas ya existentes se saltan (unique course_id+session_date).
+ * Genera las sesiones de UN MES para un curso, según su `weekday`.
+ *
+ * Por mes natural y no "las próximas N semanas": lo normal es dar al botón con
+ * el mes ya empezado o a mitad, y con la lógica anterior se perdían las
+ * sesiones ya pasadas del mes y se colaban las del siguiente (ver
+ * `lib/sessions.ts`). Las fechas que ya existen se saltan — el unique
+ * (course_id, session_date) las protege — así que se puede pulsar dos veces
+ * sin duplicar nada.
+ *
+ * `month` en formato "YYYY-MM"; por omisión, el mes en curso en Madrid.
  */
 export async function generateSessions(
   courseId: string,
-  weeks = 4,
+  month?: string,
 ): Promise<ActionResult> {
   if (!(await isAdminSession())) {
     return { status: "error", message: "No tienes permisos para generar sesiones." };
   }
 
+  const mes = month ?? currentMonthInMadrid();
+
   const supabase = await createClient();
   const { data: course } = await supabase
     .from("courses")
-    .select("*")
+    .select("id, name, weekday, start_date, end_date")
     .eq("id", courseId)
     .maybeSingle();
   if (!course) return { status: "error", message: "Curso no encontrado." };
 
-  const cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-  if (course.start_date) {
-    const start = new Date(`${course.start_date}T00:00:00`);
-    if (start > cursor) cursor.setTime(start.getTime());
-  }
-
-  // weekday 1=Lun…7=Dom → getDay() 0=Dom…6=Sáb.
-  const targetDay = course.weekday % 7;
-  while (cursor.getDay() !== targetDay) cursor.setDate(cursor.getDate() + 1);
-
-  const end = course.end_date ? new Date(`${course.end_date}T00:00:00`) : null;
-  const dates: string[] = [];
-  for (let i = 0; i < weeks; i++) {
-    if (end && cursor > end) break;
-    dates.push(toISODate(cursor));
-    cursor.setDate(cursor.getDate() + 7);
-  }
+  const dates = sessionDatesForMonth(
+    course.weekday,
+    mes,
+    course.start_date,
+    course.end_date,
+  );
 
   if (dates.length === 0) {
     return {
       status: "error",
-      message: "No hay fechas que generar: el curso ya ha terminado (end_date pasada).",
+      message: `No hay sesiones que generar en ${formatMonth(mes)}: el mes queda fuera del rango del curso.`,
     };
   }
 
@@ -202,8 +197,193 @@ export async function generateSessions(
   revalidateCourse(courseId);
   return {
     status: "success",
-    message: `Sesiones generadas hasta el ${dates[dates.length - 1]} (las existentes se conservan).`,
+    message: `${dates.length} ${dates.length === 1 ? "sesión" : "sesiones"} de ${formatMonth(mes)} (las que ya existían se conservan).`,
   };
+}
+
+/**
+ * Lo mismo, para TODOS los cursos activos de una vez.
+ *
+ * Es el gesto real de principio de mes: quince cursos, quince clics. Los
+ * cursos inactivos se quedan fuera — si no se imparten, no tienen sesiones.
+ */
+export async function generateSessionsForAllCourses(
+  month?: string,
+): Promise<ActionResult> {
+  if (!(await isAdminSession())) {
+    return { status: "error", message: "No tienes permisos para generar sesiones." };
+  }
+
+  const mes = month ?? currentMonthInMadrid();
+
+  const supabase = await createClient();
+  const { data: courses, error: coursesError } = await supabase
+    .from("courses")
+    .select("id, weekday, start_date, end_date")
+    .eq("active", true);
+
+  if (coursesError) {
+    console.error("[generateSessionsForAllCourses] cursos:", coursesError.message);
+    return { status: "error", message: "No se han podido leer los cursos." };
+  }
+  if (!courses || courses.length === 0) {
+    return { status: "error", message: "No hay cursos activos." };
+  }
+
+  const rows = courses.flatMap((c) =>
+    sessionDatesForMonth(c.weekday, mes, c.start_date, c.end_date).map(
+      (session_date) => ({
+        course_id: c.id,
+        session_date,
+        status: "programada" as const,
+        substitute_teacher_id: null,
+      }),
+    ),
+  );
+
+  if (rows.length === 0) {
+    return {
+      status: "error",
+      message: `Ningún curso activo tiene sesiones en ${formatMonth(mes)}.`,
+    };
+  }
+
+  const { error } = await supabase
+    .from("class_sessions")
+    .upsert(rows, { onConflict: "course_id,session_date", ignoreDuplicates: true });
+
+  if (error) {
+    console.error("[generateSessionsForAllCourses] upsert:", error.message);
+    return { status: "error", message: "No se han podido generar las sesiones." };
+  }
+
+  revalidateCourse();
+  revalidatePath("/area-privada/admin");
+  revalidatePath("/area-privada/profesor");
+  return {
+    status: "success",
+    message: `${rows.length} sesiones de ${formatMonth(mes)} repartidas entre ${courses.length} cursos (las que ya existían se conservan).`,
+  };
+}
+
+/** Lo que se perdería al borrar una sesión. */
+export type SessionUsage = { asistencia: number; diario: boolean };
+
+export type DeleteSessionResult = ActionResult & {
+  /** Presente cuando hace falta confirmar porque la sesión tiene datos. */
+  usage?: SessionUsage;
+};
+
+/**
+ * Borra una sesión.
+ *
+ * `attendance`, `session_notes` y `session_videos` cuelgan con ON DELETE
+ * CASCADE: borrar una sesión con lista pasada o diario se lleva esos datos y
+ * no hay vuelta atrás. Por eso la primera llamada se NIEGA y devuelve el
+ * recuento; la UI enseña qué se pierde y solo entonces repite con
+ * `force: true`. Una sesión vacía se borra directamente, sin fricción.
+ */
+export async function deleteSession(
+  sessionId: string,
+  force = false,
+): Promise<DeleteSessionResult> {
+  if (!(await isAdminSession())) {
+    return { status: "error", message: "No tienes permisos para borrar sesiones." };
+  }
+
+  const supabase = await createClient();
+  const { data: session } = await supabase
+    .from("class_sessions")
+    .select("id, course_id, session_date")
+    .eq("id", sessionId)
+    .maybeSingle();
+  if (!session) return { status: "error", message: "Esa sesión ya no existe." };
+
+  const [{ count: asistencia }, { count: notas }, { count: videos }] = await Promise.all([
+    supabase
+      .from("attendance")
+      .select("id", { count: "exact", head: true })
+      .eq("class_session_id", sessionId),
+    supabase
+      .from("session_notes")
+      .select("id", { count: "exact", head: true })
+      .eq("class_session_id", sessionId),
+    supabase
+      .from("session_videos")
+      .select("id", { count: "exact", head: true })
+      .eq("class_session_id", sessionId),
+  ]);
+
+  const usage: SessionUsage = {
+    asistencia: asistencia ?? 0,
+    diario: (notas ?? 0) + (videos ?? 0) > 0,
+  };
+
+  if (!force && (usage.asistencia > 0 || usage.diario)) {
+    const partes = [
+      usage.asistencia > 0 &&
+        `la lista de ${usage.asistencia} ${usage.asistencia === 1 ? "alumno" : "alumnos"}`,
+      usage.diario && "el diario con sus vídeos",
+    ].filter(Boolean);
+    return {
+      status: "error",
+      usage,
+      message: `Esta sesión tiene datos: se perdería ${partes.join(" y ")}. Confirma para borrarla.`,
+    };
+  }
+
+  const { error } = await supabase.from("class_sessions").delete().eq("id", sessionId);
+  if (error) {
+    console.error("[deleteSession]", error.message);
+    return { status: "error", message: "No se ha podido borrar la sesión." };
+  }
+
+  revalidateCourse(session.course_id);
+  revalidatePath("/area-privada/admin");
+  return { status: "success", message: "Sesión borrada." };
+}
+
+/**
+ * Cambia la fecha de una sesión (una clase que se mueve de día).
+ *
+ * Mover en vez de borrar y volver a crear conserva la lista y el diario, que
+ * es justo lo que se quiere cuando la clase del martes se pasa al jueves.
+ * El unique (course_id, session_date) impide dejar dos sesiones el mismo día:
+ * ese choque se traduce a un mensaje, no a un error de Postgres en pantalla.
+ */
+export async function updateSessionDate(
+  sessionId: string,
+  sessionDate: string,
+): Promise<ActionResult> {
+  if (!(await isAdminSession())) {
+    return { status: "error", message: "No tienes permisos para editar sesiones." };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(sessionDate)) {
+    return { status: "error", message: "Esa fecha no es válida." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("class_sessions")
+    .update({ session_date: sessionDate })
+    .eq("id", sessionId)
+    .select("course_id")
+    .single();
+
+  if (error || !data) {
+    if (error?.code === "23505") {
+      return {
+        status: "error",
+        message: "Ya hay una sesión de este curso ese día.",
+      };
+    }
+    console.error("[updateSessionDate]", error?.message);
+    return { status: "error", message: "No se ha podido cambiar la fecha." };
+  }
+
+  revalidateCourse(data.course_id);
+  revalidatePath("/area-privada/admin");
+  return { status: "success", message: "Fecha actualizada." };
 }
 
 /** Cambia el estado de una sesión (programada ⇄ cancelada). */

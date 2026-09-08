@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { getActivityFeed, getDashboardStats, listLeads } from "@/lib/queries/activity";
+import { getCoberturaDelMes } from "@/lib/queries/courses";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ActivityFeed } from "./_components/ActivityFeed";
 import { LeadCard } from "./_components/LeadCard";
+import { SesionesDelMes } from "./_components/SesionesDelMes";
 import { StatTiles } from "./_components/StatTiles";
 
 /**
@@ -16,10 +18,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   await requireRole("admin");
 
-  const [stats, leadsNuevos, activity] = await Promise.all([
+  const [stats, leadsNuevos, activity, cobertura] = await Promise.all([
     getDashboardStats(),
     listLeads({ estado: "nuevo", limit: 5 }),
     getActivityFeed(25),
+    getCoberturaDelMes(),
   ]);
 
   return (
@@ -46,6 +49,10 @@ export default async function AdminPage() {
 
       <div className="mt-6">
         <StatTiles stats={stats} />
+      </div>
+
+      <div className="mt-8">
+        <SesionesDelMes cobertura={cobertura} />
       </div>
 
       <section className="mt-10">

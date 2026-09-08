@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import {
   assignSubstitute,
+  deleteSession,
   generateSessions,
+  updateSessionDate,
   updateSessionStatus,
 } from "@/lib/actions/courses";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate, SESSION_STATUS_LABELS } from "@/lib/format";
+import { currentMonthInMadrid, formatMonth } from "@/lib/sessions";
 import type { SessionStatus } from "@/types/database";
 
 /**
@@ -40,6 +43,9 @@ const STATUS_VARIANT: Record<SessionStatus, "neutral" | "success" | "danger"> = 
 export function GenerateSessionsButton({ courseId }: { courseId: string }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  // El mes se resuelve en el cliente solo para la etiqueta; la action vuelve a
+  // calcularlo en el servidor, que es donde manda la zona de Madrid.
+  const mes = formatMonth(currentMonthInMadrid());
 
   return (
     <div className="flex flex-col items-end gap-1.5">
@@ -50,7 +56,7 @@ export function GenerateSessionsButton({ courseId }: { courseId: string }) {
         onClick={() => {
           setMessage(null);
           startTransition(async () => {
-            const res = await generateSessions(courseId, 4);
+            const res = await generateSessions(courseId);
             setMessage({
               ok: res.status === "success",
               text: res.message ?? "Error inesperado.",
@@ -58,7 +64,7 @@ export function GenerateSessionsButton({ courseId }: { courseId: string }) {
           });
         }}
       >
-        Generar sesiones (4 semanas)
+        Generar {mes}
       </Button>
       {message && (
         <p
@@ -83,6 +89,10 @@ function SessionRow({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [editandoFecha, setEditandoFecha] = useState(false);
+  const [fecha, setFecha] = useState(session.session_date);
+  /** Texto del aviso cuando el borrado tiene datos que se perderían. */
+  const [confirmarBorrado, setConfirmarBorrado] = useState<string | null>(null);
 
   const run = (fn: () => Promise<{ status: string; message?: string }>) => {
     setError(null);
@@ -92,17 +102,81 @@ function SessionRow({
     });
   };
 
+  /**
+   * Primer clic: la action se niega si hay lista o diario y devuelve qué se
+   * perdería. Segundo clic (ya con el aviso en pantalla): borra de verdad.
+   */
+  const borrar = () => {
+    setError(null);
+    startTransition(async () => {
+      const res = await deleteSession(session.id, confirmarBorrado !== null);
+      if (res.status === "error") {
+        if (res.usage) setConfirmarBorrado(res.message ?? "Confirma para borrarla.");
+        else setError(res.message ?? "Error inesperado.");
+      }
+    });
+  };
+
   const editable = session.status !== "impartida";
 
   return (
     <li className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3">
-        <span className="font-body text-sm font-semibold text-text-strong">
-          {formatDate(session.session_date)}
-        </span>
-        <Badge variant={STATUS_VARIANT[session.status]}>
-          {SESSION_STATUS_LABELS[session.status]}
-        </Badge>
+      <div className="flex flex-wrap items-center gap-3">
+        {editandoFecha ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="sr-only" htmlFor={`fecha-${session.id}`}>
+              Nueva fecha de la sesión
+            </label>
+            <input
+              id={`fecha-${session.id}`}
+              type="date"
+              value={fecha}
+              disabled={pending}
+              onChange={(e) => setFecha(e.target.value)}
+              className="scheme-dark min-h-11 rounded-sm border border-text-strong/15 bg-bg-elevated px-3 py-2 font-body text-base text-text-strong focus-visible:outline-accent disabled:opacity-55 sm:min-h-9 sm:text-[13px]"
+            />
+            <Button
+              variant="primary"
+              size="sm"
+              loading={pending}
+              disabled={fecha === session.session_date}
+              onClick={() =>
+                run(async () => {
+                  const res = await updateSessionDate(session.id, fecha);
+                  if (res.status === "success") setEditandoFecha(false);
+                  return res;
+                })
+              }
+            >
+              Guardar
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setFecha(session.session_date);
+                setEditandoFecha(false);
+                setError(null);
+              }}
+            >
+              Cancelar
+            </Button>
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => setEditandoFecha(true)}
+              title="Cambiar la fecha"
+              className="rounded-sm font-body text-sm font-semibold text-text-strong underline decoration-text-strong/25 decoration-dotted underline-offset-4 hover:text-accent hover:decoration-accent"
+            >
+              {formatDate(session.session_date)}
+            </button>
+            <Badge variant={STATUS_VARIANT[session.status]}>
+              {SESSION_STATUS_LABELS[session.status]}
+            </Badge>
+          </>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5">
@@ -163,7 +237,36 @@ function SessionRow({
             </span>
           )
         )}
+
+        <Button
+          variant="ghost"
+          size="sm"
+          loading={pending}
+          className="text-text-faint hover:bg-danger/10 hover:text-danger"
+          onClick={borrar}
+        >
+          {confirmarBorrado ? "Sí, borrar" : "Borrar"}
+        </Button>
+
+        {confirmarBorrado && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setConfirmarBorrado(null)}
+          >
+            No
+          </Button>
+        )}
       </div>
+
+      {confirmarBorrado && (
+        <p
+          role="alert"
+          className="rounded-sm border border-warning/30 bg-warning/10 px-3 py-2 font-body text-xs font-semibold text-warning"
+        >
+          {confirmarBorrado}
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="font-body text-xs font-semibold text-danger">
