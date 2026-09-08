@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatDate,
   formatRelative,
+  formatSessionDay,
   formatTime,
   WEEKDAYS,
   WEEKDAYS_SHORT,
@@ -88,5 +89,31 @@ describe("formatRelative", () => {
     expect(formatRelative(new Date(now.getTime() + 60_000).toISOString(), now)).toBe(
       "ahora",
     );
+  });
+});
+
+describe("formatSessionDay", () => {
+  // 10:00 de Madrid del miércoles 9 de septiembre de 2026.
+  const ahora = new Date("2026-09-09T08:00:00Z");
+
+  it("dice Hoy, Mañana y Ayer en vez de la fecha", () => {
+    expect(formatSessionDay("2026-09-09", ahora)).toBe("Hoy");
+    expect(formatSessionDay("2026-09-10", ahora)).toBe("Mañana");
+    expect(formatSessionDay("2026-09-08", ahora)).toBe("Ayer");
+  });
+
+  it("a partir de ahí cae a día de la semana y fecha, sin coma", () => {
+    const salida = formatSessionDay("2026-09-15", ahora);
+    expect(salida).not.toContain(",");
+    expect(salida).toMatch(/^mar 15/);
+  });
+
+  /**
+   * Vercel corre en UTC: a las 00:30 de Madrid en verano ya es el día anterior
+   * en UTC. Sin `todayInMadrid` esto diría "Mañana" a una clase que es hoy.
+   */
+  it("usa el día de Madrid, no el del servidor en UTC", () => {
+    const medianocheMadrid = new Date("2026-09-08T22:30:00Z"); // 00:30 del día 9
+    expect(formatSessionDay("2026-09-09", medianocheMadrid)).toBe("Hoy");
   });
 });

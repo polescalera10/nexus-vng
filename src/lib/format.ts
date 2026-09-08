@@ -93,6 +93,32 @@ export function formatRelative(iso: string, now: Date = new Date()): string {
   return then.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }
 
+/**
+ * Fecha de sesión (YYYY-MM-DD) → "Hoy", "Mañana", "Ayer" o "mar 10 sep".
+ *
+ * El alumno no lee "2026-09-10": lee "mañana". La referencia es el día de
+ * Madrid, no el del servidor — en Vercel es UTC y de madrugada fallaría.
+ */
+export function formatSessionDay(iso: string, now: Date = new Date()): string {
+  const hoy = todayInMadrid(now);
+  if (iso === hoy) return "Hoy";
+
+  const diff = Math.round(
+    (new Date(`${iso}T00:00:00`).getTime() - new Date(`${hoy}T00:00:00`).getTime()) / 86_400_000,
+  );
+  if (diff === 1) return "Mañana";
+  if (diff === -1) return "Ayer";
+
+  const d = new Date(`${iso}T00:00:00`);
+  const etiqueta = d.toLocaleDateString("es-ES", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+  // "mar, 10 sept" → "mar 10 sept": la coma sobra en una línea tan corta.
+  return etiqueta.replace(",", "");
+}
+
 /** Etiquetas de UI para enums del panel. */
 export const DANCE_ROLE_LABELS: Record<string, string> = {
   leader: "Leader",

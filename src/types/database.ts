@@ -204,6 +204,29 @@ export type Attendance = {
   recorded_at: string;
 };
 
+// ── Diario de clase (migración 0043) ─────────────────────────────────────────
+/** Qué se dio en una sesión. Uno por sesión (unique en `class_session_id`). */
+export type SessionNote = {
+  id: string;
+  class_session_id: string;
+  resumen: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Vídeo de una sesión. Siempre URL externa: ver `lib/video.ts` y la 0043a. */
+export type SessionVideo = {
+  id: string;
+  class_session_id: string;
+  url: string;
+  titulo: string | null;
+  orden: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type WhatsappEvent = {
   id: string;
   student_id: string | null;
@@ -392,6 +415,18 @@ export interface Database {
         Update: Partial<Attendance>;
         Relationships: [];
       };
+      session_notes: {
+        Row: SessionNote;
+        Insert: Pick<SessionNote, "class_session_id" | "resumen"> & Partial<SessionNote>;
+        Update: Partial<SessionNote>;
+        Relationships: [];
+      };
+      session_videos: {
+        Row: SessionVideo;
+        Insert: Pick<SessionVideo, "class_session_id" | "url"> & Partial<SessionVideo>;
+        Update: Partial<SessionVideo>;
+        Relationships: [];
+      };
       whatsapp_events: {
         Row: WhatsappEvent;
         Insert: Pick<WhatsappEvent, "type"> & Partial<WhatsappEvent>;
@@ -457,6 +492,14 @@ export interface Database {
        * Socios fundadores que el profe puede añadir de suelto a una sesión
        * (migración 0038c). SECURITY DEFINER: devuelve solo id y nombre.
        */
+      /**
+       * ¿La sesión pertenece a un curso del alumno de la sesión? (0043b)
+       * SECURITY DEFINER para no encadenar políticas sobre `class_sessions`.
+       */
+      student_can_see_session: {
+        Args: { p_session_id: string };
+        Returns: boolean;
+      };
       founding_drop_in_candidates: {
         Args: { p_session_id: string };
         Returns: { id: string; full_name: string }[];

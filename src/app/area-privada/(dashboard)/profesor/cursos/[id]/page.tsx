@@ -153,12 +153,22 @@ export default async function ProfesorCursoDetailPage({
                     {SESSION_STATUS_LABELS[s.status]}
                   </Badge>
                 </div>
-                {s.substituteName && (
-                  <span className="font-body text-[13px] text-text-muted">
-                    Sustituto: {s.substituteName}
-                    {s.substitute_teacher_id === teacher.id && " (tú)"}
-                  </span>
-                )}
+                <div className="flex items-center gap-3">
+                  {s.status !== "cancelada" && (
+                    <Link
+                      href={`/area-privada/profesor/asistencia/${s.id}`}
+                      className="font-body text-[13px] font-semibold text-accent hover:underline"
+                    >
+                      Lista y diario
+                    </Link>
+                  )}
+                  {s.substituteName && (
+                    <span className="font-body text-[13px] text-text-muted">
+                      Sustituto: {s.substituteName}
+                      {s.substitute_teacher_id === teacher.id && " (tú)"}
+                    </span>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

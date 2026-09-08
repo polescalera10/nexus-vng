@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import {
   assignSubstitute,
@@ -13,7 +14,11 @@ import type { SessionStatus } from "@/types/database";
 
 /**
  * Sesiones del curso (admin): generación de las próximas semanas, cambio de
- * estado (programada ⇄ cancelada) y asignación de profe sustituto por sesión.
+ * estado (programada ⇄ cancelada), asignación de profe sustituto y acceso a la
+ * hoja de la sesión — donde se pasa lista y se cuelga el diario (0043).
+ *
+ * El enlace a la hoja está aquí porque hoy ninguna ficha de `teachers` tiene
+ * usuario enlazado: sin él nadie podría subir un vídeo.
  */
 
 export type SessionItem = {
@@ -101,6 +106,13 @@ function SessionRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5">
+        <Link
+          href={`/area-privada/profesor/asistencia/${session.id}`}
+          className="font-body text-[13px] font-semibold text-accent hover:underline"
+        >
+          Lista y diario
+        </Link>
+
         {editable ? (
           <>
             <label className="sr-only" htmlFor={`sub-${session.id}`}>

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireRole } from "@/lib/auth";
+import { requireAnyRole } from "@/lib/auth";
 import { getAttendanceSheet } from "@/lib/queries/attendance";
+import { getDiarioDeSesion } from "@/lib/queries/diario";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import {
@@ -11,6 +12,8 @@ import {
   WEEKDAYS,
 } from "@/lib/format";
 import { AttendanceSheet } from "./AttendanceSheet";
+import { DiarioForm } from "./DiarioForm";
+import { Card } from "@/components/ui/Card";
 
 /** "YYYY-MM-DD" → 1=Lun … 7=Dom (convención del proyecto). */
 function isoWeekday(iso: string): number {
@@ -19,8 +22,17 @@ function isoWeekday(iso: string): number {
 }
 
 /**
- * Pasar lista de una sesión. La RLS de `class_sessions` solo devuelve la
- * sesión al titular/sustituto: para cualquier otro profe → notFound().
+ * Pasar lista de una sesión y contar qué se dio (diario, migración 0043).
+ *
+ * La RLS de `class_sessions` solo devuelve la sesión al titular, al sustituto
+ * o al admin: para cualquier otro profe → notFound().
+ *
+ * El guard acepta admin además de profesor porque la RLS ya le deja pasar
+ * lista y escribir el diario (`is_admin()` en 0020 y 0043d) — era la pantalla
+ * la que se lo impedía. Hace falta de verdad: ninguna ficha de `teachers`
+ * tiene todavía usuario enlazado, así que sin esto no hay nadie que pueda
+ * subir un vídeo.
+ *
  * Si ya hay asistencia registrada, la hoja abre en modo edición.
  */
 export default async function AsistenciaPage({
@@ -28,11 +40,13 @@ export default async function AsistenciaPage({
 }: {
   params: Promise<{ sessionId: string }>;
 }) {
-  await requireRole("profesor");
+  await requireAnyRole(["profesor", "admin"]);
 
   const { sessionId } = await params;
   const sheet = await getAttendanceSheet(sessionId);
   if (!sheet) notFound();
+
+  const diario = await getDiarioDeSesion(sessionId);
 
   const { session, course, students, records, dropInCandidates } = sheet;
   const attendanceTaken = records.length > 0;
@@ -98,6 +112,22 @@ export default async function AsistenciaPage({
           />
         )}
       </div>
+
+      {session.status !== "cancelada" && (
+        <div className="mt-8">
+          <Card title="Diario de la clase">
+            <p className="mb-4 font-body text-sm text-text-muted">
+              Esto lo ven los alumnos matriculados en su área privada. El que faltó
+              se pone al día y el que vino repasa en casa.
+            </p>
+            <DiarioForm
+              sessionId={session.id}
+              initialResumen={diario.resumen ?? ""}
+              initialVideos={diario.videos.map((v) => ({ url: v.url, titulo: v.titulo }))}
+            />
+          </Card>
+        </div>
+      )}
     </>
   );
 }
