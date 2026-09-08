@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="supported-color-schemes" content="dark">
+<title>Tu enlace de acceso a NEXUS VNG</title>
+</head>
+<!--
+  NEXUS VNG · Supabase Auth › Magic Link
+  Asunto: Tu enlace de acceso a NEXUS VNG
+  Pegar en Dashboard › Authentication › Emails › Templates › Magic Link.
+  Este archivo es la FUENTE DE VERDAD: se edita aquí y se vuelve a pegar.
+  Reglas de email: CSS siempre en línea, tablas para la estructura, sin
+  webfonts (Anton no existe en el correo → Arial Black para el titular).
+-->
+<body style="margin:0;padding:0;background-color:#0a0a0a;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0a0a0a" style="margin:0;padding:0;background-color:#0a0a0a;">
+  <tr>
+    <td align="center" style="padding:32px 12px;">
+
+      <!-- Preheader: es lo que se lee en la bandeja, no en el cuerpo -->
+      <div style="display:none;font-size:1px;color:#0a0a0a;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">Tu enlace para entrar en el área privada. Caduca en 1 hora.</div>
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;width:100%;">
+
+        <!-- Logo -->
+        <tr>
+          <td align="center" style="padding:0 0 28px;">
+            <img src="https://nexusvng.es/images/nexus-logo-email.png" width="164" height="77" alt="NEXUS VNG" style="display:block;width:164px;height:77px;border:0;outline:none;text-decoration:none;">
+          </td>
+        </tr>
+
+        <!-- Tarjeta -->
+        <tr>
+          <td bgcolor="#131316" style="background-color:#131316;border:1px solid #2a2a30;border-radius:16px;padding:36px 32px;">
+
+            <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#30e4ec;">Área privada</p>
+
+            <h1 style="margin:0 0 16px;font-family:'Arial Black','Arial Bold',Arial,Helvetica,sans-serif;font-size:26px;line-height:1.2;font-weight:900;color:#f4f7f5;">Entra en tu cuenta</h1>
+
+            <p style="margin:0 0 26px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#c0c7c4;">Pulsa el botón y entras directo. Sin contraseña.</p>
+
+            <!-- CTA -->
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px;">
+              <tr>
+                <td bgcolor="#30e4ec" style="background-color:#30e4ec;border-radius:12px;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 30px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1;color:#0a0a0a;text-decoration:none;border-radius:12px;">Entrar en NEXUS VNG</a>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0 0 22px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#8b938f;">El enlace <strong style="color:#c0c7c4;font-weight:700;">caduca en 1 hora</strong>, solo sirve una vez y hay que abrirlo en el mismo dispositivo desde el que lo pediste.</p>
+
+            <hr style="border:0;border-top:1px solid #2a2a30;margin:0 0 22px;">
+
+            <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;color:#5c635f;">Si el botón no funciona, copia esta dirección y pégala en el navegador:</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;word-break:break-all;">
+              <a href="{{ .ConfirmationURL }}" style="color:#71e9c9;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+            </p>
+
+          </td>
+        </tr>
+
+        <!-- Pie -->
+        <tr>
+          <td align="center" style="padding:26px 16px 0;">
+            <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;color:#8b938f;">¿No has pedido este enlace? Ignora este correo: sin pulsarlo no pasa nada.</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#5c635f;">NEXUS VNG &middot; Rambla del Garraf, 32 &middot; Sant Pere de Ribes</p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
