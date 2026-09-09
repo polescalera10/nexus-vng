@@ -413,15 +413,16 @@ export async function getCoberturaDelMes(
 ): Promise<CoberturaDelMes> {
   const supabase = await createClient();
 
+  const [y, m] = month.split("-").map(Number) as [number, number];
+  const siguienteMes = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}-01`;
+
   const [{ data: courses }, { data: sessions }] = await Promise.all([
     supabase.from("courses").select("id").eq("active", true),
     supabase
       .from("class_sessions")
       .select("course_id")
       .gte("session_date", `${month}-01`)
-      // El día 32 no existe, y `lt` con él cubre cualquier longitud de mes sin
-      // tener que calcular el último día.
-      .lt("session_date", `${month}-32`),
+      .lt("session_date", siguienteMes),
   ]);
 
   const activos = new Set((courses ?? []).map((c) => c.id));
