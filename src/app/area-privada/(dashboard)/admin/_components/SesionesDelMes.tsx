@@ -7,12 +7,11 @@ import { formatMonth } from "@/lib/sessions";
 import type { CoberturaDelMes } from "@/lib/queries/courses";
 
 /**
- * Generar de golpe las sesiones del mes para todos los cursos activos.
+ * Aviso de que faltan sesiones del mes por generar, con botón de un clic.
  *
- * Es el gesto de principio de mes: sin esto había que entrar en los quince
- * cursos y darle al botón uno por uno. Y hasta que las sesiones existen, el
- * profe no encuentra su clase para pasar lista y el alumno no ve ni su próxima
- * clase ni el diario — así que el aviso avisa cuando faltan.
+ * La generación corre automática a principios de mes (cron), así que este
+ * aviso ya no hace falta cuando todos los cursos activos están cubiertos —
+ * solo se pinta si de verdad falta algo (curso nuevo, fallo del cron, etc).
  *
  * Repetir el clic no duplica nada: el unique (course_id, session_date) protege
  * y la action ignora las que ya están.
@@ -25,14 +24,10 @@ export function SesionesDelMes({ cobertura }: { cobertura: CoberturaDelMes }) {
   const faltan = cobertura.cursosActivos - cobertura.cursosConSesiones;
   const completo = faltan === 0 && cobertura.cursosActivos > 0;
 
+  if (completo && !message) return null;
+
   return (
-    <div
-      className={`rounded-lg border p-5 shadow-soft ${
-        completo
-          ? "border-text-strong/8 bg-bg-panel"
-          : "border-warning/30 bg-warning/8"
-      }`}
-    >
+    <div className="rounded-lg border border-warning/30 bg-warning/8 p-5 shadow-soft">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="font-body text-[15px] font-bold text-text-strong">
@@ -42,8 +37,7 @@ export function SesionesDelMes({ cobertura }: { cobertura: CoberturaDelMes }) {
             {completo ? (
               <>
                 Los {cobertura.cursosActivos} cursos activos ya tienen sus sesiones:{" "}
-                {cobertura.sesiones} en total. Puedes volver a generar si has añadido
-                un curso.
+                {cobertura.sesiones} en total.
               </>
             ) : (
               <>
@@ -58,7 +52,7 @@ export function SesionesDelMes({ cobertura }: { cobertura: CoberturaDelMes }) {
         </div>
 
         <Button
-          variant={completo ? "secondary" : "primary"}
+          variant="primary"
           size="sm"
           loading={pending}
           onClick={() => {

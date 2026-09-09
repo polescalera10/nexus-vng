@@ -70,6 +70,8 @@ function Row({ item }: { item: ActivityItem }) {
   );
 }
 
+const VISIBLE_COUNT = 5;
+
 export function ActivityFeed({ items }: { items: ActivityItem[] }) {
   if (items.length === 0) {
     return (
@@ -80,11 +82,30 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
     );
   }
 
+  const visible = items.slice(0, VISIBLE_COUNT);
+  const resto = items.slice(VISIBLE_COUNT);
+
   return (
-    <ul className="divide-y divide-text-strong/8 rounded-lg border border-text-strong/8 bg-bg-panel shadow-soft">
-      {items.map((item) => (
-        <Row key={item.id} item={item} />
-      ))}
-    </ul>
+    <div className="rounded-lg border border-text-strong/8 bg-bg-panel shadow-soft">
+      <ul className="divide-y divide-text-strong/8">
+        {visible.map((item) => (
+          <Row key={item.id} item={item} />
+        ))}
+      </ul>
+
+      {resto.length > 0 && (
+        <details className="group border-t border-text-strong/8">
+          <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 py-3 font-body text-[13px] font-semibold text-accent hover:underline [&::-webkit-details-marker]:hidden">
+            <span className="group-open:hidden">Ver {resto.length} más</span>
+            <span className="hidden group-open:inline">Ocultar</span>
+          </summary>
+          <ul className="divide-y divide-text-strong/8 border-t border-text-strong/8">
+            {resto.map((item) => (
+              <Row key={item.id} item={item} />
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
   );
 }
