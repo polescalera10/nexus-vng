@@ -165,7 +165,7 @@ export default async function RankingPage() {
                 <p className="font-body text-sm text-text-muted">
                   {student.show_in_leaderboard
                     ? "Todavía no tienes puntos, así que no sales en la tabla. Al pasar lista en tu próxima clase entras."
-                    : "Has pedido no salir en el ranking. Puedes volver a activarlo cuando quieras."}
+                    : "Has elegido no aparecer en el ranking. Puedes volver a activarlo cuando quieras."}
                 </p>
                 <Link
                   href="/area-privada/alumno/perfil"
@@ -203,8 +203,8 @@ export default async function RankingPage() {
           )}
 
           <p className="mt-6 max-w-[60ch] font-body text-xs text-text-faint">
-            Solo aparecen los alumnos activos con puntos que no han pedido salir del
-            ranking. Puedes salir tú desde tu perfil.
+            Solo aparecen los alumnos activos con puntos que han elegido aparecer aquí.
+            Tú puedes dejar de aparecer desde tu perfil.
           </p>
         </>
       )}

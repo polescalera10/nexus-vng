@@ -6,10 +6,13 @@ import { getMyCourses, getStudentForUser } from "@/lib/queries/alumno";
 import { getProximaClase } from "@/lib/queries/diario";
 import { getEventos } from "@/lib/queries/eventos";
 import {
+  getPointRule,
   getRewards,
   getStudentPoints,
   getStudentRedemptions,
 } from "@/lib/queries/gamificacion";
+import { camposPendientes, listaPendientes } from "@/lib/perfil-completo";
+import { Onboarding } from "./Onboarding";
 import {
   DANCE_ROLE_LABELS,
   ENROLLMENT_STATUS_LABELS,
@@ -59,14 +62,22 @@ export default async function AlumnoPage() {
     );
   }
 
-  const [puntos, cursos, premios, canjes, proxima, eventos] = await Promise.all([
-    getStudentPoints(student.id, 20),
-    getMyCourses(student.id),
-    getRewards(true),
-    getStudentRedemptions(student.id),
-    getProximaClase(student.id),
-    getEventos(),
-  ]);
+  const [puntos, cursos, premios, canjes, proxima, eventos, reglaPerfil] =
+    await Promise.all([
+      getStudentPoints(student.id, 20),
+      getMyCourses(student.id),
+      getRewards(true),
+      getStudentRedemptions(student.id),
+      getProximaClase(student.id),
+      getEventos(),
+      getPointRule("perfil_completo"),
+    ]);
+
+  // Los puntos los concede el trigger de 0045d leyendo esta misma regla. Si
+  // Pol la apaga desde el panel, aquí deja de prometerse nada.
+  const pendientes = camposPendientes(student);
+  const premioPerfil = reglaPerfil?.points ?? 0;
+  const pidePerfil = pendientes.length > 0 && premioPerfil > 0;
 
   // `getEventos()` los devuelve por fecha ascendente, pasados incluidos.
   const ahora = Date.now();
@@ -91,6 +102,33 @@ export default async function AlumnoPage() {
         )}
         {student.is_founding_member && <Badge variant="success">Socia fundadora</Badge>}
       </div>
+
+      {/* La bienvenida sale una sola vez; el recordatorio de abajo es el que
+          insiste mientras falten datos. */}
+      {student.onboarding_seen_at === null && (
+        <Onboarding
+          nombre={student.full_name.split(" ")[0] ?? ""}
+          pendientes={pendientes}
+          puntosPremio={premioPerfil}
+        />
+      )}
+
+      {pidePerfil && (
+        <div className="mt-6 rounded-lg border border-accent/30 bg-accent/8 p-5">
+          <p className="font-body text-base font-bold text-text-strong">
+            Completa tu perfil y suma {premioPerfil} puntos
+          </p>
+          <p className="mt-1 font-body text-sm text-text-muted">
+            Nos faltan {listaPendientes(pendientes)}.
+          </p>
+          <Link
+            href="/area-privada/alumno/perfil"
+            className="mt-3 inline-block font-body text-sm font-semibold text-accent hover:underline"
+          >
+            Completar mi perfil →
+          </Link>
+        </div>
+      )}
 
       {/* ── Próxima clase ──────────────────────────────────────────────────── */}
       {proxima && (

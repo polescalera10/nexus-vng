@@ -131,6 +131,8 @@ export type Student = {
   avatar_path: string | null;
   /** false = ha pedido no salir en el ranking. */
   show_in_leaderboard: boolean;
+  /** Cuándo vio la bienvenida del área privada. Null = todavía no la ha visto. */
+  onboarding_seen_at: string | null;
   created_at: string;
   updated_at: string;
 };

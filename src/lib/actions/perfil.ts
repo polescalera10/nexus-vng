@@ -143,6 +143,32 @@ export async function setMiAvatar(path: string): Promise<PerfilMutationResult> {
   return { ok: true };
 }
 
+/**
+ * Marca la bienvenida como vista.
+ *
+ * Se llama tanto si el alumno pulsa "Completar mi perfil" como si la cierra:
+ * la bienvenida se enseña una vez, no hasta que hace caso. El recordatorio de
+ * los puntos pendientes se queda en el inicio, que es el que sí insiste.
+ */
+export async function marcarOnboardingVisto(): Promise<PerfilMutationResult> {
+  const ficha = await fichaDeLaSesion();
+  if (!ficha) return { ok: false, message: "Tu cuenta no está enlazada a una ficha." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("students")
+    .update({ onboarding_seen_at: new Date().toISOString() })
+    .eq("id", ficha.id);
+
+  if (error) {
+    console.error("[marcarOnboardingVisto]", error.message);
+    return { ok: false };
+  }
+
+  revalidarPerfil();
+  return { ok: true };
+}
+
 /** Quita la foto y vuelve al avatar de iniciales. */
 export async function removeMiAvatar(): Promise<PerfilMutationResult> {
   const ficha = await fichaDeLaSesion();

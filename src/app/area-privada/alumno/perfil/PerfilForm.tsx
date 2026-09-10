@@ -101,7 +101,7 @@ export function PerfilForm({ student }: { student: Student }) {
           />
           <span className="flex flex-col">
             <span className="font-body text-sm font-semibold text-text-strong">
-              Salir en el ranking
+              Aparecer en el ranking
             </span>
             <span className="font-body text-xs text-text-muted">
               Si lo desmarcas, tu nombre, tu foto y tus puntos dejan de verse para el

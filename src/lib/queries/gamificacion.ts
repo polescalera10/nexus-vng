@@ -50,6 +50,57 @@ export async function getPointRules(onlyActive = false): Promise<PointRule[]> {
   return data ?? [];
 }
 
+/**
+ * Una regla concreta por código, o null si no existe o está apagada.
+ *
+ * Lo usa la pantalla del alumno para decir cuántos puntos da completar el
+ * perfil sin escribir el número a mano: quien concede los puntos es el trigger
+ * de 0045d, y también los lee de aquí. Si Pol cambia el valor en el panel, la
+ * promesa y el premio siguen cuadrando.
+ */
+export async function getPointRule(code: string): Promise<PointRule | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("point_rules")
+    .select("*")
+    .eq("code", code)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[getPointRule]", error.message);
+    return null;
+  }
+  return data;
+}
+
+/**
+ * ¿Ya se le concedió a este alumno el apunte de una regla concreta?
+ *
+ * Para no prometer puntos que ya cobró ni darlos por cobrados sin serlo: una
+ * ficha que ya estaba completa antes de existir la regla no tiene apunte,
+ * porque el trigger se dispara al guardar, no al mirar.
+ */
+export async function hasPointEventForRule(
+  studentId: string,
+  code: string,
+): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("point_events")
+    .select("id")
+    .eq("student_id", studentId)
+    .eq("rule_code", code)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[hasPointEventForRule]", error.message);
+    return false;
+  }
+  return data !== null;
+}
+
 export async function getRewards(onlyActive = false): Promise<Reward[]> {
   const supabase = await createClient();
   let query = supabase
