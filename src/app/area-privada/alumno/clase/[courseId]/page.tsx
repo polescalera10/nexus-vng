@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { VideoEmbed } from "@/components/alumno/VideoEmbed";
-import { AlumnoShell } from "@/app/area-privada/alumno/Shell";
 import { requireRole } from "@/lib/auth";
 import { getStudentForUser } from "@/lib/queries/alumno";
 import { getCursoDelAlumno, getDiarioDelCurso } from "@/lib/queries/diario";
@@ -44,7 +43,7 @@ export default async function ClaseDelAlumnoPage({
   const conLista = diario.filter((s) => s.asistio !== null).length;
 
   return (
-    <AlumnoShell email={user.email}>
+    <>
       <Link
         href="/area-privada/alumno"
         className="font-body text-sm font-semibold text-text-muted hover:text-accent"
@@ -131,6 +130,6 @@ export default async function ClaseDelAlumnoPage({
           ))}
         </ul>
       )}
-    </AlumnoShell>
+    </>
   );
 }

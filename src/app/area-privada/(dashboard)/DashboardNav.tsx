@@ -15,7 +15,8 @@ export type NavIconName =
   | "whatsapp"
   | "today"
   | "eventos"
-  | "puntos";
+  | "puntos"
+  | "perfil";
 
 export type NavItem = {
   href: string;
@@ -83,6 +84,12 @@ function NavIcon({ name }: { name: NavIconName }) {
         <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9L12 3.5Z" />
       </>
     ),
+    perfil: (
+      <>
+        <circle cx="12" cy="8" r="3.4" />
+        <path d="M4.8 20c.5-3.9 3.4-6.1 7.2-6.1s6.7 2.2 7.2 6.1" />
+      </>
+    ),
   };
 
   return (
@@ -106,7 +113,7 @@ function isActive(pathname: string, item: NavItem) {
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
-/** Navegación lateral (escritorio, md+). */
+/** Navegación lateral (escritorio, md+). La comparten los tres roles. */
 export function SidebarNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 

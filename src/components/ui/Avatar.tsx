@@ -1,10 +1,15 @@
 /**
- * Avatar de iniciales.
+ * Avatar del alumno: foto si la ha subido, iniciales si no.
  *
- * No guardamos fotos de alumnos (no hay columna ni bucket), así que el avatar
- * es tipográfico: las iniciales sobre un tinte estable derivado del `seed`
- * (el id). No es decoración — en una lista de veinte nombres, el color fijo de
- * cada persona es lo que permite reconocerla de un vistazo sin leer.
+ * Las iniciales no son un placeholder de relleno — en una lista de veinte
+ * nombres, el tinte fijo de cada persona es lo que permite reconocerla de un
+ * vistazo sin leer. Por eso el color se deriva del `seed` (el id) y no se
+ * reparte al azar.
+ *
+ * La foto llega como URL FIRMADA y caduca en una hora (bucket privado, ver
+ * `lib/avatars.ts`). Se pinta con `<img>` a propósito y no con `next/image`:
+ * el optimizador cachea por URL, y una URL que cambia cada hora convertiría
+ * cada visita en una optimización nueva facturable de la misma foto.
  */
 
 const TINTS = [
@@ -18,6 +23,8 @@ const TINTS = [
 const SIZES = {
   sm: "h-9 w-9 text-[12px]",
   md: "h-11 w-11 text-sm",
+  lg: "h-16 w-16 text-xl",
+  xl: "h-24 w-24 text-3xl",
 } as const;
 
 /** Primera letra del nombre y del último apellido: "Ana Ruiz Gil" → "AG". */
@@ -39,15 +46,32 @@ function tintIndex(seed: string): number {
 export function Avatar({
   name,
   seed,
+  src,
   size = "md",
   className = "",
 }: {
   name: string;
   /** Cualquier valor estable por persona; normalmente el id. */
   seed?: string;
+  /** URL firmada de la foto. Sin ella se pintan las iniciales. */
+  src?: string | null;
   size?: keyof typeof SIZES;
   className?: string;
 }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        className={`shrink-0 rounded-full object-cover ${SIZES[size]} ${className}`}
+      />
+    );
+  }
+
   return (
     <span
       aria-hidden="true"

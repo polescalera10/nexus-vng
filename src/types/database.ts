@@ -127,6 +127,10 @@ export type Student = {
   /** Usuario de Auth con el que entra al área privada. Null = sin login. */
   profile_id: string | null;
   birthday: string | null;
+  /** Ruta en el bucket privado `avatars` (`<student_id>/<fichero>`), no una URL. */
+  avatar_path: string | null;
+  /** false = ha pedido no salir en el ranking. */
+  show_in_leaderboard: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -503,6 +507,20 @@ export interface Database {
       founding_drop_in_candidates: {
         Args: { p_session_id: string };
         Returns: { id: string; full_name: string }[];
+      };
+      /**
+       * Ranking de puntos para el área del alumno (0044d). SECURITY DEFINER:
+       * devuelve las tres columnas que se pintan y solo a quien tiene ficha,
+       * en vez de abrir `students` en SELECT a todos los autenticados.
+       */
+      leaderboard_alumno: {
+        Args: { p_limit?: number };
+        Returns: {
+          student_id: string;
+          full_name: string;
+          avatar_path: string | null;
+          balance: number;
+        }[];
       };
     };
     CompositeTypes: Record<never, never>;

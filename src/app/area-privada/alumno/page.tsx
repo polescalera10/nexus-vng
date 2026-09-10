@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { AlumnoShell } from "./Shell";
 import { requireRole } from "@/lib/auth";
 import { getMyCourses, getStudentForUser } from "@/lib/queries/alumno";
 import { getProximaClase } from "@/lib/queries/diario";
@@ -47,7 +46,7 @@ export default async function AlumnoPage() {
 
   if (!student) {
     return (
-      <AlumnoShell email={user.email}>
+      <>
         <h1 className="font-display text-[clamp(30px,5vw,48px)] text-text-strong">
           Ya casi
         </h1>
@@ -56,7 +55,7 @@ export default async function AlumnoPage() {
           Escríbenos por WhatsApp o díselo a tu profe en la próxima clase y lo
           conectamos en un minuto.
         </p>
-      </AlumnoShell>
+      </>
     );
   }
 
@@ -78,7 +77,7 @@ export default async function AlumnoPage() {
   const canjesPendientes = canjes.filter((c) => c.status === "solicitado").length;
 
   return (
-    <AlumnoShell email={user.email}>
+    <>
       <span className="font-body text-xs font-bold uppercase tracking-[0.18em] text-accent">
         Área privada
       </span>
@@ -242,6 +241,12 @@ export default async function AlumnoPage() {
               recoger.
             </p>
           )}
+          <Link
+            href="/area-privada/alumno/ranking"
+            className="mt-4 inline-block font-body text-sm font-semibold text-accent hover:underline"
+          >
+            Ver el ranking →
+          </Link>
         </Card>
 
         <Card title="Premios" className="lg:col-span-2">
@@ -308,6 +313,6 @@ export default async function AlumnoPage() {
           )}
         </Card>
       </div>
-    </AlumnoShell>
+    </>
   );
 }

@@ -21,6 +21,24 @@ export const phoneSchema = z
   .max(25, "Teléfono demasiado largo")
   .regex(/^[+0-9\s().-]+$/, "El teléfono solo puede tener números y símbolos");
 
+/**
+ * Fecha de nacimiento en ISO `YYYY-MM-DD`.
+ *
+ * Vive fuera de `studentSchema` porque la comparte el formulario de perfil del
+ * alumno (`validation/perfil.ts`): duplicar el `refine` era garantizar que un
+ * día la ficha del admin y el perfil del alumno aceptaran fechas distintas.
+ */
+export const birthdaySchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha no válida")
+  .refine((v) => {
+    const d = new Date(`${v}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d < new Date() && d.getUTCFullYear() > 1900;
+  }, "Fecha no válida")
+  .optional()
+  .or(z.literal(""));
+
 export const studentSchema = z.object({
   full_name: z
     .string()
@@ -40,16 +58,7 @@ export const studentSchema = z.object({
     .email("Email no válido")
     .max(254, "Email demasiado largo"),
   /** ISO `YYYY-MM-DD`. Alimenta la felicitación automática. */
-  birthday: z
-    .string()
-    .trim()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha no válida")
-    .refine((v) => {
-      const d = new Date(`${v}T00:00:00Z`);
-      return !Number.isNaN(d.getTime()) && d < new Date() && d.getUTCFullYear() > 1900;
-    }, "Fecha no válida")
-    .optional()
-    .or(z.literal("")),
+  birthday: birthdaySchema,
   dance_role: z.enum(danceRoles, {
     errorMap: () => ({ message: "Elige un rol de baile" }),
   }),
