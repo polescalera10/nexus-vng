@@ -46,7 +46,7 @@
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px;">
               <tr>
                 <td bgcolor="#30e4ec" style="background-color:#30e4ec;border-radius:12px;">
-                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 30px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1;color:#0a0a0a;text-decoration:none;border-radius:12px;">Entrar en NEXUS VNG</a>
+                  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink" style="display:inline-block;padding:16px 30px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;line-height:1;color:#0a0a0a;text-decoration:none;border-radius:12px;">Entrar en NEXUS VNG</a>
                 </td>
               </tr>
             </table>
@@ -57,7 +57,7 @@
 
             <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;color:#5c635f;">Si el botón no funciona, copia esta dirección y pégala en el navegador:</p>
             <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.6;word-break:break-all;">
-              <a href="{{ .ConfirmationURL }}" style="color:#71e9c9;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+              <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink" style="color:#71e9c9;text-decoration:underline;">{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink</a>
             </p>
 
           </td>

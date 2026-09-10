@@ -38,8 +38,11 @@ export function LoginForm({
     const supabase = createClient();
 
     if (mode === "enlace") {
+      // `next` va SIEMPRE, aunque valga el valor por defecto: la plantilla del
+      // correo concatena `&token_hash=…` a esta URL y necesita que ya lleve
+      // query. Ver docs/email-templates/README.md.
       const callback = new URL("/area-privada/callback", window.location.origin);
-      if (redirectTo !== "/area-privada") callback.searchParams.set("next", redirectTo);
+      callback.searchParams.set("next", redirectTo);
 
       const { error } = await supabase.auth.signInWithOtp({
         email,

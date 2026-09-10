@@ -25,8 +25,40 @@ acceso se pide siempre por enlace mágico.
   en el `style`. El logo del correo es `public/images/nexus-logo-email.png`
   (360 px de ancho, 34 KB) — versión ligera de `nexus-logo.png` generada con
   `sips --resampleWidth 360`.
-- **`{{ .ConfirmationURL }}` aparece dos veces a propósito**: en el botón y en
-  texto plano. Hay clientes que no pintan el botón.
+- **El enlace NO usa `{{ .ConfirmationURL }}`.** Esa variable apunta a
+  `vruqtozggrntirdjmezy.supabase.co`, un dominio que no es el que firma el
+  correo: Resend lo marca como *link URLs don't match sending domain* y los
+  filtros lo penalizan. El enlace se construye a mano contra nuestro dominio:
+
+  ```
+  {{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink
+  ```
+
+  `.RedirectTo` es el `emailRedirectTo` que manda `LoginForm.tsx`
+  (`https://nexusvng.es/area-privada/callback?next=…`), y por eso el formulario
+  pone **siempre** el parámetro `next`: sin query previa, el `&` del `token_hash`
+  produce una URL rota. El route handler del callback ya sabe canjear
+  `token_hash` + `type` con `verifyOtp`.
+
+  Si algún día se manda un enlace fuera del formulario y `.RedirectTo` viene
+  vacío, la variante sin `next` es:
+  `{{ .SiteURL }}/area-privada/callback?token_hash={{ .TokenHash }}&type=magiclink`
+  (pierde el destino profundo, entra por el panel que toque según el rol).
+
+- **El enlace aparece dos veces a propósito**: en el botón y en texto plano.
+  Hay clientes que no pintan el botón.
+
+## Remitente y autenticación del dominio
+
+- **Nada de `no-reply@`.** Resend lo avisa y los filtros lo puntúan peor: un
+  buzón que no recibe respuestas es señal de correo masivo. El remitente se
+  cambia en Supabase Dashboard › Project Settings › Authentication › SMTP
+  Settings (`Sender email`), no en esta plantilla.
+- **DMARC**: `_dmarc.nexusvng.es` TXT
+  `v=DMARC1; p=none; sp=none; adkim=r; aspf=r; fo=1` (dado de alta el
+  10-09-2026 en el DNS de Vercel). Está en modo observación: subir a
+  `p=quarantine` cuando lleve unas semanas sin sorpresas.
+- SPF y DKIM los pone Resend en `send.nexusvng.es` y `resend._domainkey`.
 
 ## Lo que dice Supabase sobre los emails de autenticación
 
