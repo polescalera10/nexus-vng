@@ -53,7 +53,16 @@ acceso se pide siempre por enlace mágico.
 - **Nada de `no-reply@`.** Resend lo avisa y los filtros lo puntúan peor: un
   buzón que no recibe respuestas es señal de correo masivo. El remitente se
   cambia en Supabase Dashboard › Project Settings › Authentication › SMTP
-  Settings (`Sender email`), no en esta plantilla.
+  Settings (`Sender email`), no en esta plantilla. La dirección buena es
+  **`contacto@nexusvng.es`**.
+- **`contacto@nexusvng.es` es un reenvío, no un buzón.** Va por
+  [Forward Email](https://forwardemail.net) — gratis y sin cuenta, se configura
+  solo con DNS, igual que en `artesmarcialesgarraf.es`. En el DNS de Vercel
+  (10-09-2026): dos MX de prioridad 0 a `mx1`/`mx2.forwardemail.net` y un TXT
+  en la raíz `forward-email=contacto:polescalera10@gmail.com`. Lo que llegue a
+  esa dirección aparece en el Gmail de Pol. Para responder desde ella hace
+  falta configurar "Enviar como" en Gmail; si no, la respuesta sale con la
+  dirección personal.
 - **DMARC**: `_dmarc.nexusvng.es` TXT
   `v=DMARC1; p=none; sp=none; adkim=r; aspf=r; fo=1` (dado de alta el
   10-09-2026 en el DNS de Vercel). Está en modo observación: subir a
