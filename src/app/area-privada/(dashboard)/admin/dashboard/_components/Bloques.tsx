@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatEuros, WEEKDAYS } from "@/lib/format";
 import type { Aviso, ClaseNegocio, Negocio, Supuestos } from "@/lib/dashboard/negocio";
 
@@ -209,7 +210,10 @@ function Celda({ clase }: { clase: ClaseNegocio | undefined }) {
   }
   const pct = Math.round(clase.ocupacion * 100);
   return (
-    <div className="flex flex-col gap-1.5 rounded-sm border border-text-strong/8 bg-bg-elevated/40 p-3">
+    <Link
+      href={`/area-privada/admin/cursos/${clase.id}`}
+      className="flex flex-col gap-1.5 rounded-sm border border-text-strong/8 bg-bg-elevated/40 p-3 transition-colors hover:border-accent/40 hover:bg-bg-elevated/70"
+    >
       <span className="font-body text-sm font-semibold text-text-strong">
         {clase.nombre}
         {clase.esCompania && (
@@ -240,7 +244,7 @@ function Celda({ clase }: { clase: ClaseNegocio | undefined }) {
         </span>
         <ChipMargen valor={clase.margenMes} />
       </div>
-    </div>
+    </Link>
   );
 }
 
