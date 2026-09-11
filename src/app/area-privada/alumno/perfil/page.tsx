@@ -3,7 +3,8 @@ import { requireRole } from "@/lib/auth";
 import { signAvatarUrl } from "@/lib/avatars";
 import { getStudentForUser } from "@/lib/queries/alumno";
 import { getPointRule, hasPointEventForRule } from "@/lib/queries/gamificacion";
-import { camposPendientes, listaPendientes } from "@/lib/perfil-completo";
+import { camposPendientes } from "@/lib/perfil-completo";
+import { ChecklistPerfil } from "./ChecklistPerfil";
 import { AvatarUploader } from "./AvatarUploader";
 import { PerfilForm } from "./PerfilForm";
 
@@ -56,30 +57,11 @@ export default async function PerfilPage() {
         Mi perfil
       </h1>
 
-      {/* El aviso solo aparece mientras haya algo que hacer o algo que celebrar:
-          una ficha completa antes de existir la regla no cobra nada y tampoco
-          se le promete. */}
-      {pendientes.length > 0 && premioPerfil > 0 && (
-        <div className="mt-6 rounded-lg border border-accent/30 bg-accent/8 p-5">
-          <p className="font-body text-base font-bold text-text-strong">
-            Suma {premioPerfil} puntos completando tu perfil
-          </p>
-          <p className="mt-1 font-body text-sm text-text-muted">
-            Rellena {listaPendientes(pendientes)} y entran solos en tu saldo.
-          </p>
-        </div>
-      )}
-
-      {pendientes.length === 0 && yaCobrado && (
-        <div className="mt-6 rounded-lg border border-accent/30 bg-accent/8 p-5">
-          <p className="font-body text-base font-bold text-text-strong">
-            Perfil completo
-          </p>
-          <p className="mt-1 font-body text-sm text-text-muted">
-            Los puntos por completarlo ya están en tu saldo.
-          </p>
-        </div>
-      )}
+      <ChecklistPerfil
+        pendientes={pendientes}
+        premioPerfil={premioPerfil}
+        yaCobrado={yaCobrado}
+      />
 
       <div className="mt-8 grid gap-4">
         <Card title="Foto">
@@ -91,7 +73,7 @@ export default async function PerfilPage() {
         </Card>
 
         <Card title="Tus datos">
-          <PerfilForm student={student} />
+          <PerfilForm student={student} faltanApellidos={pendientes.includes("apellidos")} />
         </Card>
       </div>
     </>

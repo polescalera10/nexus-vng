@@ -29,7 +29,14 @@ function SubmitButton() {
  * intento de entrar con la ficha descuadrada. El cambio real necesita SMTP
  * propio y verificación en el correo nuevo (sigue pendiente).
  */
-export function PerfilForm({ student }: { student: Student }) {
+export function PerfilForm({
+  student,
+  /** true si el nombre guardado no lleva apellido. Pinta la pista en el campo. */
+  faltanApellidos,
+}: {
+  student: Student;
+  faltanApellidos: boolean;
+}) {
   const [state, formAction] = useActionState(updateMiPerfil, initial);
   const err = (field: string) => state.errors?.[field]?.[0];
 
@@ -42,7 +49,11 @@ export function PerfilForm({ student }: { student: Student }) {
           defaultValue={student.full_name}
           autoComplete="name"
           placeholder="Nombre y apellidos"
-          hint="Es el nombre con el que sales en el ranking."
+          hint={
+            faltanApellidos
+              ? "Te faltan los apellidos: escribe el nombre completo, como en el ranking."
+              : "Es el nombre con el que sales en el ranking."
+          }
           error={err("full_name")}
         />
       </div>
