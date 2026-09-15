@@ -23,21 +23,37 @@ import type { NextConfig } from "next";
  */
 const isDev = process.env.NODE_ENV === "development";
 
+/**
+ * Origen del Supabase configurado, SOLO si es local (http://127.0.0.1:54321 al
+ * usar `scripts/db-reset-local.sh --full`). En producción es https://*.supabase.co
+ * y ya está en la lista; sin esto, contra un Supabase local el navegador
+ * bloquea el login (connect-src) y el formulario dice "contraseña incorrecta".
+ */
+const localSupabaseOrigin = (() => {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    return ["127.0.0.1", "localhost"].includes(url.hostname) ? url.origin : "";
+  } catch {
+    return "";
+  }
+})();
+
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://challenges.cloudflare.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+  `connect-src 'self' https://*.supabase.co${localSupabaseOrigin ? ` ${localSupabaseOrigin}` : ""} https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com`,
   "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
   // Solo tiene efecto en modo bloqueante (en Report-Only el navegador lo
-  // ignora y lo marca como error en consola).
-  "upgrade-insecure-requests",
+  // ignora y lo marca como error en consola). Con un Supabase local por http se
+  // omite: reescribiría sus llamadas a https y el login fallaría igual.
+  ...(localSupabaseOrigin ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 /**
