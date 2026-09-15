@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   formatDate,
   formatRelative,
   formatSessionDay,
   formatTime,
+  recentMonthKeysInMadrid,
   WEEKDAYS,
   WEEKDAYS_SHORT,
   DANCE_ROLE_LABELS,
@@ -115,5 +116,33 @@ describe("formatSessionDay", () => {
   it("usa el día de Madrid, no el del servidor en UTC", () => {
     const medianocheMadrid = new Date("2026-09-08T22:30:00Z"); // 00:30 del día 9
     expect(formatSessionDay("2026-09-09", medianocheMadrid)).toBe("Hoy");
+  });
+});
+
+describe("recentMonthKeysInMadrid", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /**
+   * 22:30 UTC del 30-09 = 00:30 del 01-10 en Madrid. Con el reloj del servidor
+   * el informe de horas del profesor empezaría en septiembre.
+   */
+  it("el día 1 de madrugada ya cuenta el mes nuevo de Madrid", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-30T22:30:00Z"));
+    expect(recentMonthKeysInMadrid(6)).toEqual([
+      "2026-10",
+      "2026-09",
+      "2026-08",
+      "2026-07",
+      "2026-06",
+      "2026-05",
+    ]);
+  });
+
+  it("cruza el cambio de año", () => {
+    const keys = recentMonthKeysInMadrid(3, new Date("2026-12-31T23:30:00Z"));
+    expect(keys).toEqual(["2027-01", "2026-12", "2026-11"]);
   });
 });

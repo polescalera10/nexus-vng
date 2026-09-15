@@ -1,4 +1,5 @@
 import { getCourseIdsForTeacher } from "@/lib/queries/course-teachers";
+import { recentMonthKeysInMadrid } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import type { Course, Profile, Teacher } from "@/types/database";
 
@@ -124,8 +125,6 @@ export async function getTeacherCourses(teacherId: string): Promise<TeacherCours
   }));
 }
 
-const ym = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-
 /**
  * Registro de horas de los últimos 6 meses (mes actual incluido), read-only.
  *   · Titular:   sesiones `impartida` de SUS cursos SIN sustituto asignado.
@@ -135,18 +134,13 @@ const ym = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
  */
 export async function getTeacherHoursReport(
   teacherId: string,
+  now: Date = new Date(),
 ): Promise<TeacherMonthReport[]> {
   const supabase = await createClient();
 
-  const now = new Date();
-  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-  const fromIso = `${ym(from)}-01`;
-
-  // Meses del informe, de más reciente a más antiguo.
-  const months: string[] = [];
-  for (let i = 0; i < 6; i++) {
-    months.push(ym(new Date(now.getFullYear(), now.getMonth() - i, 1)));
-  }
+  // Meses del informe en Madrid, de más reciente a más antiguo.
+  const months = recentMonthKeysInMadrid(6, now);
+  const fromIso = `${months[months.length - 1]}-01`;
   const rows = new Map<string, TeacherMonthReport>(
     months.map((monthKey) => [
       monthKey,

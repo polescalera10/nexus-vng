@@ -70,6 +70,25 @@ export function todayInMadrid(now: Date = new Date()): string {
 }
 
 /**
+ * Últimos `count` meses ("YYYY-MM") en Madrid, del actual hacia atrás.
+ * Parte de `todayInMadrid`: el día 1 entre las 00:00 y las 02:00 el reloj UTC
+ * del servidor aún va por el mes anterior.
+ */
+export function recentMonthKeysInMadrid(count: number, now: Date = new Date()): string[] {
+  const today = todayInMadrid(now);
+  const year = Number(today.slice(0, 4));
+  const month = Number(today.slice(5, 7));
+  const keys: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const total = year * 12 + (month - 1) - i;
+    const y = Math.floor(total / 12);
+    const m = (total % 12) + 1;
+    keys.push(`${y}-${String(m).padStart(2, "0")}`);
+  }
+  return keys;
+}
+
+/**
  * Timestamp ISO → tiempo relativo corto ("hace 5 min", "ayer", "hace 3 d").
  * A partir de 7 días cae a fecha absoluta. `now` es inyectable para tests.
  */
