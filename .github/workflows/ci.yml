@@ -1,0 +1,55 @@
+# CI mínima: lo mismo que se pide en local antes de dar algo por terminado,
+# pero sin depender de acordarse.
+#
+# No sustituye al build de Vercel (que sigue siendo quien despliega) y no corre
+# los e2e: levantan un build de producción y leen Supabase, así que necesitarían
+# secretos. Lo que sí caza, y Vercel no avisa hasta que el despliegue ya ha
+# fallado o, peor, ha salido:
+#   · lockfile desincronizado con package.json (Vercel instala con
+#     --frozen-lockfile y tumba el despliegue antes de compilar)
+#   · errores de tipos
+#   · reglas de lint en error
+#   · tests unitarios rotos (como sesiones-mes-render, que estuvo en rojo del
+#     09-09 al 15-09-2026 sin que nadie lo viera)
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Tipos, lint y tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # La versión de pnpm sale de `packageManager` en package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar (lockfile congelado, como Vercel)
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Tests unitarios
+        run: pnpm test
