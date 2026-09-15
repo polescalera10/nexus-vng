@@ -53,7 +53,11 @@ const csp = [
   // Solo tiene efecto en modo bloqueante (en Report-Only el navegador lo
   // ignora y lo marca como error en consola). Con un Supabase local por http se
   // omite: reescribiría sus llamadas a https y el login fallaría igual.
-  ...(localSupabaseOrigin ? [] : ["upgrade-insecure-requests"]),
+  // También en el build de los e2e (`E2E_HTTP=1`, playwright.config.ts): se
+  // sirve por http://127.0.0.1 y WebKit, a diferencia de Chromium, no exime a
+  // localhost de la subida a https — pedía el CSS y el JS por https, no cargaba
+  // nada y los 45 tests de mobile-safari fallaban sin que la web tuviera culpa.
+  ...(localSupabaseOrigin || process.env.E2E_HTTP === "1" ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 /**

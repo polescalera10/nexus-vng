@@ -33,7 +33,9 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {
-    command: `npx next build && npx next start --port ${PORT}`,
+    // E2E_HTTP=1: el build de pruebas no lleva `upgrade-insecure-requests` en la
+    // CSP (ver next.config.ts). Sin él, WebKit no carga ni el CSS por http.
+    command: `E2E_HTTP=1 npx next build && E2E_HTTP=1 npx next start --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
