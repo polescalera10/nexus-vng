@@ -53,7 +53,11 @@ test("lee el diario de su clase y el vídeo no se carga hasta darle al play", as
 
 test("no abre el diario de un curso en el que no está", async ({ page }) => {
   await page.goto(`/area-privada/alumno/clase/${IDS.otherCourse}`);
-  await expect(page.getByText("No hemos encontrado lo que buscas")).toBeVisible();
+  // El área de alumno no tiene not-found propio: sale el 404 general de la web.
+  await expect(
+    page.getByRole("heading", { name: "¡Ups! Te has quedado fuera de tiempo", level: 1 }),
+  ).toBeVisible();
+  await expect(page.getByText("Lo que hemos dado")).toHaveCount(0);
 });
 
 test("sube su foto de perfil y la quita", async ({ page }) => {
