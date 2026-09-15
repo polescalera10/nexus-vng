@@ -1,5 +1,6 @@
 import { sesionesRegulares } from "@/content/horario-regular";
 import { precios } from "@/content/precios";
+import { mediaSobreNosotros } from "@/content/media";
 import { site } from "@/lib/site";
 
 /** Día de la semana del cartel → schema.org DayOfWeek. */
@@ -86,9 +87,11 @@ export function localBusinessLd() {
       addressCountry: site.nap.addressCountry,
     },
     telephone: site.nap.telephoneDisplay,
-    // Foto real del equipo: Google la usa en el panel de conocimiento y en el
-    // resultado local. Absoluta, como exige schema.org.
-    image: `${site.url}/images/equipo-nexus.png`,
+    // Fotos reales de la sala y de una clase (material de agosto de 2026):
+    // Google las usa en el panel de conocimiento y en el resultado local.
+    // Antes era `equipo-nexus.png`, anterior al material real. Absolutas, como
+    // exige schema.org; salen de content/media.ts, la fuente única de rutas.
+    image: [mediaSobreNosotros.sala.src, mediaSobreNosotros.clase.src].map((src) => `${site.url}${src}`),
     logo: `${site.url}/images/nexus-logo.png`,
     sameAs: [site.social.instagram, site.social.tiktok].filter(Boolean),
     // Rango de precio derivado del modelo real (35-100 €/mes), no inventado.
