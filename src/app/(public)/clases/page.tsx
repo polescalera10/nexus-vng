@@ -15,7 +15,9 @@ import { portadaAnchaModalidad } from "@/content/media";
 import { getModalidades } from "@/lib/queries/modalidades";
 
 export const metadata: Metadata = {
-  title: "Clases de Baile · Curso Regular",
+  // Sin "Clases de baile en Vilanova…": ese es el title de la home y las dos
+  // URLs competirían por la misma consulta.
+  title: "Curso regular de baile en Vilanova i la Geltrú",
   // 150–160 caracteres: por encima, Google corta la descripción en el SERP.
   description:
     "Curso regular de baile en Vilanova i la Geltrú, temporada 26·27: salsa cubana, bachata, reggaetón y más, de lunes a viernes. Desde cero y desde 35 €/mes.",
@@ -66,11 +68,12 @@ export default async function ClasesPage() {
             </Reveal>
             <Reveal delay={0.06}>
               <h1 className="font-display mt-3 max-w-[18ch] text-[clamp(40px,7vw,80px)] leading-[0.92] text-balance">
-                Aprende a bailar y <span className="text-gradient-nexus">encuentra tu gente</span>
+                Curso regular de baile <span className="text-gradient-nexus">en Vilanova</span>
               </h1>
             </Reveal>
             <Reveal delay={0.12}>
               <p className="font-body mt-5 max-w-[56ch] text-[clamp(16px,1.6vw,20px)] leading-relaxed text-white/80">
+                <strong className="font-bold text-white">Aprende a bailar y encuentra tu gente.</strong>{" "}
                 Salsa cubana, bachata, urbano y estilo, de lunes a viernes, con grupos desde cero
                 absoluto. La mejor decisión de este año no es un propósito más: son dos horas a la
                 semana para ti.

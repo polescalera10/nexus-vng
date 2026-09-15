@@ -11,7 +11,7 @@ import { safeImageSrc } from "@/lib/images";
 import type { Evento } from "@/types/database";
 
 export const metadata: Metadata = {
-  title: "Eventos de Baile",
+  title: "Fiestas y socials de baile en Vilanova",
   description: "Fiestas, masterclasses y socials de NEXUS VNG en Vilanova i la Geltrú: las citas donde se practica lo de clase y se conoce al resto de la comunidad.",
   alternates: { canonical: "/eventos" },
 };
@@ -55,7 +55,7 @@ export default async function EventosPage() {
   return (
     <SupportPage
       eyebrow="La comunidad en vivo"
-      title="Eventos"
+      title="Fiestas y socials de baile"
       intro="Fiestas, masterclasses y socials donde la escuela se convierte en pista."
     >
       <Breadcrumbs

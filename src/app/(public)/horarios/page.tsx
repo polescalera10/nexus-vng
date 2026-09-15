@@ -48,7 +48,7 @@ export default function HorariosPage() {
   return (
     <SupportPage
       eyebrow={`Temporada 26·27 · ${primerDia} a ${ultimoDia}`}
-      title="Horarios"
+      title="Horarios de clases de baile en Vilanova"
       intro={`${totalClases} clases a la semana, de ${primerDia.toLowerCase()} a ${ultimoDia.toLowerCase()} en franjas de tarde-noche. Busca tu día, mira qué se baila y escríbenos: te ubicamos en el grupo de tu nivel.`}
     >
       <div className="mb-8">

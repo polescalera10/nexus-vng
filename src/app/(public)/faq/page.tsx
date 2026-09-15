@@ -7,7 +7,7 @@ import { JsonLd, faqLd } from "@/components/seo/JsonLd";
 import { faqGrupos, faqTodas } from "@/content/faq-completa";
 
 export const metadata: Metadata = {
-  title: "Preguntas frecuentes",
+  title: "Preguntas frecuentes sobre clases de baile",
   description:
     "Nivel, ritmo, precios, horarios, bailar en pareja y ambiente: las dudas que más nos llegan antes de la primera clase de baile en Vilanova i la Geltrú.",
   alternates: { canonical: "/faq" },

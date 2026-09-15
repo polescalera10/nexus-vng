@@ -57,6 +57,18 @@ function personLd(profe: Profesor) {
   };
 }
 
+/**
+ * Title y H1 de la ficha: lo que alguien busca ("clases de bachata") delante y
+ * el nombre detrás. Neutro en género a propósito: "profesor de…" obligaba a
+ * elegir y la plantilla se equivocaba con ellas. Con más de dos disciplinas la
+ * lista no cabe en 60 caracteres y se resume en "baile".
+ */
+function tituloProfesor(profe: Profesor): string {
+  const nombres = modalidadesDe(profe.nombre).map((m) => m.nombre.toLowerCase());
+  const que = nombres.length === 0 || nombres.length > 2 ? "baile" : nombres.join(" y ");
+  return `Clases de ${que} con ${profe.nombre}`;
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const profe = getProfesor(slug);
@@ -76,11 +88,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     nombres.length > 2
       ? `${cardinal[nombres.length] ?? nombres.length} disciplinas`
       : nombres.join(" y ") || "clases de baile";
-  const disciplinasTitle =
-    nombres.length > 2 ? "Clases de baile" : `Clases de ${nombres.join(" y ")}`;
 
   return {
-    title: `${profe.nombre} · ${nombres.length > 0 ? disciplinasTitle : "Equipo"}`,
+    title: tituloProfesor(profe),
     description: `${profe.nombre} imparte ${disciplinas} en NEXUS VNG, ${site.locality}. Sus clases, días y niveles, y cómo reservar tu clase de prueba.`,
     alternates: { canonical: `/profesores/${profe.slug}` },
     openGraph: {
@@ -101,7 +111,7 @@ export default async function ProfesorPage({ params }: Params) {
   const otros = profesores.filter((p) => p.slug !== profe.slug);
 
   return (
-    <SupportPage eyebrow="Equipo NEXUS VNG" title={profe.nombre} intro={profe.claim}>
+    <SupportPage eyebrow="Equipo NEXUS VNG" title={tituloProfesor(profe)} intro={profe.claim}>
       {/* Los CTA globales escriben sobre ESTE profe. */}
       <SetWaPageContext {...waContextProfesor(profe.slug, profe.nombre)} />
       <div className="space-y-[clamp(48px,7vw,80px)]">

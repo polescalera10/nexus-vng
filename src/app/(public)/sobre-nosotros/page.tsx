@@ -15,7 +15,7 @@ import { mediaSobreNosotros } from "@/content/media";
 import { precios } from "@/content/precios";
 
 export const metadata: Metadata = {
-  title: "Sobre nosotros",
+  title: "Escuela de baile en Vilanova · Quiénes somos",
   description:
     "La escuela de baile del gimnasio Aranha en Vilanova i la Geltrú: diez disciplinas, grupos por nivel real y una comunidad que sigue fuera de clase.",
   alternates: { canonical: "/sobre-nosotros" },

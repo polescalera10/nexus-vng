@@ -9,7 +9,7 @@ import { diasSemana, horarioRegular, sesionesRegulares } from "@/content/horario
 import { site, WHATSAPP_NUMBER } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Contacto",
+  title: "Contacto y clase de prueba en Vilanova",
   description:
     "Contacta con NEXUS VNG, escuela de baile en Vilanova i la Geltrú: WhatsApp, teléfono y formulario para reservar tu clase de prueba y elegir grupo.",
   alternates: { canonical: "/contacto" },
@@ -97,7 +97,7 @@ export default function ContactoPage() {
   return (
     <SupportPage
       eyebrow="Hablemos"
-      title="Contacto"
+      title="Contacto y clase de prueba"
       intro="La vía más rápida es WhatsApp: nos cuentas qué quieres bailar y qué días puedes, y te decimos qué grupo encaja. Si lo prefieres, déjanos tus datos y te escribimos nosotros."
     >
       <div className="mb-8">
