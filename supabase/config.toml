@@ -4,7 +4,9 @@ project_id = "aranha-baile"
 
 [db]
 port = 54322
-major_version = 15
+# Misma versión que producción (PostgreSQL 17.6, comprobado el 15-09-2026).
+# La CI levanta la BD con esta versión para los tests de RLS.
+major_version = 17
 
 [api]
 port = 54321

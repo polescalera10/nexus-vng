@@ -53,3 +53,25 @@ jobs:
 
       - name: Tests unitarios
         run: pnpm test
+
+  # Levanta un Postgres de Supabase vacío, le aplica TODAS las migraciones del
+  # repo y el seed, y corre supabase/tests/database/*.test.sql (pgTAP).
+  # Caza dos cosas que ni tsc ni vitest ven: una política de RLS que deja ver o
+  # escribir lo que no debe (o que rompe con 42P17, como en 0031), y una
+  # migración que ya no se puede reproducir desde cero.
+  rls:
+    name: RLS (pgTAP sobre las migraciones)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Levantar Postgres con migraciones y seed
+        run: supabase db start
+
+      - name: Tests de RLS
+        run: supabase test db
