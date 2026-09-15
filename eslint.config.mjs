@@ -23,7 +23,13 @@ const eslintConfig = [
     },
   },
   {
-    ignores: ["design-reference/**", ".next/**", "node_modules/**"],
+    // database.generated.ts sale de `supabase gen types`: no se toca a mano.
+    ignores: [
+      "design-reference/**",
+      ".next/**",
+      "node_modules/**",
+      "src/types/database.generated.ts",
+    ],
   },
 ];
 

@@ -75,7 +75,28 @@ jobs:
       - name: Levantar Postgres con todas las migraciones y el seed
         run: bash scripts/db-reset-local.sh
 
+      - name: Tipos generados al día con las migraciones
+        run: |
+          supabase gen types typescript \
+            --db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres" \
+            --schema public > "$RUNNER_TEMP/database.generated.ts"
+          if ! diff -u src/types/database.generated.ts "$RUNNER_TEMP/database.generated.ts"; then
+            cp "$RUNNER_TEMP/database.generated.ts" database.generated.ci.ts
+            echo "::error file=src/types/database.generated.ts::No coincide con las migraciones. Regenera con 'pnpm db:reset && pnpm db:types' (o descarga el artefacto database-generated-ts) y súbelo."
+            exit 1
+          fi
+
+      - name: Artefacto con los tipos regenerados
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-generated-ts
+          path: database.generated.ci.ts
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Tests de RLS
+        if: ${{ !cancelled() }}
         run: supabase test db
 
   # Login, roles, leads, asistencia y área de alumna en un navegador de verdad,

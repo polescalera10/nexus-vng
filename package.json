@@ -12,7 +12,7 @@
     "db:push": "supabase db push",
     "db:reset": "bash scripts/db-reset-local.sh",
     "test:db": "supabase test db",
-    "db:types": "supabase gen types typescript --local > src/types/database.ts",
+    "db:types": "supabase gen types typescript --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres --schema public > src/types/database.generated.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

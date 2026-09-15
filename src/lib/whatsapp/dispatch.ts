@@ -1,6 +1,6 @@
 import { postToN8n } from "@/lib/n8n/client";
 import type { createClient } from "@/lib/supabase/server";
-import type { WhatsappEventType } from "@/types/database";
+import type { Json, WhatsappEventType } from "@/types/database";
 
 /**
  * Despacho de eventos de WhatsApp. Flujo (docs/whatsapp-contracts.md):
@@ -19,7 +19,12 @@ export type DispatchWhatsappEventInput = {
   type: WhatsappEventType;
   /** null en `broadcast`: los destinatarios van en payload.recipients[]. */
   studentId: string | null;
-  payload: Record<string, unknown>;
+  /**
+   * Va a una columna `jsonb` y en el cuerpo del POST a n8n: solo valores JSON.
+   * Con `Record<string, unknown>` pasaría un `Date` o un `undefined`, que no
+   * llegan como se escribieron (lo destapó el tipo generado, 15-09-2026).
+   */
+  payload: { [key: string]: Json | undefined };
 };
 
 export async function dispatchWhatsappEvent(

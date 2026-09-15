@@ -1,0 +1,3 @@
+# Generado por `supabase gen types` (pnpm db:types). La CI lo compara byte a
+# byte con lo que sale de las migraciones: si se formatea, deja de coincidir.
+src/types/database.generated.ts
