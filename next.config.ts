@@ -45,7 +45,8 @@ const csp = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   `connect-src 'self' https://*.supabase.co${localSupabaseOrigin ? ` ${localSupabaseOrigin}` : ""} https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com`,
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://challenges.cloudflare.com",
+  // www.google.com: el mapa de /contacto (components/ui/MapaFachada.tsx).
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://challenges.cloudflare.com https://www.google.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

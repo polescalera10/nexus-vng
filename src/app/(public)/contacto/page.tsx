@@ -7,6 +7,7 @@ import { WaLink } from "@/components/ui/WaLink";
 import { JsonLd, ORG_ID } from "@/components/seo/JsonLd";
 import { diasSemana, horarioRegular, sesionesRegulares } from "@/content/horario-regular";
 import { site, WHATSAPP_NUMBER } from "@/lib/site";
+import { MapaFachada } from "@/components/ui/MapaFachada";
 
 export const metadata: Metadata = {
   title: "Contacto y clase de prueba en Vilanova",
@@ -161,8 +162,12 @@ export default function ContactoPage() {
               {site.nap.telephoneDisplay}
             </address>
             <p className="font-body text-text-faint max-w-[46ch] text-[13px] leading-relaxed">
-              Escríbenos por WhatsApp y te mandamos la ubicación exacta y cómo llegar a la sala.
+              Estamos en la primera planta del gimnasio. Si tienes dudas para llegar, escríbenos
+              por WhatsApp.
             </p>
+            <div className="pt-3">
+              <MapaFachada />
+            </div>
           </div>
         </div>
 
