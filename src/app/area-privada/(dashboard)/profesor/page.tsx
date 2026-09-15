@@ -60,12 +60,8 @@ export default async function ProfesorPage() {
     );
   }
 
-  const { today, upcoming } = await getTeacherAgenda(teacher.id);
-
-  const now = new Date();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  const todayIso = `${now.getFullYear()}-${m}-${d}`;
+  // `todayIso` es el día de Madrid con el que se repartieron las listas.
+  const { todayIso, today, upcoming } = await getTeacherAgenda(teacher.id);
 
   return (
     <>

@@ -1,5 +1,6 @@
 import { getCourseIdsForTeacher } from "@/lib/queries/course-teachers";
 import { createClient } from "@/lib/supabase/server";
+import { splitTeacherAgenda, teacherAgendaWindow } from "@/lib/teacher-agenda";
 import type { Attendance, ClassSession, Course, Student } from "@/types/database";
 
 /**
@@ -8,13 +9,6 @@ import type { Attendance, ClassSession, Course, Student } from "@/types/database
  * Joins resueltos en JS con consultas planas — los tipos de `Database`
  * no describen relaciones (convención de Fase 2).
  */
-
-/** Date local → "YYYY-MM-DD" (sin sorpresas de zona horaria). */
-function toISODate(d: Date): string {
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${m}-${day}`;
-}
 
 export type TeacherSessionItem = {
   session: ClassSession;
@@ -28,6 +22,8 @@ export type TeacherSessionItem = {
 };
 
 export type TeacherAgenda = {
+  /** Hoy en Madrid ("YYYY-MM-DD"): el mismo día con el que se reparten las listas. */
+  todayIso: string;
   /** Sesiones de hoy (programadas o impartidas). */
   today: TeacherSessionItem[];
   /** Sesiones de los 7 días siguientes. */
@@ -38,14 +34,13 @@ export type TeacherAgenda = {
  * Agenda del profe: sesiones de hoy y de los próximos 7 días donde es
  * titular del curso o sustituto de la sesión. Las canceladas no aparecen.
  */
-export async function getTeacherAgenda(teacherId: string): Promise<TeacherAgenda> {
+export async function getTeacherAgenda(
+  teacherId: string,
+  now: Date = new Date(),
+): Promise<TeacherAgenda> {
   const supabase = await createClient();
 
-  const now = new Date();
-  const todayIso = toISODate(now);
-  const horizon = new Date(now);
-  horizon.setDate(horizon.getDate() + 7);
-  const horizonIso = toISODate(horizon);
+  const { todayIso, horizonIso } = teacherAgendaWindow(now);
 
   const ownCourseIds = await getCourseIdsForTeacher(teacherId);
 
@@ -73,7 +68,7 @@ export async function getTeacherAgenda(teacherId: string): Promise<TeacherAgenda
   for (const s of subSessions ?? []) bySessionId.set(s.id, s);
 
   const sessions = [...bySessionId.values()];
-  if (sessions.length === 0) return { today: [], upcoming: [] };
+  if (sessions.length === 0) return { todayIso, today: [], upcoming: [] };
 
   const courseIds = [...new Set(sessions.map((s) => s.course_id))];
   const sessionIds = sessions.map((s) => s.id);
@@ -117,10 +112,7 @@ export async function getTeacherAgenda(teacherId: string): Promise<TeacherAgenda
         a.startTime.localeCompare(b.startTime),
     );
 
-  return {
-    today: items.filter((i) => i.session.session_date === todayIso),
-    upcoming: items.filter((i) => i.session.session_date > todayIso),
-  };
+  return { todayIso, ...splitTeacherAgenda(items, todayIso) };
 }
 
 /** Una fila de la hoja: matriculado del curso o socio fundador de suelto. */
