@@ -77,3 +77,56 @@ jobs:
 
       - name: Tests de RLS
         run: supabase test db
+
+  # Login, roles, leads, asistencia y área de alumna en un navegador de verdad,
+  # contra un Supabase local completo (Auth + API + Storage) con todas las
+  # migraciones. Nunca contra producción: playwright.private.config.ts aborta
+  # si la URL de Supabase no es local.
+  e2e-privado:
+    name: E2E del área privada (Supabase local)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar (lockfile congelado)
+        run: pnpm install --frozen-lockfile
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Supabase local completo con todas las migraciones
+        run: bash scripts/db-reset-local.sh --full
+
+      - name: Claves del Supabase local
+        run: |
+          supabase status -o json > "$RUNNER_TEMP/supabase.json"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r '.API_URL' "$RUNNER_TEMP/supabase.json")"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(jq -r '.ANON_KEY // .PUBLISHABLE_KEY' "$RUNNER_TEMP/supabase.json")"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(jq -r '.SERVICE_ROLE_KEY // .SECRET_KEY' "$RUNNER_TEMP/supabase.json")"
+          } >> "$GITHUB_ENV"
+
+      - name: Navegador de Playwright
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E del área privada
+        run: pnpm test:e2e:private
+
+      - name: Informe de Playwright si falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-area-privada
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

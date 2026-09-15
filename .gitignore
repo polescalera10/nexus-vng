@@ -48,3 +48,5 @@ yarn-error.log*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# sesiones guardadas por los e2e del área privada (Supabase local)
+/tests/e2e-private/.auth/

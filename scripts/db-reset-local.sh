@@ -20,8 +20,15 @@
 #
 # BORRA la BD local (stop --no-backup). Lo usan `pnpm db:reset` y la CI.
 # Requisitos: Docker, Supabase CLI y psql.
+#
+#   bash scripts/db-reset-local.sh          → solo Postgres (tests de RLS)
+#   bash scripts/db-reset-local.sh --full   → Postgres + Auth + API + Storage
+#                                             (e2e del área privada)
 # ════════════════════════════════════════════════════════════════════════════
 set -euo pipefail
+
+FULL=false
+[ "${1:-}" = "--full" ] && FULL=true
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DB_URL="${DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}"
@@ -38,8 +45,16 @@ cp "$ROOT/supabase/config.toml" "$WORK/supabase/config.toml"
 echo "· Parando la BD local anterior (se borra)…"
 supabase stop --no-backup --workdir "$WORK" >/dev/null 2>&1 || true
 
-echo "· Levantando Postgres sin migraciones…"
-supabase db start --workdir "$WORK"
+if $FULL; then
+  # Auth (GoTrue), API (PostgREST + Kong) y Storage hacen falta para la app;
+  # el resto solo alarga el arranque.
+  echo "· Levantando Supabase completo sin migraciones…"
+  supabase start --workdir "$WORK" \
+    -x studio,imgproxy,edge-runtime,logflare,vector,realtime,supavisor,postgres-meta
+else
+  echo "· Levantando Postgres sin migraciones…"
+  supabase db start --workdir "$WORK"
+fi
 
 echo "· Aplicando migraciones…"
 count=0
@@ -54,5 +69,8 @@ if [ -f "$ROOT/supabase/seed.sql" ]; then
   echo "· Aplicando seed…"
   psql "$DB_URL" -q -v ON_ERROR_STOP=1 -f "$ROOT/supabase/seed.sql" >/dev/null
 fi
+
+# PostgREST cachea el esquema al arrancar, cuando `public` aún estaba vacío.
+psql "$DB_URL" -q -c "notify pgrst, 'reload schema'" >/dev/null
 
 echo "✓ BD local lista en $DB_URL"
