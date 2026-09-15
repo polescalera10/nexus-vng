@@ -131,6 +131,9 @@ select is_empty($$ update public.modalidades set nombre = 'x' where id = '7e5700
 select throws_ok($$ select public.is_admin() $$, '42501', null, 'anon: no puede ejecutar is_admin() (0046c)');
 select throws_ok($$ select public.current_role() $$, '42501', null, 'anon: no puede ejecutar current_role() (0046c)');
 select lives_ok($$ select public.founding_spots_taken() $$, 'anon: sí puede leer el contador de plazas fundadoras');
+select isnt_empty($$ select 1 from public.niveles $$, 'anon: ve los niveles');
+select throws_ok($$ insert into public.niveles (nombre) values ('RLS anon') $$,
+  '42501', null, 'anon: no puede crear niveles');
 
 reset role;
 
@@ -189,6 +192,17 @@ select throws_ok($$ insert into public.reward_redemptions (reward_id, student_id
 select lives_ok($$ insert into public.reward_redemptions (reward_id, student_id, cost_points)
                    values ('7e570000-0000-4000-8000-000000000085', '7e570000-0000-4000-8000-000000000021', 20) $$,
   'alumno: puede canjear un premio propio con saldo');
+select is_empty($$ update public.reward_redemptions set status = 'entregado'
+                  where student_id = '7e570000-0000-4000-8000-000000000021' returning id $$,
+  'alumno: no puede marcar su canje como entregado');
+select isnt_empty($$ select 1 from public.point_rules $$, 'alumno: lee las reglas de puntos');
+select throws_ok($$ insert into public.rewards (name, cost_points) values ('Premio gratis', 0) $$,
+  '42501', null, 'alumno: no puede crear premios');
+select throws_ok($$ insert into public.courses (name, modalidad_id, weekday, start_time)
+                    values ('Curso pirata', '7e570000-0000-4000-8000-000000000051', 1, '10:00') $$,
+  '42501', null, 'alumno: no puede crear cursos');
+select is_empty($$ delete from public.attendance where student_id = '7e570000-0000-4000-8000-000000000021' returning id $$,
+  'alumno: no puede borrar su asistencia');
 
 reset role;
 
@@ -246,6 +260,28 @@ select is(public.can_drop_in_session('7e570000-0000-4000-8000-000000000041', '7e
 select is(public.can_drop_in_session('7e570000-0000-4000-8000-000000000042', '7e570000-0000-4000-8000-000000000024'),
   false, 'profesor: can_drop_in_session no responde en sesión ajena');
 
+select is(array(select id from public.courses where id::text like '7e570000-%' order by id),
+  array['7e570000-0000-4000-8000-000000000031', '7e570000-0000-4000-8000-000000000032']::uuid[],
+  'profesor: ve todos los cursos (horario completo)');
+select is(array(select id from public.teachers where id::text like '7e570000-%' order by id),
+  array['7e570000-0000-4000-8000-000000000011', '7e570000-0000-4000-8000-000000000012']::uuid[],
+  'profesor: ve a todos los profesores');
+select throws_ok($$ insert into public.courses (name, modalidad_id, weekday, start_time)
+                    values ('Curso del profe', '7e570000-0000-4000-8000-000000000051', 1, '10:00') $$,
+  '42501', null, 'profesor: no puede crear cursos');
+select isnt_empty($$ update public.session_notes set resumen = 'Editado' where id = '7e570000-0000-4000-8000-000000000091' returning id $$,
+  'profesor: edita el diario de su sesión');
+select is_empty($$ update public.session_notes set resumen = 'Editado' where id = '7e570000-0000-4000-8000-000000000092' returning id $$,
+  'profesor: no edita el diario de una sesión ajena');
+select is_empty($$ delete from public.attendance
+                  where class_session_id = '7e570000-0000-4000-8000-000000000041'
+                    and student_id = '7e570000-0000-4000-8000-000000000021' returning id $$,
+  'profesor: no borra la asistencia de un alumno matriculado');
+select isnt_empty($$ delete from public.attendance
+                    where class_session_id = '7e570000-0000-4000-8000-000000000041'
+                      and student_id = '7e570000-0000-4000-8000-000000000024' returning id $$,
+  'profesor: borra el apunte de un suelto de su sesión');
+
 reset role;
 
 -- Los candidatos se miran antes de apuntar a la fundadora: se deshace ese insert.
@@ -275,6 +311,13 @@ select is((select count(*) from public.whatsapp_events where id = '7e570000-0000
 select is(public.is_admin(), true, 'admin: is_admin() es true');
 select lives_ok($$ update public.profiles set role = 'profesor' where id = '7e570000-0000-4000-8000-000000000005' $$,
   'admin: puede cambiar el rol de otro usuario');
+select lives_ok($$ insert into public.rewards (id, name, cost_points)
+                   values ('7e570000-0000-4000-8000-000000000086', 'RLS premio admin', 10) $$,
+  'admin: crea premios');
+select isnt_empty($$ update public.students set payment_status = 'pendiente' where id = '7e570000-0000-4000-8000-000000000022' returning id $$,
+  'admin: cambia la cuota de un alumno');
+select isnt_empty($$ delete from public.rewards where id = '7e570000-0000-4000-8000-000000000086' returning id $$,
+  'admin: borra premios');
 
 reset role;
 
