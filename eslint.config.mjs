@@ -24,10 +24,19 @@ const eslintConfig = [
   },
   {
     // database.generated.ts sale de `supabase gen types`: no se toca a mano.
+    // `eslint .` barre todo el repo (no solo src/ como `next lint`), así que
+    // hay que excluir builds, informes y los worktrees de Claude Code.
     ignores: [
       "design-reference/**",
-      ".next/**",
+      "**/.next/**",
       "node_modules/**",
+      ".claude/**",
+      "public/**",
+      "playwright-report/**",
+      "test-results/**",
+      "blob-report/**",
+      "coverage/**",
+      "next-env.d.ts",
       "src/types/database.generated.ts",
     ],
   },
