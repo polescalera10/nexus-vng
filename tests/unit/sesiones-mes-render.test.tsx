@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { generateSessionsForAllCourses } from "@/lib/actions/courses";
 
 /**
  * El panel vive detrás de `requireRole("admin")`, así que no se puede abrir
@@ -51,8 +52,8 @@ describe("SesionesDelMes", () => {
     expect(screen.getByText(/Faltan 11 de 15 cursos/)).toBeTruthy();
   });
 
-  it("cuando están todos, no alarma y ofrece regenerar", () => {
-    render(
+  it("cuando están todos, no pinta nada (el cron ya las generó)", () => {
+    const { container } = render(
       <SesionesDelMes
         cobertura={{
           month: "2026-09",
@@ -62,8 +63,33 @@ describe("SesionesDelMes", () => {
         }}
       />,
     );
+    expect(container.innerHTML).toBe("");
+    expect(screen.queryByText(/Faltan/)).toBeNull();
+  });
+
+  it("tras generar, si la cobertura llega completa, confirma en vez de desaparecer", async () => {
+    vi.mocked(generateSessionsForAllCourses).mockResolvedValue({
+      status: "success",
+      message: "Sesiones generadas.",
+    } as Awaited<ReturnType<typeof generateSessionsForAllCourses>>);
+
+    const { rerender } = render(
+      <SesionesDelMes
+        cobertura={{ month: "2026-09", cursosActivos: 15, cursosConSesiones: 4, sesiones: 17 }}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Generar septiembre de 2026/ }));
+    expect(await screen.findByRole("status")).toHaveProperty("textContent", "Sesiones generadas.");
+
+    // revalidatePath devuelve la cobertura nueva al mismo componente montado.
+    rerender(
+      <SesionesDelMes
+        cobertura={{ month: "2026-09", cursosActivos: 15, cursosConSesiones: 15, sesiones: 64 }}
+      />,
+    );
     expect(screen.getByText(/ya tienen sus sesiones/)).toBeTruthy();
     expect(screen.getByText(/64 en total/)).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toBe("Sesiones generadas.");
     expect(screen.queryByText(/Faltan/)).toBeNull();
   });
 });
