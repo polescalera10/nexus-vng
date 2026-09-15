@@ -16,7 +16,11 @@ test.describe("sin sesión", () => {
   test("con la contraseña mal no entra", async ({ page }) => {
     await page.goto("/area-privada");
     await fillPasswordLogin(page, USERS.admin.email, "no-es-la-contraseña");
-    await expect(page.getByRole("alert")).toHaveText("Email o contraseña incorrectos.");
+    // Filtrado por texto: Next monta su propio role="alert" vacío (el anunciador
+    // de rutas) en todas las páginas.
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Email o contraseña incorrectos." }),
+    ).toBeVisible();
     await expect(page).toHaveURL(/\/area-privada$/);
   });
 

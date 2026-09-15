@@ -37,6 +37,12 @@ test("pasa lista y queda guardada", async ({ page }) => {
 });
 
 test("no puede abrir la lista de una sesión de otro curso", async ({ page }) => {
-  const response = await page.goto(`/area-privada/profesor/asistencia/${IDS.otherSession}`);
-  expect(response?.status()).toBe(404);
+  await page.goto(`/area-privada/profesor/asistencia/${IDS.otherSession}`);
+
+  // Se comprueba lo que se pinta, no el código HTTP: la ruta tiene loading.tsx,
+  // así que Next ya ha empezado a enviar la respuesta con 200 cuando la página
+  // llama a notFound(). Lo que importa es que no aparezca la lista.
+  await expect(page.getByText("No hemos encontrado lo que buscas")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Guardar (lista|cambios)$/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /presentes?$/i })).toHaveCount(0);
 });
