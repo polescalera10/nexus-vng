@@ -56,6 +56,8 @@ jobs:
 
   # Levanta un Postgres de Supabase vacío, le aplica TODAS las migraciones del
   # repo y el seed, y corre supabase/tests/database/*.test.sql (pgTAP).
+  # Las migraciones van por scripts/db-reset-local.sh y no por el CLI: el CLI
+  # se salta las que llevan letra en el nombre (0031a…0046f), ver el script.
   # Caza dos cosas que ni tsc ni vitest ven: una política de RLS que deja ver o
   # escribir lo que no debe (o que rompe con 42P17, como en 0031), y una
   # migración que ya no se puede reproducir desde cero.
@@ -70,8 +72,8 @@ jobs:
         with:
           version: latest
 
-      - name: Levantar Postgres con migraciones y seed
-        run: supabase db start
+      - name: Levantar Postgres con todas las migraciones y el seed
+        run: bash scripts/db-reset-local.sh
 
       - name: Tests de RLS
         run: supabase test db
