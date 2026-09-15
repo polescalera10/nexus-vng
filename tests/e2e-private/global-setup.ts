@@ -3,9 +3,12 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   AUTH_DIR,
   COURSE_NAME,
+  DIARIO_RESUMEN,
+  DIARIO_VIDEO_TITULO,
   E2E_PASSWORD,
   IDS,
   OTHER_COURSE_NAME,
+  REWARD_NAME,
   STUDENT_NAME,
   TEACHER_NAME,
   USERS,
@@ -150,4 +153,47 @@ export default async function globalSetup() {
       session_date: today,
     });
   }
+
+  // Sesión de AYER con su diario: lo que lee la alumna. Va aparte de la de hoy
+  // porque el test del profe reescribe el diario de hoy.
+  const yesterday = new Date(`${today}T12:00:00Z`);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  await insertIgnoringDuplicates(admin, "class_sessions", {
+    id: IDS.pastSession,
+    course_id: IDS.course,
+    session_date: yesterday.toISOString().slice(0, 10),
+    status: "impartida",
+  });
+  await insertIgnoringDuplicates(admin, "session_notes", {
+    class_session_id: IDS.pastSession,
+    resumen: DIARIO_RESUMEN,
+  });
+  const { count: videos } = await admin
+    .from("session_videos")
+    .select("id", { count: "exact", head: true })
+    .eq("class_session_id", IDS.pastSession);
+  if (!videos) {
+    await insertIgnoringDuplicates(admin, "session_videos", {
+      class_session_id: IDS.pastSession,
+      url: "https://youtu.be/dQw4w9WgXcQ",
+      titulo: DIARIO_VIDEO_TITULO,
+    });
+  }
+
+  // Premio sin límite de unidades y saldo de sobra: el canje corre en escritorio
+  // y en móvil (y en reintentos) sobre la misma BD.
+  await insertIgnoringDuplicates(admin, "rewards", {
+    id: IDS.reward,
+    name: REWARD_NAME,
+    cost_points: 10,
+    stock: null,
+    active: true,
+  });
+  await insertIgnoringDuplicates(admin, "point_events", {
+    id: IDS.pointEvent,
+    student_id: IDS.student,
+    points: 1000,
+    concept: "Saldo inicial E2E",
+    source: "ajuste",
+  });
 }

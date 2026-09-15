@@ -108,6 +108,10 @@ insert into public.whatsapp_events (id, student_id, type) values
 insert into public.intensivo_registros (id, nombre, sesion) values
   ('7e570000-0000-4000-8000-000000000073', 'Registro RLS', 'rls');
 
+-- Foto de S2 en el bucket privado `avatars` (0044e-h).
+insert into storage.objects (bucket_id, name) values
+  ('avatars', '7e570000-0000-4000-8000-000000000022/previa.jpg');
+
 
 -- ═══ ANON ══════════════════════════════════════════════════════════════════
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
@@ -134,6 +138,8 @@ select lives_ok($$ select public.founding_spots_taken() $$, 'anon: sí puede lee
 select isnt_empty($$ select 1 from public.niveles $$, 'anon: ve los niveles');
 select throws_ok($$ insert into public.niveles (nombre) values ('RLS anon') $$,
   '42501', null, 'anon: no puede crear niveles');
+select is((select count(*) from storage.objects where bucket_id = 'avatars'), 0::bigint,
+  'anon: no ve fotos de perfil');
 
 reset role;
 
@@ -203,6 +209,19 @@ select throws_ok($$ insert into public.courses (name, modalidad_id, weekday, sta
   '42501', null, 'alumno: no puede crear cursos');
 select is_empty($$ delete from public.attendance where student_id = '7e570000-0000-4000-8000-000000000021' returning id $$,
   'alumno: no puede borrar su asistencia');
+
+select lives_ok($$ insert into storage.objects (bucket_id, name)
+                   values ('avatars', '7e570000-0000-4000-8000-000000000021/yo.jpg') $$,
+  'alumno: sube su foto en su carpeta');
+select throws_ok($$ insert into storage.objects (bucket_id, name)
+                    values ('avatars', '7e570000-0000-4000-8000-000000000022/suplantada.jpg') $$,
+  '42501', null, 'alumno: no sube fotos en la carpeta de otro');
+select is_empty($$ update storage.objects set name = '7e570000-0000-4000-8000-000000000022/renombrada.jpg'
+                  where name = '7e570000-0000-4000-8000-000000000022/previa.jpg' returning id $$,
+  'alumno: no toca la foto de otro');
+select isnt_empty($$ select 1 from storage.objects
+                    where bucket_id = 'avatars' and name = '7e570000-0000-4000-8000-000000000022/previa.jpg' $$,
+  'alumno: puede leer fotos de compañeros (ranking)');
 
 reset role;
 
@@ -318,6 +337,9 @@ select isnt_empty($$ update public.students set payment_status = 'pendiente' whe
   'admin: cambia la cuota de un alumno');
 select isnt_empty($$ delete from public.rewards where id = '7e570000-0000-4000-8000-000000000086' returning id $$,
   'admin: borra premios');
+select lives_ok($$ insert into storage.objects (bucket_id, name)
+                   values ('avatars', '7e570000-0000-4000-8000-000000000022/por-admin.jpg') $$,
+  'admin: sube fotos en cualquier carpeta');
 
 reset role;
 

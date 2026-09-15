@@ -36,6 +36,28 @@ test("pasa lista y queda guardada", async ({ page }) => {
   await expect(alumna()).toHaveAttribute("aria-pressed", after);
 });
 
+test("escribe el diario de la clase y solo acepta vídeos de la lista blanca", async ({ page }, testInfo) => {
+  await page.goto(`/area-privada/profesor/asistencia/${IDS.session}`);
+
+  const resumen = `Diario E2E ${testInfo.project.name}: básico con cambio de peso.`;
+  await page.getByLabel("¿Qué habéis dado hoy?").fill(resumen);
+
+  const enlace = page.getByLabel("Enlace del vídeo 1");
+  const guardar = page.getByRole("button", { name: "Guardar el diario" });
+
+  await enlace.fill("https://example.com/mi-video");
+  await expect(page.getByText("Solo YouTube, Vimeo o Google Drive")).toBeVisible();
+  await expect(guardar).toBeDisabled();
+
+  await enlace.fill("https://youtu.be/dQw4w9WgXcQ");
+  await expect(guardar).toBeEnabled();
+  await guardar.click();
+  await expect(page.getByRole("status").filter({ hasText: "Diario guardado." })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByLabel("¿Qué habéis dado hoy?")).toHaveValue(resumen);
+});
+
 test("no puede abrir la lista de una sesión de otro curso", async ({ page }) => {
   await page.goto(`/area-privada/profesor/asistencia/${IDS.otherSession}`);
 

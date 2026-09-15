@@ -30,6 +30,10 @@ export const TEACHER_NAME = "Profe E2E";
 export const STUDENT_NAME = "Alumna E2E";
 export const COURSE_NAME = "Salsa E2E";
 export const OTHER_COURSE_NAME = "Bachata E2E ajena";
+export const REWARD_NAME = "Premio E2E";
+/** Diario de la sesión de AYER, sembrado en global-setup (el de hoy lo escribe el profe en su test). */
+export const DIARIO_RESUMEN = "Resumen E2E: enchufla doble y vuelta de la vecina.";
+export const DIARIO_VIDEO_TITULO = "Secuencia E2E";
 
 export const IDS = {
   teacher: "e2e00000-0000-4000-8000-000000000011",
@@ -38,6 +42,9 @@ export const IDS = {
   otherCourse: "e2e00000-0000-4000-8000-000000000032",
   session: "e2e00000-0000-4000-8000-000000000041",
   otherSession: "e2e00000-0000-4000-8000-000000000042",
+  pastSession: "e2e00000-0000-4000-8000-000000000043",
+  reward: "e2e00000-0000-4000-8000-000000000051",
+  pointEvent: "e2e00000-0000-4000-8000-000000000061",
 } as const;
 
 /** Rellena y envía el login por contraseña (hay que estar ya en /area-privada). */
