@@ -12,7 +12,7 @@ import { JsonLd, courseLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { getModalidades, getModalidadBySlug, getModalidadSlugs } from "@/lib/queries/modalidades";
 import { mediaModalidades } from "@/content/media";
-import { modalidadesContenido } from "@/content/modalidades";
+import { metaDescripciones, modalidadesContenido } from "@/content/modalidades";
 import { sesionesRegulares } from "@/content/horario-regular";
 import { precios } from "@/content/precios";
 import { profesoresDe } from "@/content/profesores";
@@ -37,12 +37,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const m = await getModalidadBySlug(modalidad);
   if (!m) return { title: "Clase no encontrada" };
   const contenido = modalidadesContenido[m.slug];
-  const description = contenido?.lead ?? m.descripcion ?? undefined;
+  // En el SERP va la meta con ciudad y acción; en el preview social, el lead
+  // de marca, que se lee mejor fuera de Google.
+  const description = metaDescripciones[m.slug] ?? contenido?.lead ?? m.descripcion ?? undefined;
+  const ogDescription = contenido?.lead ?? description;
   return {
     title: `Clases de ${m.nombre} en Vilanova i la Geltrú`,
     description,
     alternates: { canonical: `/clases/${m.slug}` },
-    openGraph: { title: `Clases de ${m.nombre}`, description, images: ogImages },
+    openGraph: { title: `Clases de ${m.nombre}`, description: ogDescription, images: ogImages },
   };
 }
 

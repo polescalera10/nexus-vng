@@ -45,6 +45,37 @@ export type ModalidadContenido = {
   relacionadas: { slug: string; text: string }[];
 };
 
+/**
+ * Meta description de cada ficha (`/clases/[modalidad]`), separada del `lead`.
+ *
+ * El `lead` es copy de cabecera: tono de marca y sin ciudad, se lee en la
+ * página. En el SERP hace falta otra cosa: la ciudad (es lo que se busca) y una
+ * acción al final, en 120–155 caracteres. Solo afirma lo que ya dice la ficha.
+ * Sin "gratis": las condiciones de la clase de prueba siguen sin confirmar.
+ */
+export const metaDescripciones: Record<string, string> = {
+  "salsa-cubana":
+    "Clases de salsa cubana en Vilanova i la Geltrú: casino, rueda y musicalidad en grupos por nivel, desde cero. Reserva tu clase de prueba por WhatsApp.",
+  bachata:
+    "Clases de bachata en Vilanova i la Geltrú: conexión, musicalidad y pasos en pareja, con grupos desde cero. Reserva tu clase de prueba por WhatsApp.",
+  reparto:
+    "Clases de reparto cubano en Vilanova i la Geltrú: actitud, flow y el género urbano de La Habana. Reserva tu clase de prueba por WhatsApp.",
+  reggaeton:
+    "Clases de reggaetón en Vilanova i la Geltrú: técnica y actitud, sin pareja y sin complejos. Reserva tu clase de prueba por WhatsApp.",
+  "lady-style-salsa":
+    "Lady style salsa en Vilanova i la Geltrú: brazos, cadera, giros y presencia para tu salsa cubana. Reserva tu clase de prueba por WhatsApp.",
+  "lady-style-bachata":
+    "Lady style bachata en Vilanova i la Geltrú: ondas, cadera, brazos y musicalidad, entrenados en solitario. Reserva tu clase de prueba por WhatsApp.",
+  "sexy-style":
+    "Clases de sexy style en Vilanova i la Geltrú: control, respiración y actitud trabajados con técnica. Reserva tu clase de prueba por WhatsApp.",
+  heels:
+    "Clases de heels en Vilanova i la Geltrú: potencia, líneas y actitud, sobre tacones o sin ellos. Reserva tu clase de prueba por WhatsApp.",
+  "cia-salsa":
+    "Compañía de salsa en Vilanova i la Geltrú: montaje coreográfico, ensayo continuo y actuaciones durante la temporada. Escríbenos por WhatsApp.",
+  "cia-bachata-lady":
+    "Compañía de bachata lady en Vilanova i la Geltrú: montaje coreográfico, ensayo continuo y actuaciones durante la temporada. Escríbenos por WhatsApp.",
+};
+
 export const modalidadesContenido: Record<string, ModalidadContenido> = {
   "salsa-cubana": {
     lead:

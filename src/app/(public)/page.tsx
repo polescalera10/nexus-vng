@@ -15,6 +15,19 @@ import { JsonLd, faqLd } from "@/components/seo/JsonLd";
 import { getModalidades } from "@/lib/queries/modalidades";
 import { getFoundingSpots } from "@/lib/queries/founding";
 import { faqs } from "@/content/landing";
+import type { Metadata } from "next";
+
+/*
+  Meta propia de la home, con acción al final. No se toca `site.description`:
+  además de la meta por defecto del layout, es la `description` del
+  `DanceSchool` en el JSON-LD, y ahí no pinta una llamada a WhatsApp.
+  Solo se declara `description`: Next fusiona por clave con el layout, así que
+  title, canonical y openGraph siguen saliendo de allí.
+*/
+export const metadata: Metadata = {
+  description:
+    "Escuela de baile en Vilanova i la Geltrú: salsa cubana, bachata, reparto, heels y más, con grupos desde cero. Reserva tu clase de prueba por WhatsApp.",
+};
 
 // ISR: la landing es estática y se revalida cada hora (modalidades editables).
 export const revalidate = 3600;
