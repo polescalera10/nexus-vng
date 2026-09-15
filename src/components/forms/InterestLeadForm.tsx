@@ -1,7 +1,12 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import {
+  TURNSTILE_SITE_KEY,
+  TurnstileField,
+  type TurnstileStatus,
+} from "@/components/forms/TurnstileField";
 import { trackLead } from "@/lib/analytics";
 import { submitInterestLead, type LeadFormState } from "@/lib/actions/leads";
 
@@ -22,15 +27,15 @@ export type InterestOption = {
 };
 export type InterestGroup = { label: string; options: InterestOption[] };
 
-function SubmitButton({ label }: { label: string }) {
+function SubmitButton({ label, waiting }: { label: string; waiting: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || waiting}
       className="bg-neon font-body text-ink shadow-neon inline-flex w-full items-center justify-center gap-2 rounded-md px-7 py-[15px] text-base font-bold transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
     >
-      {pending ? "Enviando…" : label}
+      {pending ? "Enviando…" : waiting ? "Un momento…" : label}
     </button>
   );
 }
@@ -71,6 +76,7 @@ export function InterestLeadForm({
   interesesHelp?: string;
 }) {
   const [state, formAction] = useActionState(submitInterestLead, initial);
+  const [captcha, setCaptcha] = useState<TurnstileStatus>(TURNSTILE_SITE_KEY ? "pending" : "ready");
 
   // Conversión: un lead guardado en Supabase vale como `generate_lead` en GA4.
   useEffect(() => {
@@ -271,8 +277,16 @@ export function InterestLeadForm({
         </p>
       )}
 
+      <TurnstileField onStatus={setCaptcha} resetSignal={state} />
+      {captcha === "error" && (
+        <p role="alert" className={ERR}>
+          No hemos podido cargar la verificación anti-spam (a veces la bloquea un bloqueador de
+          anuncios). Desactívalo para esta web o escríbenos por WhatsApp.
+        </p>
+      )}
+
       <div className="mt-1">
-        <SubmitButton label={submitLabel} />
+        <SubmitButton label={submitLabel} waiting={captcha === "pending"} />
       </div>
     </form>
   );

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { isAdminSession } from "@/lib/auth";
 import { postToN8n } from "@/lib/n8n/client";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { TURNSTILE_ERROR_MESSAGE, verifyTurnstile } from "@/lib/turnstile";
+import { TURNSTILE_RESPONSE_FIELD } from "@/lib/turnstile-shared";
 import { interestLeadSchema, leadEstadoSchema, leadSchema } from "@/lib/validation/lead";
 
 export type LeadFormState = {
@@ -65,6 +67,11 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
   if (parsed.data.website) {
     return { status: "success", message: "¡Gracias! Te escribimos enseguida." };
   }
+
+  // Turnstile después de Zod y del honeypot: un formulario mal rellenado no
+  // gasta el token (que es de un solo uso) ni una llamada a Cloudflare.
+  const captcha = await verifyTurnstile(formData.get(TURNSTILE_RESPONSE_FIELD));
+  if (!captcha.ok) return { status: "error", message: TURNSTILE_ERROR_MESSAGE };
 
   // `consentimiento` solo se valida: no hay columna para él en `leads` (mismo
   // criterio que `submitInterestLead`); viaja a n8n como booleano.
@@ -154,6 +161,9 @@ export async function submitInterestLead(
   if (parsed.data.website) {
     return { status: "success", message: "¡Gracias! Te escribimos enseguida." };
   }
+
+  const captcha = await verifyTurnstile(formData.get(TURNSTILE_RESPONSE_FIELD));
+  if (!captcha.ok) return { status: "error", message: TURNSTILE_ERROR_MESSAGE };
 
   const { website: _hp, consentimiento: _c, ...lead } = parsed.data;
 

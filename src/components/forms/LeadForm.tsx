@@ -1,7 +1,12 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import {
+  TURNSTILE_SITE_KEY,
+  TurnstileField,
+  type TurnstileStatus,
+} from "@/components/forms/TurnstileField";
 import { trackLead } from "@/lib/analytics";
 import { submitLead, type LeadFormState } from "@/lib/actions/leads";
 import type { leadOrigenes } from "@/lib/validation/lead";
@@ -15,15 +20,15 @@ const FIELD =
 const LABEL = "mb-1.5 block font-body text-[13px] font-semibold text-text-body";
 const ERR = "mt-1 font-body text-xs font-semibold text-neon";
 
-function SubmitButton() {
+function SubmitButton({ waiting }: { waiting: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || waiting}
       className="inline-flex items-center justify-center gap-2 rounded-md bg-neon px-7 py-[15px] font-body text-base font-bold text-ink shadow-neon transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
     >
-      {pending ? "Enviando…" : "Enviar"}
+      {pending ? "Enviando…" : waiting ? "Un momento…" : "Enviar"}
     </button>
   );
 }
@@ -45,6 +50,7 @@ export function LeadForm({
   hiddenModalidad?: string;
 }) {
   const [state, formAction] = useActionState(submitLead, initial);
+  const [captcha, setCaptcha] = useState<TurnstileStatus>(TURNSTILE_SITE_KEY ? "pending" : "ready");
 
   // Conversión: un lead guardado en Supabase vale como `generate_lead` en GA4.
   useEffect(() => {
@@ -173,8 +179,16 @@ export function LeadForm({
         </p>
       )}
 
+      <TurnstileField onStatus={setCaptcha} resetSignal={state} />
+      {captcha === "error" && (
+        <p role="alert" className={ERR}>
+          No hemos podido cargar la verificación anti-spam (a veces la bloquea un bloqueador de
+          anuncios). Desactívalo para esta web o escríbenos por WhatsApp.
+        </p>
+      )}
+
       <div className="mt-1">
-        <SubmitButton />
+        <SubmitButton waiting={captcha === "pending"} />
       </div>
     </form>
   );

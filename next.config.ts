@@ -10,6 +10,8 @@ import type { NextConfig } from "next";
  *                   una plataforma de vídeo allí, va también aquí.
  *   · connect-src — `*.google-analytics.com` cubre `region1.…`, que es adonde
  *                   GA4 manda los hits de visitantes del EEE.
+ *   · challenges.cloudflare.com — script e iframe de Turnstile en los
+ *                   formularios de lead (components/forms/TurnstileField.tsx).
  *   · `'unsafe-eval'` solo en `next dev` (React Refresh lo necesita); nunca
  *                   en el build de producción.
  *
@@ -23,12 +25,12 @@ const isDev = process.env.NODE_ENV === "development";
 
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://challenges.cloudflare.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com",
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
