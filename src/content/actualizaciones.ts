@@ -17,7 +17,7 @@ export const actualizaciones: Record<string, string> = {
   "": "2026-08-14",
   "/clases": "2026-09-15",
   "/socio-fundador": "2026-08-01",
-  "/intensivos": "2026-08-14",
+  "/intensivos": "2026-09-15",
   "/profesores": "2026-08-14",
   "/horarios": "2026-09-15",
   "/eventos": "2026-09-15",

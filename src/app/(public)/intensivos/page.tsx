@@ -22,9 +22,11 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   // ≤60 caracteres contando el sufijo " · NEXUS VNG" de la plantilla del layout.
-  title: "Intensivos de baile en Vilanova i la Geltrú",
+  // Evergreen: la URL sirve para todas las ediciones de verano. La fecha va en
+  // el eyebrow de la página, no en el title, que es lo que se queda en Google.
+  title: "Intensivos de baile de verano en Vilanova",
   description:
-    "Ocho intensivos de baile en agosto de 2026 en Vilanova i la Geltrú: salsa, bachata, reparto, heels y más. Dos semanas, un estilo cada día.",
+    "Intensivos de baile de verano en Vilanova i la Geltrú: salsa, bachata, reparto, heels y más, un estilo por sesión de dos horas. Así fue la edición de agosto.",
   alternates: { canonical: "/intensivos" },
 };
 
@@ -167,12 +169,12 @@ export default function IntensivosPage() {
               as="span"
               className="mt-5 block font-body text-xs font-bold uppercase tracking-[0.18em] text-neon-mint"
             >
-              Nexus VNG · Vilanova i la Geltrú
+              Edición agosto {ANYO} · Vilanova i la Geltrú
             </Reveal>
             <Reveal delay={0.06}>
               <h1 className="mt-3 max-w-[19ch] text-balance font-display text-[clamp(38px,6.5vw,76px)] leading-[0.94]">
-                Intensivos de baile <span className="text-gradient-nexus">agosto 2026</span> en
-                Vilanova i la Geltrú
+                Intensivos de baile de verano{" "}
+                <span className="text-gradient-nexus">en Vilanova i la Geltrú</span>
               </h1>
             </Reveal>
             <Reveal delay={0.12}>
@@ -395,7 +397,10 @@ export default function IntensivosPage() {
         </section>
         )}
 
-        <JsonLd data={intensivosLd()} />
+        {/* Eventos solo mientras la edición está viva: ocho `Event` con fecha
+            pasada no ganan resultado enriquecido y le dicen a Google que la
+            página está desactualizada. */}
+        {!finalizado && <JsonLd data={intensivosLd()} />}
       </main>
     </>
   );
