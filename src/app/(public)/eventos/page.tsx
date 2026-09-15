@@ -8,13 +8,21 @@ import { site } from "@/lib/site";
 import { getEventos } from "@/lib/queries/eventos";
 import { EVENTO_TIPO_LABELS } from "@/lib/format";
 import { safeImageSrc } from "@/lib/images";
+import { robotsListado } from "@/lib/indexable";
 import type { Evento } from "@/types/database";
 
-export const metadata: Metadata = {
-  title: "Fiestas y socials de baile en Vilanova",
-  description: "Fiestas, masterclasses y socials de NEXUS VNG en Vilanova i la Geltrú: las citas donde se practica lo de clase y se conoce al resto de la comunidad.",
-  alternates: { canonical: "/eventos" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Misma consulta que la página: React la deduplica en el mismo render.
+  const eventos = await getEventos();
+  return {
+    title: "Fiestas y socials de baile en Vilanova",
+    description: "Fiestas, masterclasses y socials de NEXUS VNG en Vilanova i la Geltrú: las citas donde se practica lo de clase y se conoce al resto de la comunidad.",
+    alternates: { canonical: "/eventos" },
+    // Sin eventos publicados la página es un estado vacío: fuera del índice
+    // hasta que haya al menos uno (lib/indexable.ts). Va a la par con el sitemap.
+    robots: robotsListado(eventos.length),
+  };
+}
 
 // Revalidar cada hora
 export const revalidate = 3600;

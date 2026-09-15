@@ -4,6 +4,7 @@ import { ultimaActualizacion } from "@/content/actualizaciones";
 import { listProfesorSlugs } from "@/content/profesores";
 import { getModalidadesSitemap } from "@/lib/queries/modalidades";
 import { getEventosSitemap } from "@/lib/queries/eventos";
+import { listadoIndexable } from "@/lib/indexable";
 
 /**
  * Sitemap: SOLO URLs canónicas e indexables.
@@ -34,7 +35,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/intensivos",
     "/profesores",
     "/horarios",
-    "/eventos",
     "/sobre-nosotros",
     "/contacto",
     "/faq",
@@ -47,6 +47,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fichas de evento: misma fuente que /eventos y /eventos/[slug]
   // (Supabase con fallback estático), así el sitemap nunca se desincroniza.
   const eventos = await getEventosSitemap();
+
+  // /eventos solo entra si hay algo publicado: vacía va en `noindex` (ver
+  // eventos/page.tsx) y una URL con noindex en el sitemap es una contradicción.
+  if (listadoIndexable(eventos.length)) staticPaths.push("/eventos");
 
   return [
     ...staticPaths.map((path) => ({
