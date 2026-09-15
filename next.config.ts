@@ -3,11 +3,15 @@ import type { NextConfig } from "next";
 /**
  * Content-Security-Policy — ver docs/auditoria-seguridad-2026-08-03.md (A1).
  *
- * Se despliega primero en modo REPORT-ONLY: el navegador registra las
- * violaciones en consola pero no bloquea nada, así que es imposible que rompa
- * la web. Cuando se confirme que no salen avisos durante unos días, cambiar la
- * clave de la cabecera a "Content-Security-Policy" (sin sufijo) para que pase
- * a bloquear de verdad.
+ * BLOQUEANTE desde el 15-09-2026 (estuvo en Report-Only del 03-08 al 15-09).
+ * Cualquier origen nuevo — un embed, un script de terceros, un endpoint — hay
+ * que añadirlo aquí o el navegador lo bloquea sin avisar más que en consola.
+ *   · frame-src   — los orígenes de `parseVideoUrl` (lib/video.ts). Si se añade
+ *                   una plataforma de vídeo allí, va también aquí.
+ *   · connect-src — `*.google-analytics.com` cubre `region1.…`, que es adonde
+ *                   GA4 manda los hits de visitantes del EEE.
+ *   · `'unsafe-eval'` solo en `next dev` (React Refresh lo necesita); nunca
+ *                   en el build de producción.
  *
  * `'unsafe-inline'` en script-src hace falta hoy por el bootstrap de Consent
  * Mode (`components/analytics/Analytics.tsx`), que DEBE ser inline para
@@ -15,23 +19,23 @@ import type { NextConfig } from "next";
  * middleware, pero eso obliga a que el middleware cubra también las rutas
  * públicas (hoy solo cubre /area-privada) y añade una llamada por visita.
  */
+const isDev = process.env.NODE_ENV === "development";
+
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+  "connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  // OJO: `upgrade-insecure-requests` va aquí SOLO cuando la cabecera deje de
-  // ser Report-Only. En report-only el navegador lo ignora y además escupe un
-  // error en consola ("...is ignored when delivered in a report-only policy"),
-  // que Lighthouse cuenta como error de navegador (Prácticas recomendadas 96,
-  // 15-08-2026). Mientras tanto no se pierde nada: HSTS con preload ya fuerza
-  // https en todo el dominio.
+  // Solo tiene efecto en modo bloqueante (en Report-Only el navegador lo
+  // ignora y lo marca como error en consola).
+  "upgrade-insecure-requests",
 ].join("; ");
 
 /**
@@ -46,7 +50,8 @@ const csp = [
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  // DENY, igual que `frame-ancestors 'none'`: la web no se enmarca ni a sí misma.
+  { key: "X-Frame-Options", value: "DENY" },
   {
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
@@ -55,7 +60,7 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
-  { key: "Content-Security-Policy-Report-Only", value: csp },
+  { key: "Content-Security-Policy", value: csp },
 ];
 
 /**

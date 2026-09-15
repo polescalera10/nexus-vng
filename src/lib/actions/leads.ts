@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isAdminSession } from "@/lib/auth";
 import { postToN8n } from "@/lib/n8n/client";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { interestLeadSchema, leadEstadoSchema, leadSchema } from "@/lib/validation/lead";
@@ -197,12 +198,15 @@ export type LeadMutationResult = { ok: boolean; message?: string };
 
 /**
  * Cambia el estado de un lead desde el panel (acción rápida del inicio de admin).
- * La barrera real es la RLS: solo `is_admin()` puede actualizar `leads`.
+ * La barrera real es la RLS: solo `is_admin()` puede actualizar `leads`. El
+ * guard de aquí es la segunda, como en el resto de acciones del panel.
  */
 export async function updateLeadEstado(
   leadId: string,
   estado: string,
 ): Promise<LeadMutationResult> {
+  if (!(await isAdminSession())) return { ok: false, message: "No tienes permiso." };
+
   const parsed = leadEstadoSchema.safeParse(estado);
   if (!parsed.success) return { ok: false, message: "Estado no válido." };
 
