@@ -3,17 +3,13 @@
 import { useState } from "react";
 import { site } from "@/lib/site";
 
-/** Dirección tal y como la conoce Google: la del NAP, nunca la localidad de marca. */
-const direccion = [
-  site.nap.streetAddress,
-  `${site.nap.postalCode} ${site.nap.addressLocality}`,
-  site.nap.addressRegion,
-]
-  .filter(Boolean)
-  .join(", ");
-
-export const MAPA_EMBED_URL = `https://www.google.com/maps?q=${encodeURIComponent(direccion)}&output=embed`;
-export const MAPA_ENLACE_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
+/*
+  El mapa marca las coordenadas de la ficha verificada de Google Business
+  Profile (lib/site.ts), no una búsqueda por dirección: así el pin cae donde
+  Google tiene el negocio. "Cómo llegar" abre la ficha, con reseñas y ruta.
+*/
+export const MAPA_EMBED_URL = `https://www.google.com/maps?q=${site.geo.latitude},${site.geo.longitude}&z=17&output=embed`;
+export const MAPA_ENLACE_URL = site.google.mapsUrl;
 
 /**
  * Mapa de la sala con fachada de dos clics, igual que los vídeos del diario

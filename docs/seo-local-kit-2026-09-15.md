@@ -75,9 +75,9 @@ Con eso hago la T11 (`geo`, `hasMap` y `sameAs` en el schema).
 - [ ] No se piden reseñas a profesores, familia ni amigos que no son alumnos.
 - [ ] No se borran ni se esconden las negativas: se responden con educación.
 
-**Mensaje de WhatsApp** (sustituir `[ENLACE]` por el de GBP):
+**Mensaje de WhatsApp** (enlace de la ficha verificada el 16-09-2026):
 
-> Hola, {nombre}. Estamos empezando a darnos a conocer en Google y nos ayuda mucho saber qué opinan quienes ya bailan con nosotros. Si te apetece, puedes dejar tu opinión aquí, tal cual la tengas: [ENLACE]
+> Hola, {nombre}. Estamos empezando a darnos a conocer en Google y nos ayuda mucho saber qué opinan quienes ya bailan con nosotros. Si te apetece, puedes dejar tu opinión aquí, tal cual la tengas: https://g.page/r/CYgihhQ1LBbiEBM/review
 > Tarda un minuto. Y si hay algo que mejorarías, también queremos saberlo. ¡Gracias!
 
 **Responder a cada reseña** en menos de una semana, con nombre y algo concreto de lo que dice. Nunca una respuesta copiada.

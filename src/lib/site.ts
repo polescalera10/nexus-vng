@@ -38,6 +38,18 @@ export const site = {
     /** Teléfono visible (formato local). El de WhatsApp sale de env o del fallback de abajo. */
     telephoneDisplay: "+34 669 29 10 88",
   },
+  /**
+   * Coordenadas de la ficha verificada de Google Business Profile (16-09-2026),
+   * las que Google tiene para el negocio (no un pin puesto a mano). El schema
+   * y el mapa de /contacto tienen que decir lo mismo que la ficha.
+   */
+  geo: { latitude: 41.2341134, longitude: 1.7475994 },
+  google: {
+    /** Enlace estable a la ficha (por `cid`); los enlaces cortos de "Compartir" caducan de formato. */
+    mapsUrl: "https://maps.google.com/?cid=16291257308548571784",
+    /** Formulario de reseña de la ficha. Pedirla a todos y sin nada a cambio (docs/seo-local-kit). */
+    reviewUrl: "https://g.page/r/CYgihhQ1LBbiEBM/review",
+  },
   social: {
     instagram: "https://www.instagram.com/nexusvng",
     instagramHandle: "@nexusvng",

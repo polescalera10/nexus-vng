@@ -93,7 +93,15 @@ export function localBusinessLd() {
     // exige schema.org; salen de content/media.ts, la fuente única de rutas.
     image: [mediaSobreNosotros.sala.src, mediaSobreNosotros.clase.src].map((src) => `${site.url}${src}`),
     logo: `${site.url}/images/nexus-logo.png`,
-    sameAs: [site.social.instagram, site.social.tiktok].filter(Boolean),
+    // Coordenadas y mapa de la ficha verificada de Google: lo que ata esta
+    // entidad a la del resultado local y la desambigua de otros "Nexus VNG".
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: site.geo.latitude,
+      longitude: site.geo.longitude,
+    },
+    hasMap: site.google.mapsUrl,
+    sameAs: [site.google.mapsUrl, site.social.instagram, site.social.tiktok].filter(Boolean),
     // Rango de precio derivado del modelo real (35-100 €/mes), no inventado.
     // Guion simple, no raya tipográfica: algunos validadores no la digieren.
     priceRange: `${precios.base}-${precios.flat} €/${precios.periodo}`,
