@@ -90,16 +90,24 @@ Mismo texto en todos. Descripción corta (≤300 caracteres):
 
 > Escuela de baile a dos calles de Vilanova i la Geltrú, en el Gimnasio Aranha. Salsa cubana, bachata, reparto, reggaetón, lady style y heels en grupos por nivel, desde cero y sin necesidad de pareja. Clases de lunes a viernes por la tarde-noche.
 
-| Directorio | URL de alta | Hecho | URL de la ficha publicada |
-|---|---|---|---|
-| go&dance | https://www.goandance.com | [ ] | |
-| salsaybachata.net | https://salsaybachata.net | [ ] | |
-| sientelbaile.com | https://sientelbaile.com | [ ] | |
-| mydance.zone | https://www.mydance.zone | [ ] | |
-| Cylex | https://www.cylex.es | [ ] | |
-| Fixando | https://www.fixando.es | [ ] | |
-| Guía de Eix Diari | https://www.eixdiari.cat/serveis/guia/ | [ ] | |
-| Directorio de vilanova.cat | https://www.vilanova.cat/directori | [ ] | |
+| Directorio | URL de alta | Coste | Hecho | URL de la ficha publicada |
+|---|---|---|---|---|
+| Bing Places | https://www.bingplaces.com (importa desde Google Business Profile) | Gratis | [ ] | |
+| Apple Business Connect | https://businessconnect.apple.com | Gratis | [ ] | |
+| salsaybachata.net | https://salsaybachata.net/profesionales/ | Gratis ("para siempre") | [ ] | |
+| sientelbaile.com | https://sientelbaile.com/add-listing/ | Sin precio publicado: comprobar antes de enviar | [ ] | |
+| go&dance | https://www.goandance.com (cuenta profesional → crear local) | Local gratis; comisión solo si vendes plazas | [ ] | |
+| Cylex | https://www.cylex.es | Gratis | [ ] | |
+| Infobel | https://www.infobel.com/es/spain | Gratis | [ ] | |
+| Hotfrog | https://www.hotfrog.es | Ficha básica gratis | [ ] | |
+| QDQ | https://www.qdq.com | Ficha básica gratis | [ ] | |
+| Páginas Amarillas | https://www.paginasamarillas.es | Ficha básica gratis; ofrecen planes de pago | [ ] | |
+| Serveis Actius (Garraf) | https://www.serveisactius.cat | Por confirmar | [ ] | |
+| Guía d'establiments de Sant Pere de Ribes | promocioeconomica@santperederibes.cat | Gratis (municipal) | [ ] | |
+| Guía de Eix Diari | https://www.eixdiari.cat/serveis/guia/ | Por confirmar | [ ] | |
+| Directorio de vilanova.cat | https://www.vilanova.cat/directori | Gratis; puede exigir sede o entidad en Vilanova | [ ] | |
+| Fixando | https://www.fixando.es | Perfil gratis; pagas por cada solicitud | [ ] | |
+| ~~mydance.zone~~ | — | Certificado SSL caducado el 16-09-2026: no darse de alta | — | |
 
 Estilos que marcar donde haya lista: salsa cubana, casino, rueda de casino, bachata, reggaetón, reparto, lady style, heels. **Pásame las URL publicadas** y compruebo el NAP de cada una.
 
