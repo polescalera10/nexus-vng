@@ -42,8 +42,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   // de marca, que se lee mejor fuera de Google.
   const description = metaDescripciones[m.slug] ?? contenido?.lead ?? m.descripcion ?? undefined;
   const ogDescription = contenido?.lead ?? description;
+  /*
+    El layout añade " · NEXUS VNG" (12 caracteres) y Google corta el title
+    alrededor de los 60. Con nombres largos (Lady Style Bachata, Cía Bachata
+    Lady) el municipio entero se pasaba, así que ahí se acorta a "Vilanova",
+    que es como lo busca la gente. El H1 sí conserva el nombre completo.
+  */
+  const base = `Clases de ${m.nombre} en `;
+  const titleLargo = `${base}Vilanova i la Geltrú`;
+
   return {
-    title: `Clases de ${m.nombre} en Vilanova i la Geltrú`,
+    title: titleLargo.length <= 48 ? titleLargo : `${base}Vilanova`,
     description,
     alternates: { canonical: `/clases/${m.slug}` },
     openGraph: { title: `Clases de ${m.nombre}`, description: ogDescription, images: ogImages },
