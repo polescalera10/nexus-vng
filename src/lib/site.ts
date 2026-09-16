@@ -49,6 +49,13 @@ export const site = {
     mapsUrl: "https://maps.google.com/?cid=16291257308548571784",
     /** Formulario de reseña de la ficha. Pedirla a todos y sin nada a cambio (docs/seo-local-kit). */
     reviewUrl: "https://g.page/r/CYgihhQ1LBbiEBM/review",
+    /**
+     * `place_id` de la ficha para la Places API (reseñas en la home). Es el
+     * único dato de Places que Google permite guardar indefinidamente.
+     * Derivado del identificador de la URL de la ficha (0x12a387df15d609c9:
+     * 0xe2162c3514862288); si la API lo rechaza, sácalo de su respuesta.
+     */
+    placeId: "ChIJyQnWFd-HoxIRiCKGFDUsFuI",
   },
   social: {
     instagram: "https://www.instagram.com/nexusvng",

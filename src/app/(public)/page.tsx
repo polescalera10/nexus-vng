@@ -11,6 +11,7 @@ import { Precios } from "@/components/landing/Precios";
 import { ComoEmpezar } from "@/components/landing/ComoEmpezar";
 import { Faq } from "@/components/landing/Faq";
 import { CtaFinal } from "@/components/landing/CtaFinal";
+import { DondeEstamos } from "@/components/landing/DondeEstamos";
 import { JsonLd, faqLd } from "@/components/seo/JsonLd";
 import { getModalidades } from "@/lib/queries/modalidades";
 import { getFoundingSpots } from "@/lib/queries/founding";
@@ -58,6 +59,7 @@ export default async function HomePage() {
       <ComoEmpezar />
       <PuntoDePartida />
       <Faq />
+      <DondeEstamos />
       <CtaFinal />
       <JsonLd data={faqLd(faqs)} />
     </main>
