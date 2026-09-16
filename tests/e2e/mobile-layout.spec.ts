@@ -56,6 +56,13 @@ test.describe("elementos que no deben salirse de la pantalla", () => {
           if (rect.width === 0) return false;
           // Los fondos decorativos van a propósito más anchos que la pantalla.
           if (getComputedStyle(el).position === "absolute") return false;
+          // Lo que vive dentro de un contenedor con scroll horizontal propio (el
+          // carrusel de reseñas, una tabla) sale de la vista a propósito: se
+          // desplaza él, no la página. El contenedor sí se sigue comprobando.
+          for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+            const ox = getComputedStyle(p).overflowX;
+            if (ox === "auto" || ox === "scroll") return false;
+          }
           return rect.right > limite || rect.left < -1;
         })
         .map((el) => `${el.tagName.toLowerCase()}.${el.className.toString().slice(0, 60)}`);

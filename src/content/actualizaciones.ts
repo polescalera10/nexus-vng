@@ -14,7 +14,7 @@
  * eventos) no van aquí: su fecha sale del `updated_at` de Supabase.
  */
 export const actualizaciones: Record<string, string> = {
-  "": "2026-08-14",
+  "": "2026-09-16",
   "/clases": "2026-09-15",
   "/socio-fundador": "2026-08-01",
   "/intensivos": "2026-09-15",
@@ -25,8 +25,8 @@ export const actualizaciones: Record<string, string> = {
   "/contacto": "2026-09-15",
   "/faq": "2026-09-15",
   "/aviso-legal": "2026-08-01",
-  "/privacidad": "2026-08-01",
-  "/cookies": "2026-08-01",
+  "/privacidad": "2026-09-16",
+  "/cookies": "2026-09-16",
 };
 
 /** Fecha de la sección para el sitemap; cae a hoy si la ruta no está declarada. */

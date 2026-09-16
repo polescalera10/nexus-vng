@@ -64,7 +64,8 @@ export default function CookiesPage() {
       <LegalSection title="4. Cookies de terceros">
         <LegalP>
           El único tercero que puede instalar cookies en nuestras páginas es Google Analytics, y
-          solo tras tu consentimiento (apartado 3). Los enlaces a servicios externos (WhatsApp,
+          solo tras tu consentimiento (apartado 3). El mapa de la sala se sirve desde MapTiler, que
+          no instala cookies (ver la política de privacidad). Los enlaces a servicios externos (WhatsApp,
           Instagram, Google Maps) abren esos servicios fuera de este sitio; una vez allí, se aplican
           sus propias políticas de cookies.
         </LegalP>

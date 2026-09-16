@@ -7,7 +7,7 @@ import { WaLink } from "@/components/ui/WaLink";
 import { JsonLd, ORG_ID } from "@/components/seo/JsonLd";
 import { diasSemana, horarioRegular, sesionesRegulares } from "@/content/horario-regular";
 import { site, WHATSAPP_NUMBER } from "@/lib/site";
-import { MapaFachada } from "@/components/ui/MapaFachada";
+import { MapaSala } from "@/components/ui/MapaSala";
 
 export const metadata: Metadata = {
   title: "Contacto y clase de prueba en Vilanova",
@@ -166,7 +166,7 @@ export default function ContactoPage() {
               por WhatsApp.
             </p>
             <div className="pt-3">
-              <MapaFachada />
+              <MapaSala />
             </div>
           </div>
         </div>

@@ -68,6 +68,8 @@ export default function PrivacidadPage() {
             <>Cloudflare Turnstile (Cloudflare, Inc.), al enviar un formulario: comprueba que quien lo envía es una persona y no un programa automático, para evitar el spam. Para ello analiza datos técnicos de la conexión y del navegador; no le enviamos tu nombre, teléfono ni email. Base jurídica: interés legítimo en proteger el formulario — <LegalTodo>confirmar el acuerdo de encargo (DPA) de Cloudflare y la garantía de las transferencias fuera del EEE</LegalTodo>.</>,
             "WhatsApp (Meta Platforms Ireland Ltd.), si nos escribes por ese canal: se aplica su propia política de privacidad.",
             "Google Analytics 4 (Google Ireland Ltd.), solo si aceptas las cookies de análisis: mide de forma agregada el uso de la web. Ver la política de cookies.",
+            "MapTiler AG (Suiza), para mostrar el mapa de la sala en la página de inicio y en contacto: cuando el mapa aparece en pantalla, tu navegador le pide las imágenes del mapa y, con ello, MapTiler recibe tu dirección IP y datos técnicos del navegador. No instala cookies. Base jurídica: interés legítimo en enseñarte dónde estamos. Suiza cuenta con decisión de adecuación de la Comisión Europea.",
+            "Featurable, para mostrar las reseñas de nuestra ficha de Google: la consulta la hace nuestro servidor, así que tu navegador no se conecta con Featurable ni recibe nada de él.",
           ]}
         />
       </LegalSection>

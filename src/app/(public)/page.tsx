@@ -16,6 +16,7 @@ import { JsonLd, faqLd } from "@/components/seo/JsonLd";
 import { getModalidades } from "@/lib/queries/modalidades";
 import { getFoundingSpots } from "@/lib/queries/founding";
 import { faqs } from "@/content/landing";
+import { getResenasGoogle } from "@/lib/google-reviews";
 import type { Metadata } from "next";
 
 /*
@@ -34,18 +35,22 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [modalidades, spots] = await Promise.all([getModalidades(), getFoundingSpots()]);
+  const [modalidades, spots, resenas] = await Promise.all([
+    getModalidades(),
+    getFoundingSpots(),
+    getResenasGoogle(),
+  ]);
 
   return (
     <main>
-      <Hero />
+      <Hero valoracion={resenas ? { nota: resenas.nota, total: resenas.total } : null} />
       <IntroLocal />
       <ParaTi />
       <Experiencia />
       <Modalidades modalidades={modalidades} />
-      {/* Fotos reales desde 05-09-2026. El bloque de reseñas sigue condicionado
-          a que existan reseñas verificadas de Google (content/landing.ts). */}
-      <Comunidad />
+      {/* Fotos reales de clase y, debajo, el carrusel de reseñas de la ficha de
+          Google (Featurable). Sin reseñas, solo las fotos. */}
+      <Comunidad resenas={resenas} />
       <Profesores />
       <Founding spots={spots} />
       {/* Precios "estándar": debajo del founding a propósito — cuando la promo
@@ -57,9 +62,10 @@ export default async function HomePage() {
         </div>
       </section>
       <ComoEmpezar />
+      {/* El mapa, justo cuando se le dice al visitante que venga a la sala. */}
+      <DondeEstamos />
       <PuntoDePartida />
       <Faq />
-      <DondeEstamos />
       <CtaFinal />
       <JsonLd data={faqLd(faqs)} />
     </main>

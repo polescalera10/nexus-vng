@@ -1,16 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { ResenasGoogle } from "@/components/landing/ResenasGoogle";
 import { MAX_RESENAS } from "@/lib/google-reviews";
-import { site } from "@/lib/site";
+
+// jsdom no trae ResizeObserver ni matchMedia.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
 
 const datos = {
   nota: 4.8,
   total: 12,
-  fichaUrl: site.google.mapsUrl,
+  fichaUrl: "https://maps.google.com/?cid=1",
   resenas: [
     {
-      autor: "Laura M.",
+      autor: "Laura",
       autorUrl: "https://www.google.com/maps/contrib/123",
       avatar: null,
       estrellas: 5,
@@ -28,22 +35,26 @@ const datos = {
   ],
 };
 
-describe("bloque de reseñas de Google", () => {
-  it("pinta autor enlazado, estrellas, fecha y texto literal", () => {
+describe("carrusel de reseñas de Google", () => {
+  it("pinta cada reseña como diapositiva con autor, estrellas, fecha y texto literal", () => {
     render(<ResenasGoogle datos={datos} />);
-    expect(screen.getByRole("link", { name: "Laura M." })).toHaveAttribute(
-      "href",
-      "https://www.google.com/maps/contrib/123",
-    );
+    const diapositivas = screen.getAllByRole("listitem");
+    expect(diapositivas).toHaveLength(2);
+    expect(diapositivas[0]).toHaveAttribute("aria-roledescription", "diapositiva");
+    expect(diapositivas[0]).toHaveAttribute("aria-label", "1 de 2");
+    expect(screen.getByText("Laura")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "5 de 5 estrellas" })).toBeInTheDocument();
     expect(screen.getByText("septiembre de 2026")).toBeInTheDocument();
     expect(screen.getByText("Texto de prueba de la reseña.")).toBeInTheDocument();
   });
 
-  it("sin perfil, el nombre va sin enlace; con foto, la del proxy", () => {
+  it("no enlaza a Google: ni perfiles, ni 'ver todas', ni 'escribir una reseña'", () => {
+    render(<ResenasGoogle datos={datos} />);
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+  });
+
+  it("con foto, la del proxy", () => {
     const { container } = render(<ResenasGoogle datos={datos} />);
-    expect(screen.queryByRole("link", { name: "Jordi" })).toBeNull();
-    expect(screen.getByText("Jordi")).toBeInTheDocument();
     expect(container.querySelector('img[src="/api/resenas/avatar?u=x"]')).not.toBeNull();
   });
 
@@ -53,13 +64,36 @@ describe("bloque de reseñas de Google", () => {
     expect(screen.getByText("12 reseñas")).toBeInTheDocument();
   });
 
-  it("dice cómo se eligen (Ómnibus) y enlaza a la ficha y a dejar reseña", () => {
+  it("dice cómo se eligen (Ómnibus)", () => {
     render(<ResenasGoogle datos={datos} />);
     expect(
       screen.getByText(new RegExp(`hasta ${MAX_RESENAS} de las más recientes que llevan comentario, sin filtrar por puntuación`)),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /ver todas en google maps/i })).toHaveAttribute("href", site.google.mapsUrl);
-    expect(screen.getByRole("link", { name: /escribir una reseña/i })).toHaveAttribute("href", site.google.reviewUrl);
+  });
+
+  it("las flechas desplazan la lista una tarjeta y se desactivan en los extremos", () => {
+    render(<ResenasGoogle datos={datos} />);
+    const lista = screen.getByRole("list", { name: "Reseñas" });
+    // jsdom no maqueta: se simula una lista más ancha que su hueco.
+    Object.defineProperty(lista, "scrollWidth", { configurable: true, value: 900 });
+    Object.defineProperty(lista, "clientWidth", { configurable: true, value: 300 });
+    const llamadas: ScrollToOptions[] = [];
+    lista.scrollBy = ((o: ScrollToOptions) => llamadas.push(o)) as typeof lista.scrollBy;
+    fireEvent.scroll(lista);
+
+    const anterior = screen.getByRole("button", { name: "Reseña anterior" });
+    const siguiente = screen.getByRole("button", { name: "Reseña siguiente" });
+    expect(anterior).toBeDisabled();
+    expect(siguiente).toBeEnabled();
+
+    fireEvent.click(siguiente);
+    expect(llamadas).toHaveLength(1);
+    expect(llamadas[0]?.left).toBeGreaterThan(0);
+
+    Object.defineProperty(lista, "scrollLeft", { configurable: true, value: 600 });
+    fireEvent.scroll(lista);
+    expect(siguiente).toBeDisabled();
+    expect(anterior).toBeEnabled();
   });
 
   it("sin nota media no pinta la cabecera de valoración", () => {

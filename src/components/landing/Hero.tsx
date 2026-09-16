@@ -12,7 +12,16 @@ function splitTitle(title: string): [string, string | null] {
   return [title.slice(0, idx + 1), title.slice(idx + 2)];
 }
 
-export function Hero() {
+/** "5,0" — misma forma que el bloque de reseñas. */
+function formatNota(nota: number) {
+  return nota.toLocaleString("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+/**
+ * `valoracion` es la nota REAL de la ficha de Google (lib/google-reviews.ts).
+ * Sin ella no se pinta el sello: nunca una cifra por defecto (Ómnibus).
+ */
+export function Hero({ valoracion }: { valoracion?: { nota: number | null; total: number | null } | null }) {
   const [lead, highlight] = splitTitle(hero.title);
 
   return (
@@ -85,6 +94,18 @@ export function Hero() {
             {hero.cta}
           </WaLink>
           <span className="font-body text-sm text-white/70">{hero.ctaNote}</span>
+          {/* Prueba social sin hacer scroll: la nota de Google junto al botón. */}
+          {valoracion?.nota != null && (
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-ink/60 px-3.5 py-1.5 font-body text-sm text-white/85 backdrop-blur-sm">
+              <span className="text-star" aria-hidden="true">
+                ★
+              </span>
+              <span>
+                <strong className="font-bold text-white">{formatNota(valoracion.nota)}</strong> en Google
+                {valoracion.total != null && <> · {valoracion.total} reseñas</>}
+              </span>
+            </span>
+          )}
         </RevealEager>
       </div>
     </section>

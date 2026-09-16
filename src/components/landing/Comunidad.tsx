@@ -1,21 +1,20 @@
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
+import { ResenasGoogle } from "@/components/landing/ResenasGoogle";
 import { mediaMosaico } from "@/content/media";
-import { reviews, googleRating } from "@/content/landing";
+import type { ResenasGoogle as Resenas } from "@/lib/google-reviews";
 
 /**
- * "El corazón son las personas": mosaico de fotos reales de clase.
+ * "El corazón son las personas": fotos reales de clase y, debajo, lo que dicen
+ * los alumnos en Google. Caras y voces juntas, antes de profesores y precios,
+ * que es donde quien no nos conoce decide si fiarse.
  *
- * Estuvo desactivada de la home desde el rebrand porque el mosaico eran cuatro
- * placeholders a rayas. Vuelve con fotografía real de los intensivos de agosto
- * de 2026 (`content/media.ts`).
- *
- * Las reseñas siguen su propia regla: solo se pintan si `content/landing.ts`
- * trae reseñas REALES de Google. Mientras la lista esté vacía, la sección
- * enseña el mosaico y nada más — sin marcador visible y sin nota media
- * inventada (Directiva Omnibus).
+ * El mosaico sale de los intensivos de agosto de 2026 (`content/media.ts`).
+ * Las reseñas llegan de la ficha real vía Featurable (`lib/google-reviews.ts`);
+ * sin ellas la sección enseña solo las fotos, sin marcador ni nota inventada
+ * (Directiva Ómnibus).
  */
-export function Comunidad() {
+export function Comunidad({ resenas }: { resenas: Resenas | null }) {
   return (
     <section className="bg-bg-base py-[clamp(64px,9vw,120px)]">
       <div className="container-nexus">
@@ -33,17 +32,6 @@ export function Comunidad() {
             modelos: es la gente que viene cada semana.
           </p>
         </Reveal>
-
-        {/* Badge de valoración: solo se pinta con la nota REAL de Google (ver content/landing.ts). */}
-        {googleRating && (
-          <Reveal delay={0.12} className="mt-[18px] inline-flex items-center gap-3 rounded-full border border-white/10 bg-bg-panel px-[18px] py-2.5 shadow-soft">
-            <span className="font-display text-[26px] leading-none text-text-strong">{googleRating}</span>
-            <span className="text-base tracking-[1px] text-star">★★★★★</span>
-            <span className="font-body text-[13px] font-semibold text-text-muted">
-              Reseñas reales en Google
-            </span>
-          </Reveal>
-        )}
 
         {/* Mosaico: 15 teselas cuadradas y pequeñas. Antes eran 5 grandes y la
             sección se comía media pantalla; con muchas caras a la vez se dice
@@ -66,32 +54,7 @@ export function Comunidad() {
           ))}
         </Reveal>
 
-        <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-4">
-          {reviews.map((r, i) => (
-            <Reveal
-              key={r.name}
-              delay={i * 0.08}
-              className="flex flex-col rounded-lg border border-white/8 bg-bg-panel p-6 shadow-card"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-[11px]">
-                  <span className={`flex h-[42px] w-[42px] flex-none items-center justify-center rounded-full font-body text-[17px] font-bold text-ink ${r.hue}`}>
-                    {r.initial}
-                  </span>
-                  <div className="min-w-0">
-                    <div className="font-body text-sm font-bold text-text-strong">{r.name}</div>
-                    <div className="font-body text-xs text-text-faint">{r.date}</div>
-                  </div>
-                </div>
-                <span className="flex-none rounded-full border border-white/12 px-[9px] py-1 font-body text-[11px] font-bold text-text-muted">
-                  Google
-                </span>
-              </div>
-              <div className="mt-3.5 text-[15px] tracking-[1px] text-star">★★★★★</div>
-              <p className="mt-2.5 font-body text-[15px] leading-relaxed text-text-body">{r.text}</p>
-            </Reveal>
-          ))}
-        </div>
+        {resenas && <ResenasGoogle datos={resenas} />}
       </div>
     </section>
   );

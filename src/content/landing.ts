@@ -9,7 +9,6 @@
  *   · (Resuelto 26-07) Founding: 85 €/mes, 10 plazas. Tarifa plana sin promo: 100 €/mes. Estilos sueltos desde 35 €/mes.
  *   · Horarios reales (FAQ de horarios).
  *   · Dirección exacta (FAQ "¿Dónde estáis?").
- *   · Reseñas reales de Google (array `reviews` — NUNCA inventarlas, Directiva Omnibus).
  */
 
 import { disciplinasRegulares } from "@/content/horario-regular";
@@ -113,29 +112,8 @@ export const modalidadesFallback = [
   },
 ];
 
-export type Review = {
-  name: string;
-  date: string;
-  initial: string;
-  hue: string;
-  text: string;
-};
-
-/**
- * Reseñas de alumnos.
- * TODO: añadir SOLO reseñas reales de Google (texto literal, con permiso del autor).
- * PROHIBIDO inventarlas o retocarlas: infringe la Directiva Omnibus (reseñas falsas).
- * Formato de cada entrada:
- *   { name: "Nombre A.", date: "hace X semanas", initial: "N", hue: "bg-neon|bg-neon-mint|bg-neon-lime", text: "…" }
- */
-export const reviews: Review[] = [];
-
-/**
- * Nota media real del perfil de Google Business.
- * TODO: poner la nota real (p. ej. "4,8") cuando exista el perfil con reseñas.
- * Mientras sea null, el badge de valoración no se muestra.
- */
-export const googleRating: string | null = null;
+/* Las reseñas ya no viven aquí: llegan de la ficha real de Google vía
+   Featurable (lib/google-reviews.ts). */
 
 export const steps = [
   {
