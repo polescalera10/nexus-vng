@@ -1,16 +1,6 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-import { Roboto } from "next/font/google";
 import type { ResenasGoogle as Datos } from "@/lib/google-reviews";
-
-/*
-  La atribución "Google Maps" tiene que ir en Roboto (condiciones de Places).
-  next/font la sirve desde nuestro dominio: no hay petición a Google Fonts.
-*/
-const roboto = Roboto({ subsets: ["latin"], weight: "400", display: "swap" });
-
-type Estado = { fase: "esperando" } | { fase: "cargando" } | { fase: "vacio" } | { fase: "listo"; datos: Datos };
+import { MAX_RESENAS } from "@/lib/google-reviews";
+import { site } from "@/lib/site";
 
 function Estrellas({ n, className = "", label }: { n: number; className?: string; label?: string }) {
   return (
@@ -31,65 +21,22 @@ function formatNota(nota: number) {
   return nota.toLocaleString("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
-/**
- * Reseñas de Google, pedidas a `/api/resenas` cuando el bloque está a punto de
- * entrar en pantalla: así solo se paga una llamada a Places por quien llega
- * hasta aquí. Sin reseñas (sin clave, cuota agotada o error), no se pinta nada.
- */
-export function ResenasGoogle() {
-  const contenedor = useRef<HTMLDivElement>(null);
-  const [estado, setEstado] = useState<Estado>({ fase: "esperando" });
-
-  useEffect(() => {
-    const el = contenedor.current;
-    if (!el) return;
-    let cancelado = false;
-
-    const cargar = async () => {
-      setEstado({ fase: "cargando" });
-      try {
-        const res = await fetch("/api/resenas", { cache: "no-store" });
-        if (cancelado) return;
-        if (res.status !== 200) return setEstado({ fase: "vacio" });
-        setEstado({ fase: "listo", datos: (await res.json()) as Datos });
-      } catch {
-        if (!cancelado) setEstado({ fase: "vacio" });
-      }
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          observer.disconnect();
-          void cargar();
-        }
-      },
-      { rootMargin: "400px 0px" },
-    );
-    observer.observe(el);
-    return () => {
-      cancelado = true;
-      observer.disconnect();
-    };
-  }, []);
-
-  if (estado.fase === "vacio") return null;
-
-  return (
-    <div ref={contenedor} aria-live="polite" className="mt-[clamp(40px,6vw,64px)]">
-      {estado.fase !== "listo" ? (
-        // Hueco reservado mientras llega la respuesta, para no empujar la página.
-        <div className="min-h-24" aria-hidden="true" />
-      ) : (
-        <Bloque datos={estado.datos} />
-      )}
-    </div>
-  );
+/** "septiembre de 2026": estable aunque la página se regenere solo cada hora. */
+function formatMes(iso: string) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? null
+    : d.toLocaleDateString("es-ES", { month: "long", year: "numeric", timeZone: "Europe/Madrid" });
 }
 
-function Bloque({ datos }: { datos: Datos }) {
+/**
+ * Reseñas de la ficha de Google, ya pedidas en el servidor
+ * (`lib/google-reviews.ts`). Texto literal de cada autor, con su nombre, foto y
+ * enlace a su perfil, y el criterio de selección a la vista (Ómnibus).
+ */
+export function ResenasGoogle({ datos }: { datos: Datos }) {
   return (
-    <section aria-labelledby="resenas-google-titulo" className="space-y-6">
+    <section aria-labelledby="resenas-google-titulo" className="mt-[clamp(40px,6vw,64px)] space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h3 id="resenas-google-titulo" className="font-display text-[clamp(28px,4vw,40px)] leading-none text-text-strong">
@@ -104,62 +51,72 @@ function Bloque({ datos }: { datos: Datos }) {
             </p>
           )}
         </div>
-        <a
-          href={datos.fichaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center font-body text-sm font-semibold text-neon no-underline hover:underline"
-        >
-          Ver todas en Google Maps
-        </a>
+        <div className="flex flex-wrap gap-x-5">
+          <a
+            href={datos.fichaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center font-body text-sm font-semibold text-neon no-underline hover:underline"
+          >
+            Ver todas en Google Maps
+          </a>
+          <a
+            href={site.google.reviewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center font-body text-sm font-semibold text-text-muted no-underline hover:text-neon hover:underline"
+          >
+            Escribir una reseña
+          </a>
+        </div>
       </div>
 
       <ul className="grid list-none grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-4 p-0">
-        {datos.resenas.map((r, i) => (
-          <li key={`${r.autor}-${i}`} className="flex flex-col rounded-lg border border-white/8 bg-bg-panel p-5 shadow-soft">
-            <div className="flex items-center gap-3">
-              {r.avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element -- la foto llega de nuestro proxy sin caché; next/image la guardaría, y Places no lo permite.
-                <img src={r.avatar} alt="" width={40} height={40} loading="lazy" className="size-10 rounded-full bg-bg-elevated object-cover" />
-              ) : (
-                <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-bg-elevated font-body font-bold text-text-strong">
-                  {r.autor.charAt(0).toUpperCase()}
-                </span>
-              )}
-              <div className="min-w-0">
-                {r.autorUrl ? (
-                  <a
-                    href={r.autorUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block truncate font-body text-[15px] font-semibold text-text-strong no-underline hover:text-neon"
-                  >
-                    {r.autor}
-                  </a>
+        {datos.resenas.map((r, i) => {
+          const mes = r.publicada ? formatMes(r.publicada) : null;
+          return (
+            <li key={`${r.autor}-${i}`} className="flex flex-col rounded-lg border border-white/8 bg-bg-panel p-5 shadow-soft">
+              <div className="flex items-center gap-3">
+                {r.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- la foto llega de nuestro proxy; next/image la optimizaría desde Google y el origen no está en remotePatterns.
+                  <img src={r.avatar} alt="" width={40} height={40} loading="lazy" className="size-10 rounded-full bg-bg-elevated object-cover" />
                 ) : (
-                  <span className="block truncate font-body text-[15px] font-semibold text-text-strong">{r.autor}</span>
+                  <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-bg-elevated font-body font-bold text-text-strong">
+                    {r.autor.charAt(0).toUpperCase()}
+                  </span>
                 )}
-                {r.cuando && (
-                  <time dateTime={r.publicada ?? undefined} className="font-body text-xs text-text-muted">
-                    {r.cuando}
-                  </time>
-                )}
+                <div className="min-w-0">
+                  {r.autorUrl ? (
+                    <a
+                      href={r.autorUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block truncate font-body text-[15px] font-semibold text-text-strong no-underline hover:text-neon"
+                    >
+                      {r.autor}
+                    </a>
+                  ) : (
+                    <span className="block truncate font-body text-[15px] font-semibold text-text-strong">{r.autor}</span>
+                  )}
+                  {mes && r.publicada && (
+                    <time dateTime={r.publicada} className="font-body text-xs text-text-muted">
+                      {mes}
+                    </time>
+                  )}
+                </div>
               </div>
-            </div>
-            <Estrellas n={r.estrellas} className="mt-3" />
-            {/* Texto literal del autor: sin recortar ni retocar (Directiva Ómnibus). */}
-            <p className="mt-3 whitespace-pre-line font-body text-[14px] leading-relaxed text-text-body">{r.texto}</p>
-          </li>
-        ))}
+              <Estrellas n={r.estrellas} className="mt-3" />
+              {/* Texto literal del autor: sin recortar ni retocar (Directiva Ómnibus). */}
+              <p className="mt-3 whitespace-pre-line font-body text-[14px] leading-relaxed text-text-body">{r.texto}</p>
+            </li>
+          );
+        })}
       </ul>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-4">
-        <p className="max-w-[62ch] font-body text-[13px] leading-relaxed text-text-muted">
-          Reseñas publicadas por alumnos en nuestra ficha de Google. Google muestra aquí hasta cinco, las que
-          considera más relevantes; el resto está en Google Maps.
-        </p>
-        <span className={`${roboto.className} text-[12px] text-text-muted`}>Google Maps</span>
-      </div>
+      <p className="max-w-[70ch] border-t border-white/8 pt-4 font-body text-[13px] leading-relaxed text-text-muted">
+        Reseñas publicadas por alumnos en nuestra ficha de Google. Mostramos las {MAX_RESENAS} más recientes, sin
+        filtrar por puntuación; todas las demás están en Google Maps.
+      </p>
     </section>
   );
 }

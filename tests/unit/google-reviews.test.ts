@@ -1,79 +1,98 @@
 import { describe, expect, it } from "vitest";
-import { avatarPermitido, parsePlace } from "@/lib/google-reviews";
+import { avatarPermitido, parseFeaturable } from "@/lib/google-reviews";
 import { site } from "@/lib/site";
 
 const resena = (extra: Record<string, unknown> = {}) => ({
-  rating: 5,
-  relativePublishTimeDescription: "hace 2 semanas",
-  publishTime: "2026-09-01T10:00:00Z",
-  text: { text: "Traducido", languageCode: "es" },
-  originalText: { text: "Texto original del alumno", languageCode: "ca" },
-  authorAttribution: {
-    displayName: "Laura M.",
-    uri: "https://www.google.com/maps/contrib/123",
-    photoUri: "https://lh3.googleusercontent.com/a/foto=s128",
+  id: "r1",
+  platform: "google",
+  text: "Texto literal del alumno",
+  rating: { value: 5, max: 5 },
+  publishedAt: "2026-09-01T10:00:00Z",
+  author: {
+    name: "Laura M.",
+    avatarUrl: "https://lh3.googleusercontent.com/a/foto=s128",
+    profileUrl: "https://www.google.com/maps/contrib/123",
   },
   ...extra,
 });
 
-describe("parsePlace", () => {
-  it("devuelve nota, total, ficha y reseñas con el texto ORIGINAL", () => {
-    const out = parsePlace({
-      rating: 4.9,
-      userRatingCount: 12,
-      googleMapsUri: "https://maps.google.com/?cid=1",
-      reviews: [resena()],
-    });
-    expect(out).toMatchObject({ nota: 4.9, total: 12, fichaUrl: "https://maps.google.com/?cid=1" });
+const widget = (reviews: unknown[], extra: Record<string, unknown> = {}) => ({
+  success: true,
+  widget: {
+    uuid: "w",
+    isExampleReviews: false,
+    reviews,
+    gbpLocationSummary: { reviewsCount: 12, rating: 4.8 },
+    ...extra,
+  },
+});
+
+describe("parseFeaturable", () => {
+  it("devuelve nota, total, ficha y reseñas con el texto tal cual", () => {
+    const out = parseFeaturable(widget([resena()]));
+    expect(out).toMatchObject({ nota: 4.8, total: 12, fichaUrl: site.google.mapsUrl });
     expect(out?.resenas[0]).toMatchObject({
       autor: "Laura M.",
       autorUrl: "https://www.google.com/maps/contrib/123",
       estrellas: 5,
-      cuando: "hace 2 semanas",
-      texto: "Texto original del alumno",
+      publicada: "2026-09-01T10:00:00Z",
+      texto: "Texto literal del alumno",
     });
   });
 
+  it("NUNCA publica las reseñas de ejemplo de Featurable", () => {
+    expect(parseFeaturable(widget([resena()], { isExampleReviews: true }))).toBeNull();
+  });
+
+  it("ordena por fecha, no por nota, y se queda con las más recientes", () => {
+    const out = parseFeaturable(
+      widget([
+        resena({ text: "vieja 5", publishedAt: "2026-01-01T00:00:00Z" }),
+        resena({ text: "nueva 2", rating: { value: 2, max: 5 }, publishedAt: "2026-09-10T00:00:00Z" }),
+        resena({ text: "media 4", rating: { value: 4, max: 5 }, publishedAt: "2026-05-01T00:00:00Z" }),
+      ]),
+      2,
+    );
+    expect(out?.resenas.map((r) => r.texto)).toEqual(["nueva 2", "media 4"]);
+    expect(out?.resenas[0]?.estrellas).toBe(2);
+  });
+
   it("sirve la foto del autor por nuestro proxy, nunca directa", () => {
-    const out = parsePlace({ reviews: [resena()] });
-    expect(out?.resenas[0]?.avatar).toBe(
+    expect(parseFeaturable(widget([resena()]))?.resenas[0]?.avatar).toBe(
       `/api/resenas/avatar?u=${encodeURIComponent("https://lh3.googleusercontent.com/a/foto=s128")}`,
     );
   });
 
-  it("sin texto original usa el de Google, y sin ninguno descarta la reseña", () => {
-    const soloText = parsePlace({ reviews: [resena({ originalText: undefined })] });
-    expect(soloText?.resenas[0]?.texto).toBe("Traducido");
-    expect(parsePlace({ reviews: [resena({ originalText: undefined, text: { text: "  " } })] })).toBeNull();
-  });
-
-  it("descarta reseñas mal formadas sin tumbar las buenas", () => {
-    const out = parsePlace({ reviews: [{ rating: 9 }, { autor: "x" }, resena()] });
+  it("descarta reseñas sin texto o mal formadas sin tumbar las buenas", () => {
+    const out = parseFeaturable(widget([resena({ text: "  " }), resena({ text: null }), { rating: 9 }, resena()]));
     expect(out?.resenas).toHaveLength(1);
   });
 
-  it("sin reseñas o con una respuesta rara devuelve null", () => {
-    expect(parsePlace({ rating: 5, userRatingCount: 0 })).toBeNull();
-    expect(parsePlace(null)).toBeNull();
-    expect(parsePlace("error")).toBeNull();
+  it("escala notas sobre otra base a 5 estrellas", () => {
+    expect(parseFeaturable(widget([resena({ rating: { value: 8, max: 10 } })]))?.resenas[0]?.estrellas).toBe(4);
   });
 
-  it("sin enlace de ficha en la respuesta cae al de lib/site", () => {
-    expect(parsePlace({ reviews: [resena()] })?.fichaUrl).toBe(site.google.mapsUrl);
+  it("sin reseñas, con error o con respuesta rara devuelve null", () => {
+    expect(parseFeaturable(widget([]))).toBeNull();
+    expect(parseFeaturable({ success: false, widget: { reviews: [resena()] } })).toBeNull();
+    expect(parseFeaturable(null)).toBeNull();
+    expect(parseFeaturable("error")).toBeNull();
+  });
+
+  it("sin resumen de la ficha, sin nota ni total pero con reseñas", () => {
+    const out = parseFeaturable(widget([resena()], { gbpLocationSummary: null }));
+    expect(out).toMatchObject({ nota: null, total: null });
+    expect(out?.resenas).toHaveLength(1);
   });
 
   it("no enlaza perfiles ni fotos fuera de Google", () => {
-    const out = parsePlace({
-      reviews: [
+    const out = parseFeaturable(
+      widget([
         resena({
-          authorAttribution: {
-            displayName: "X",
-            uri: "https://evil.example/perfil",
-            photoUri: "https://evil.example/foto.png",
-          },
+          author: { name: "X", avatarUrl: "https://evil.example/foto.png", profileUrl: "https://evil.example/p" },
         }),
-      ],
-    });
+      ]),
+    );
     expect(out?.resenas[0]?.autorUrl).toBeNull();
     expect(out?.resenas[0]?.avatar).toBeNull();
   });

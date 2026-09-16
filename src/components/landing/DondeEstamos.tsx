@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { MapaFachada } from "@/components/ui/MapaFachada";
 import { ResenasGoogle } from "@/components/landing/ResenasGoogle";
+import { getResenasGoogle } from "@/lib/google-reviews";
 import { site } from "@/lib/site";
 
 /**
@@ -9,10 +10,13 @@ import { site } from "@/lib/site";
  * en Google. Es la prueba de que la escuela existe y dónde, que es justo lo que
  * busca quien aún no nos conoce.
  *
- * El mapa va con fachada de dos clics y las reseñas las trae nuestro servidor:
- * cargar la home no manda nada del visitante a Google.
+ * Las reseñas llegan ya en el HTML (se piden en el servidor, con la ISR de la
+ * home) y el mapa va con fachada de dos clics: cargar la home no manda nada
+ * del visitante a Google ni a Featurable.
  */
-export function DondeEstamos() {
+export async function DondeEstamos() {
+  const resenas = await getResenasGoogle();
+
   return (
     <section aria-labelledby="donde-estamos-titulo" className="border-t border-white/5 bg-bg-base py-[clamp(56px,9vw,110px)]">
       <div className="container-nexus">
@@ -49,7 +53,7 @@ export function DondeEstamos() {
           </Reveal>
         </div>
 
-        <ResenasGoogle />
+        {resenas && <ResenasGoogle datos={resenas} />}
       </div>
     </section>
   );

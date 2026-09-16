@@ -4,10 +4,10 @@ import { avatarPermitido } from "@/lib/google-reviews";
 /**
  * GET /api/resenas/avatar?u=<url> — foto del autor de una reseña de Google.
  *
- * Google exige mostrarla junto a la reseña. Si la pidiera el navegador, la IP
- * de cada visitante de la home le llegaría a Google sin consentimiento (RGPD),
- * así que la pide nuestro servidor y la reenvía tal cual, sin guardarla
- * (`no-store`: las condiciones de Places tampoco permiten cachearla).
+ * Si la pidiera el navegador, la IP de cada visitante de la home le llegaría a
+ * Google sin consentimiento (RGPD), así que la pide nuestro servidor y la
+ * reenvía tal cual. La CDN la guarda un día: una foto de perfil cambia poco y
+ * así no se pide a Google en cada visita.
  *
  * Solo acepta imágenes de `*.googleusercontent.com` (`avatarPermitido`): sin
  * esa lista blanca, esta ruta sería un reenviador abierto a cualquier URL.
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     return new NextResponse(cuerpo, {
       headers: {
         "Content-Type": tipo,
-        "Cache-Control": "no-store",
+        "Cache-Control": "public, max-age=3600, s-maxage=86400",
         "X-Content-Type-Options": "nosniff",
       },
     });
