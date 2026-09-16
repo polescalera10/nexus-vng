@@ -1,15 +1,48 @@
-import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { ResenasGoogle } from "@/components/landing/ResenasGoogle";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { AUTOPLAY_MS, REANUDAR_MS, ResenasGoogle } from "@/components/landing/ResenasGoogle";
 import { MAX_RESENAS } from "@/lib/google-reviews";
 
-// jsdom no trae ResizeObserver ni matchMedia.
-globalThis.ResizeObserver ??= class {
+// jsdom no trae ResizeObserver, IntersectionObserver ni matchMedia.
+globalThis.ResizeObserver = class {
   observe() {}
   unobserve() {}
   disconnect() {}
 } as unknown as typeof ResizeObserver;
-window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
+/** El carrusel está en pantalla nada más observarlo. */
+globalThis.IntersectionObserver = class {
+  constructor(private cb: IntersectionObserverCallback) {}
+  observe() {
+    this.cb([{ isIntersecting: true } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
+  }
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+} as unknown as typeof IntersectionObserver;
+let menosMovimiento = false;
+window.matchMedia = ((q: string) => ({
+  matches: q.includes("reduce") ? menosMovimiento : false,
+  media: q,
+  addEventListener() {},
+  removeEventListener() {},
+})) as unknown as typeof window.matchMedia;
+
+/** jsdom no maqueta: se simula una lista más ancha que su hueco. */
+function simularLista(scrollLeft = 0) {
+  const lista = screen.getByRole("list", { name: "Reseñas" });
+  Object.defineProperty(lista, "scrollWidth", { configurable: true, value: 900 });
+  Object.defineProperty(lista, "clientWidth", { configurable: true, value: 300 });
+  Object.defineProperty(lista, "scrollLeft", { configurable: true, value: scrollLeft });
+  const llamadas: { tipo: string; left?: number }[] = [];
+  lista.scrollBy = ((o: ScrollToOptions) => llamadas.push({ tipo: "by", left: o.left })) as typeof lista.scrollBy;
+  lista.scrollTo = ((o: ScrollToOptions) => llamadas.push({ tipo: "to", left: o.left })) as typeof lista.scrollTo;
+  act(() => {
+    fireEvent.scroll(lista);
+  });
+  return { lista, llamadas };
+}
 
 const datos = {
   nota: 4.8,
@@ -73,13 +106,7 @@ describe("carrusel de reseñas de Google", () => {
 
   it("las flechas desplazan la lista una tarjeta y se desactivan en los extremos", () => {
     render(<ResenasGoogle datos={datos} />);
-    const lista = screen.getByRole("list", { name: "Reseñas" });
-    // jsdom no maqueta: se simula una lista más ancha que su hueco.
-    Object.defineProperty(lista, "scrollWidth", { configurable: true, value: 900 });
-    Object.defineProperty(lista, "clientWidth", { configurable: true, value: 300 });
-    const llamadas: ScrollToOptions[] = [];
-    lista.scrollBy = ((o: ScrollToOptions) => llamadas.push(o)) as typeof lista.scrollBy;
-    fireEvent.scroll(lista);
+    const { lista, llamadas } = simularLista();
 
     const anterior = screen.getByRole("button", { name: "Reseña anterior" });
     const siguiente = screen.getByRole("button", { name: "Reseña siguiente" });
@@ -91,7 +118,9 @@ describe("carrusel de reseñas de Google", () => {
     expect(llamadas[0]?.left).toBeGreaterThan(0);
 
     Object.defineProperty(lista, "scrollLeft", { configurable: true, value: 600 });
-    fireEvent.scroll(lista);
+    act(() => {
+      fireEvent.scroll(lista);
+    });
     expect(siguiente).toBeDisabled();
     expect(anterior).toBeEnabled();
   });
@@ -99,5 +128,86 @@ describe("carrusel de reseñas de Google", () => {
   it("sin nota media no pinta la cabecera de valoración", () => {
     render(<ResenasGoogle datos={{ ...datos, nota: null, total: null }} />);
     expect(screen.queryByRole("img", { name: /nota media/i })).toBeNull();
+  });
+});
+
+describe("paso automático del carrusel", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    menosMovimiento = false;
+  });
+
+  it("avanza una tarjeta solo cada cierto tiempo", () => {
+    vi.useFakeTimers();
+    render(<ResenasGoogle datos={datos} />);
+    const { llamadas } = simularLista();
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS - 100));
+    expect(llamadas).toHaveLength(0);
+    act(() => vi.advanceTimersByTime(200));
+    expect(llamadas).toEqual([{ tipo: "by", left: expect.any(Number) }]);
+  });
+
+  it("al llegar al final vuelve al principio", () => {
+    vi.useFakeTimers();
+    render(<ResenasGoogle datos={datos} />);
+    const { llamadas } = simularLista(600);
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS + 10));
+    expect(llamadas).toEqual([{ tipo: "to", left: 0 }]);
+  });
+
+  it("el botón lo pausa y lo reanuda", () => {
+    vi.useFakeTimers();
+    render(<ResenasGoogle datos={datos} />);
+    const { llamadas } = simularLista();
+    const boton = screen.getByRole("button", { name: /pausar el paso automático/i });
+    act(() => {
+      fireEvent.click(boton);
+    });
+    expect(boton).toHaveAttribute("aria-pressed", "true");
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS * 3));
+    expect(llamadas).toHaveLength(0);
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: /reanudar el paso automático/i }));
+    });
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS + 10));
+    expect(llamadas).toHaveLength(1);
+  });
+
+  it("se para con el ratón encima y mientras la lista anuncia cambios solo cuando no se mueve", () => {
+    vi.useFakeTimers();
+    render(<ResenasGoogle datos={datos} />);
+    const { lista, llamadas } = simularLista();
+    expect(lista).toHaveAttribute("aria-live", "off");
+    act(() => {
+      fireEvent.mouseEnter(screen.getByRole("region", { name: /lo que dicen en google/i }));
+    });
+    expect(lista).toHaveAttribute("aria-live", "polite");
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS * 2));
+    expect(llamadas).toHaveLength(0);
+  });
+
+  it("tras usar las flechas espera antes de seguir solo", () => {
+    vi.useFakeTimers();
+    render(<ResenasGoogle datos={datos} />);
+    const { llamadas } = simularLista();
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Reseña siguiente" }));
+    });
+    expect(llamadas).toHaveLength(1);
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS + 10));
+    expect(llamadas).toHaveLength(1);
+    act(() => vi.advanceTimersByTime(REANUDAR_MS));
+    expect(llamadas.length).toBeGreaterThan(1);
+  });
+
+  it("con 'reducir movimiento' no se mueve solo ni ofrece pausa", () => {
+    menosMovimiento = true;
+    vi.useFakeTimers();
+    render(<ResenasGoogle datos={datos} />);
+    const { llamadas } = simularLista();
+    expect(screen.queryByRole("button", { name: /paso automático/i })).toBeNull();
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS * 3));
+    expect(llamadas).toHaveLength(0);
   });
 });
