@@ -10,6 +10,29 @@
 
 ---
 
+## Estado de implementación (16 de septiembre de 2026)
+
+Todo lo que se podía resolver desde el repositorio está hecho, desplegado y verificado en producción, una tarea tras otra. El detalle de cada verificación está en `MEMORY.md`.
+
+| Punto | Estado |
+|---|---|
+| Titles y H1 sin keyword (§5) | **Hecho** — `4515fe3` |
+| Meta descriptions sin ciudad ni acción (§5) | **Hecho** — `eff9864` |
+| `/eventos` vacía e indexable (§1) | **Hecho** — `2396512`, sitemap de 28 a 27 URLs |
+| `/intensivos` con edición pasada y `Event` caducados (§1) | **Hecho** — `5fc5cc4` |
+| `image` del schema con foto antigua (§4) | **Hecho** — `7e42dc7` |
+| Mapa en `/contacto` (§9) | **Hecho** — `c98cc41`, fachada de dos clics |
+| Rendimiento y CSP (§2) | **Medido, sin cambios** — LCP móvil 1,3–2,0 s y CLS 0 (Chromium con CPU ×4 y 4G lenta; la API de PageSpeed lleva días sin cuota). CSP bloqueante confirmada |
+| Falta hub informacional (§6, §7) | **Infraestructura hecha** — `283b7f8`: `/blog` y `/blog/[slug]`, `BlogPosting`, enlace de ida y vuelta con las fichas. En `noindex` hasta el primer artículo |
+| Material para GBP, reseñas, directorios, prensa y bios (§8, §9, §10) | **Preparado** — `docs/seo-local-kit-2026-09-15.md` |
+| Brief del primer artículo (§7) | **Hecho** — `docs/briefs/salsa-cubana-o-bachata-brief.md` |
+| `lastmod` desactualizado (§1) | **Hecho** — fechas reales en `content/actualizaciones.ts` |
+| www sin redirigir · Search Console · Bing · GBP · reseñas · directorios · bios · artículos | **Pendiente de Pol** — ninguno se puede hacer desde el repositorio |
+
+Efecto secundario útil: `scripts/seo-crawl.py` rastrea el sitemap y compara contra `docs/seo-baseline-2026-09-15.jsonl`, así que cualquier cambio futuro se mide contra la foto previa a este trabajo.
+
+---
+
 ## Valoración por ámbito
 
 | Ámbito | Nota | En una línea |
