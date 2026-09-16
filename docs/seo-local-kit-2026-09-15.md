@@ -86,7 +86,11 @@ Con eso hago la T11 (`geo`, `hasMap` y `sameAs` en el schema).
 
 ## T14 · Directorios
 
-Mismo texto en todos. Descripción corta (≤300 caracteres):
+Mismo texto en todos. Descripción larga (500 caracteres), para los campos que la admitan:
+
+> NEXUS VNG es una escuela de baile en el Gimnasio Aranha (Rambla del Garraf, 32, Sant Pere de Ribes), junto a Vilanova i la Geltrú. Damos clases de salsa cubana, bachata, reparto, reggaetón, lady style, heels y sexy style, y tenemos grupos de compañía que montan coreografías y actúan. Los grupos van por nivel, hay iniciación para quien empieza de cero y no hace falta venir con pareja. Clases de una hora, de lunes a viernes por la tarde-noche. Reserva tu clase de prueba por WhatsApp: 669 29 10 88.
+
+Descripción corta (≤300 caracteres), para los campos con límite:
 
 > Escuela de baile a dos calles de Vilanova i la Geltrú, en el Gimnasio Aranha. Salsa cubana, bachata, reparto, reggaetón, lady style y heels en grupos por nivel, desde cero y sin necesidad de pareja. Clases de lunes a viernes por la tarde-noche.
 
