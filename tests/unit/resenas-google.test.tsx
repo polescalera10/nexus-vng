@@ -56,7 +56,7 @@ describe("bloque de reseñas de Google", () => {
   it("dice cómo se eligen (Ómnibus) y enlaza a la ficha y a dejar reseña", () => {
     render(<ResenasGoogle datos={datos} />);
     expect(
-      screen.getByText(new RegExp(`las ${MAX_RESENAS} más recientes, sin filtrar por puntuación`)),
+      screen.getByText(new RegExp(`hasta ${MAX_RESENAS} de las más recientes que llevan comentario, sin filtrar por puntuación`)),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /ver todas en google maps/i })).toHaveAttribute("href", site.google.mapsUrl);
     expect(screen.getByRole("link", { name: /escribir una reseña/i })).toHaveAttribute("href", site.google.reviewUrl);

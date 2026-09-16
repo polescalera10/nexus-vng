@@ -114,8 +114,9 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
       </ul>
 
       <p className="max-w-[70ch] border-t border-white/8 pt-4 font-body text-[13px] leading-relaxed text-text-muted">
-        Reseñas publicadas por alumnos en nuestra ficha de Google. Mostramos las {MAX_RESENAS} más recientes, sin
-        filtrar por puntuación; todas las demás están en Google Maps.
+        Reseñas publicadas por alumnos en nuestra ficha de Google, con el texto tal como lo escribieron. Mostramos
+        hasta {MAX_RESENAS} de las más recientes que llevan comentario, sin filtrar por puntuación; todas están en
+        Google Maps.
       </p>
     </section>
   );

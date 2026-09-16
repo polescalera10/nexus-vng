@@ -5,8 +5,7 @@ import { expect, test } from "@playwright/test";
   llegan ya en el HTML (Featurable, pedidas en el servidor). La garantía que
   importa es de privacidad: cargar y recorrer la home no hace que el navegador
   hable con Google, Featurable ni los servidores de fotos de Google.
-  El pintado de las reseñas se prueba en tests/unit/resenas-google.test.tsx:
-  aquí no hay clave de Featurable y el bloque de reseñas no sale.
+  El detalle del pintado se prueba en tests/unit/resenas-google.test.tsx.
 */
 test.describe("Dónde estamos en la home", () => {
   test("se ve la sala y nada se pide a terceros", async ({ page }) => {

@@ -49,6 +49,11 @@ export const site = {
     mapsUrl: "https://maps.google.com/?cid=16291257308548571784",
     /** Formulario de reseña de la ficha. Pedirla a todos y sin nada a cambio (docs/seo-local-kit). */
     reviewUrl: "https://g.page/r/CYgihhQ1LBbiEBM/review",
+    /**
+     * Widget de Featurable conectado a la ficha (reseñas del bloque "Dónde
+     * estamos"). Es público: va en su código de inserción. Vacío = sin reseñas.
+     */
+    featurableWidgetId: "82dddeb1-6ce9-4bb3-b4f6-1e6e6ec9cb59",
   },
   social: {
     instagram: "https://www.instagram.com/nexusvng",

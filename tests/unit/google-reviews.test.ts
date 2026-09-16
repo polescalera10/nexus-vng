@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { avatarPermitido, parseFeaturable } from "@/lib/google-reviews";
+import { avatarPermitido, nombreVisible, parseFeaturable } from "@/lib/google-reviews";
 import { site } from "@/lib/site";
 
 const resena = (extra: Record<string, unknown> = {}) => ({
@@ -38,6 +38,24 @@ describe("parseFeaturable", () => {
       publicada: "2026-09-01T10:00:00Z",
       texto: "Texto literal del alumno",
     });
+  });
+
+  it("publica el texto ORIGINAL aunque Featurable dé una traducción", () => {
+    const out = parseFeaturable(
+      widget([resena({ text: "Salsa classes are amazing!", originalText: "¡Las clases de salsa son una pasada!" })]),
+    );
+    expect(out?.resenas[0]?.texto).toBe("¡Las clases de salsa son una pasada!");
+  });
+
+  it("respeta 'solo nombre de pila' del widget", () => {
+    const out = parseFeaturable(
+      widget([resena({ author: { name: "Sara Romero Lembarki", avatarUrl: null, profileUrl: null } })], {
+        config: { name_display: "firstNamesOnly" },
+      }),
+    );
+    expect(out?.resenas[0]?.autor).toBe("Sara");
+    expect(nombreVisible("  jessica benavent pardo ", false)).toBe("jessica benavent pardo");
+    expect(nombreVisible("Johnny", true)).toBe("Johnny");
   });
 
   it("NUNCA publica las reseñas de ejemplo de Featurable", () => {

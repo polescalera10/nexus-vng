@@ -18,17 +18,21 @@ import { site } from "@/lib/site";
  * y el bloque lo dice. Si en el panel de Featurable se activa un filtro de
  * estrellas, el aviso de la web deja de ser verdad: no hacerlo.
  *
- * Sin `FEATURABLE_API_KEY` o `FEATURABLE_WIDGET_ID`, o si falla la API,
- * devuelve `null` y la home no pinta el bloque de reseñas.
+ * El ID del widget es público (va en el código de inserción de Featurable) y
+ * vive en `lib/site.ts`. La API responde sin clave; si algún día la exige,
+ * `FEATURABLE_API_KEY` se manda como `X-API-Key`. Si falla, devuelve `null` y
+ * la home no pinta el bloque de reseñas.
  */
 
-const API_URL = "https://featurable.com/api/v2/widgets";
+const API_URL = "https://api.featurable.com/v2/widgets";
 
 /** Cuántas reseñas se enseñan. El aviso del bloque usa esta misma cifra. */
 export const MAX_RESENAS = 6;
 
 const resenaSchema = z.object({
   text: z.string().nullish(),
+  /** Texto tal como lo escribió el autor; `text` puede venir traducido. */
+  originalText: z.string().nullish(),
   rating: z.object({ value: z.number(), max: z.number().positive() }),
   publishedAt: z.string().nullish(),
   author: z.object({
@@ -42,6 +46,7 @@ const widgetSchema = z.object({
   success: z.boolean().optional(),
   widget: z.object({
     isExampleReviews: z.boolean().optional(),
+    config: z.object({ name_display: z.string().nullish() }).partial().nullish(),
     reviews: z.array(z.unknown()).default([]),
     gbpLocationSummary: z
       .object({
@@ -98,6 +103,12 @@ function perfilPermitido(url: string | null | undefined): string | null {
   }
 }
 
+/** "Sara Romero Lembarki" → "Sara" cuando el widget pide solo el nombre. */
+export function nombreVisible(nombre: string, soloNombre: boolean): string {
+  const limpio = nombre.trim();
+  return soloNombre ? (limpio.split(/\s+/)[0] ?? limpio) : limpio;
+}
+
 /**
  * Convierte la respuesta de Featurable en lo que pinta la web. Pura, para
  * probarla sin red.
@@ -111,16 +122,21 @@ export function parseFeaturable(json: unknown, max = MAX_RESENAS): ResenasGoogle
   if (!parsed.success || parsed.data.success === false) return null;
   const { widget } = parsed.data;
   if (widget.isExampleReviews) return null;
+  // Respeta la opción del widget: con "firstNamesOnly" solo se ve el nombre de pila.
+  const soloNombre = widget.config?.name_display === "firstNamesOnly";
 
   const resenas: ResenaGoogle[] = [];
   for (const bruta of widget.reviews) {
     const r = resenaSchema.safeParse(bruta);
     if (!r.success) continue;
-    const texto = (r.data.text ?? "").trim();
+    // Siempre el texto ORIGINAL: Featurable devuelve en `text` una traducción
+    // automática (al inglés, con el widget en español), y publicarla como si
+    // fuera la reseña sería retocarla.
+    const texto = (r.data.originalText ?? r.data.text ?? "").trim();
     if (!texto) continue;
     const foto = r.data.author.avatarUrl;
     resenas.push({
-      autor: r.data.author.name,
+      autor: nombreVisible(r.data.author.name, soloNombre),
       autorUrl: perfilPermitido(r.data.author.profileUrl),
       avatar: foto && avatarPermitido(foto) ? `/api/resenas/avatar?u=${encodeURIComponent(foto)}` : null,
       estrellas: Math.min(5, Math.max(1, Math.round((r.data.rating.value / r.data.rating.max) * 5))),
@@ -141,15 +157,15 @@ export function parseFeaturable(json: unknown, max = MAX_RESENAS): ResenasGoogle
   };
 }
 
-/** Pide las reseñas a Featurable. Sin configurar o con error, `null`. */
+/** Pide las reseñas a Featurable. Sin widget o con error, `null`. */
 export async function getResenasGoogle(): Promise<ResenasGoogle | null> {
   const key = process.env.FEATURABLE_API_KEY;
-  const widgetId = process.env.FEATURABLE_WIDGET_ID;
-  if (!key || !widgetId) return null;
+  const widgetId = site.google.featurableWidgetId;
+  if (!widgetId) return null;
 
   try {
     const res = await fetch(`${API_URL}/${encodeURIComponent(widgetId)}`, {
-      headers: { "X-API-Key": key },
+      headers: key ? { "X-API-Key": key } : {},
       // Featurable ya refresca desde Google cada 24 h: con una vez por hora
       // sobra, y no se roza su límite de peticiones.
       next: { revalidate: 3600 },
