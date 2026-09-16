@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { ResenasGoogle as Datos } from "@/lib/google-reviews";
 import { MAX_RESENAS } from "@/lib/google-reviews";
 
@@ -77,6 +77,74 @@ function prefiereMenosMovimiento() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+/** Líneas visibles de cada reseña antes de "Leer más": fijan la altura de las tarjetas. */
+export const LINEAS_VISIBLES = 6;
+
+/**
+ * Texto de una reseña con altura fija. Si no cabe, se corta a la vista con
+ * "Leer más" y, al abrirlo, el texto completo se lee DENTRO de la tarjeta con
+ * scroll: la tarjeta no crece y el carrusel no salta. El texto nunca se
+ * recorta en el HTML: está entero, literal (Directiva Ómnibus); el corte es
+ * solo visual.
+ */
+function TextoResena({ texto, onAbrir }: { texto: string; onAbrir: (abierto: boolean) => void }) {
+  const id = useId();
+  const caja = useRef<HTMLParagraphElement>(null);
+  const [abierto, setAbierto] = useState(false);
+  const [noCabe, setNoCabe] = useState(false);
+
+  useEffect(() => {
+    const el = caja.current;
+    if (!el) return;
+    const medir = () => {
+      // Con el texto abierto no se mide: su altura ya es la del hueco.
+      if (!el.classList.contains("line-clamp-none")) setNoCabe(el.scrollHeight > el.clientHeight + 1);
+    };
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [texto]);
+
+  // El aviso al carrusel va fuera del actualizador de estado: React puede
+  // ejecutarlo dos veces y el contador de reseñas abiertas se descuadraría.
+  const alternar = () => {
+    const nuevo = !abierto;
+    setAbierto(nuevo);
+    onAbrir(nuevo);
+  };
+
+  return (
+    <div className="mt-3 flex flex-1 flex-col">
+      <p
+        id={id}
+        ref={caja}
+        tabIndex={abierto ? 0 : undefined}
+        style={{ height: `calc(1.625em * ${LINEAS_VISIBLES})` }}
+        className={`whitespace-pre-line font-body text-[14px] leading-relaxed text-text-body ${
+          abierto ? "line-clamp-none overflow-y-auto overscroll-contain pr-1" : `line-clamp-6 overflow-hidden`
+        }`}
+      >
+        {texto}
+      </p>
+      {noCabe || abierto ? (
+        <button
+          type="button"
+          onClick={alternar}
+          aria-expanded={abierto}
+          aria-controls={id}
+          className="mt-1 inline-flex min-h-11 items-center self-start font-body text-sm font-semibold text-neon hover:underline"
+        >
+          {abierto ? "Leer menos" : "Leer más"}
+        </button>
+      ) : (
+        // Mismo hueco que el botón, para que todas las tarjetas midan igual.
+        <span aria-hidden="true" className="mt-1 block min-h-11" />
+      )}
+    </div>
+  );
+}
+
 /**
  * Carrusel de reseñas de la ficha de Google, ya pedidas en el servidor
  * (`lib/google-reviews.ts`) y pintadas en el HTML.
@@ -102,6 +170,9 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
   const [enPantalla, setEnPantalla] = useState(false);
   const [encima, setEncima] = useState(false);
   const [conFoco, setConFoco] = useState(false);
+  // Reseñas abiertas con "Leer más": mientras alguien lee, no se mueve.
+  const [abiertas, setAbiertas] = useState(0);
+  const alAbrir = useCallback((abierto: boolean) => setAbiertas((n) => Math.max(0, n + (abierto ? 1 : -1))), []);
   // Momento del último gesto del usuario; el autoplay espera REANUDAR_MS.
   const ultimoGesto = useRef(0);
   // El propio autoplay también dispara `scroll`: no debe contar como gesto.
@@ -144,7 +215,7 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
   };
 
   const todoVisible = extremos.inicio && extremos.fin;
-  const autoplayActivo = !pausado && !reducido && !todoVisible && enPantalla && !encima && !conFoco;
+  const autoplayActivo = !pausado && !reducido && !todoVisible && enPantalla && !encima && !conFoco && abiertas === 0;
 
   useEffect(() => {
     if (!autoplayActivo) return;
@@ -270,7 +341,7 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
               </div>
               <Estrellas n={r.estrellas} className="mt-3" />
               {/* Texto literal del autor: sin recortar ni retocar (Directiva Ómnibus). */}
-              <p className="mt-3 whitespace-pre-line font-body text-[14px] leading-relaxed text-text-body">{r.texto}</p>
+              <TextoResena texto={r.texto} onAbrir={alAbrir} />
             </li>
           );
         })}

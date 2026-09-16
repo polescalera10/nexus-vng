@@ -1,6 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { AUTOPLAY_MS, REANUDAR_MS, ResenasGoogle } from "@/components/landing/ResenasGoogle";
+
+/*
+  jsdom no maqueta: un párrafo "no cabe" si su texto pasa de 80 caracteres.
+  Así se simulan reseñas largas (con "Leer más") y cortas (sin él).
+*/
+Object.defineProperty(HTMLElement.prototype, "clientHeight", { configurable: true, get: () => 100 });
+Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
+  configurable: true,
+  get(this: HTMLElement) {
+    return (this.textContent ?? "").length > 80 ? 400 : 100;
+  },
+});
 import { MAX_RESENAS } from "@/lib/google-reviews";
 
 // jsdom no trae ResizeObserver, IntersectionObserver ni matchMedia.
@@ -209,5 +221,66 @@ describe("paso automático del carrusel", () => {
     expect(screen.queryByRole("button", { name: /paso automático/i })).toBeNull();
     act(() => vi.advanceTimersByTime(AUTOPLAY_MS * 3));
     expect(llamadas).toHaveLength(0);
+  });
+});
+
+describe("altura fija y 'Leer más'", () => {
+  const larga = "Una reseña muy larga ".repeat(10).trim();
+  const conLarga = {
+    ...datos,
+    resenas: [
+      { ...datos.resenas[0]!, texto: larga },
+      { ...datos.resenas[1]!, texto: "Corta." },
+    ],
+  };
+
+  afterEach(() => vi.useRealTimers());
+
+  it("solo las reseñas que no caben tienen 'Leer más', y el texto va entero en el HTML", () => {
+    render(<ResenasGoogle datos={conLarga} />);
+    expect(screen.getAllByRole("button", { name: "Leer más" })).toHaveLength(1);
+    expect(screen.getByText(larga)).toBeInTheDocument();
+  });
+
+  it("todas las tarjetas reservan el mismo hueco de texto", () => {
+    const { container } = render(<ResenasGoogle datos={conLarga} />);
+    const alturas = [...container.querySelectorAll("li p")].map((p) => (p as HTMLElement).style.height);
+    expect(new Set(alturas).size).toBe(1);
+    // 6 líneas × 1.625 de interlineado (jsdom resuelve el calc).
+    expect(alturas[0]).toContain("9.75em");
+  });
+
+  it("al abrir, el texto se lee con scroll dentro de la tarjeta y se puede cerrar", () => {
+    render(<ResenasGoogle datos={conLarga} />);
+    const boton = screen.getByRole("button", { name: "Leer más" });
+    const parrafo = screen.getByText(larga);
+    expect(parrafo.className).toContain("line-clamp-6");
+    act(() => {
+      fireEvent.click(boton);
+    });
+    expect(boton).toHaveAttribute("aria-expanded", "true");
+    expect(boton).toHaveAttribute("aria-controls", parrafo.id);
+    expect(parrafo.className).toContain("overflow-y-auto");
+    expect(parrafo.style.height).toContain("9.75em");
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Leer menos" }));
+    });
+    expect(parrafo.className).toContain("line-clamp-6");
+  });
+
+  it("mientras hay una reseña abierta, el carrusel no se mueve solo", () => {
+    vi.useFakeTimers();
+    render(<ResenasGoogle datos={conLarga} />);
+    const { llamadas } = simularLista();
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Leer más" }));
+    });
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS * 3 + REANUDAR_MS));
+    expect(llamadas).toHaveLength(0);
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Leer menos" }));
+    });
+    act(() => vi.advanceTimersByTime(AUTOPLAY_MS + 10));
+    expect(llamadas).toHaveLength(1);
   });
 });
