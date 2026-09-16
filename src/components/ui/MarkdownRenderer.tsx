@@ -12,9 +12,25 @@ function parseInlineStyles(text: string): string {
   
   // Reemplazar *cursiva*
   html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-  
+
+  // Enlaces [texto](url). Lista blanca: rutas internas ("/clases/bachata") y
+  // https. Todo lo demás (javascript:, data:, http:, "//host") se queda como
+  // texto plano: este HTML se inyecta con dangerouslySetInnerHTML y el Markdown
+  // de los eventos lo escribe gente desde el panel.
+  html = html.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, texto: string, url: string) => {
+    const interno = url.startsWith("/") && !url.startsWith("//");
+    const externo = /^https:\/\/[^\s"'<>]+$/.test(url);
+    if (!interno && !externo) return texto;
+    const destino = url.replace(/"/g, "%22");
+    const extra = externo ? ' target="_blank" rel="noopener noreferrer"' : "";
+    return `<a href="${destino}"${extra} class="font-semibold text-neon underline-offset-2 hover:underline">${texto}</a>`;
+  });
+
   return html;
 }
+
+/** Solo para tests: la conversión en línea (negrita, cursiva y enlaces). */
+export const __parseInlineStyles = parseInlineStyles;
 
 export function MarkdownRenderer({ content }: { content: string }) {
   if (!content) return null;

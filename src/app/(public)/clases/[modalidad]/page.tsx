@@ -13,6 +13,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { getModalidades, getModalidadBySlug, getModalidadSlugs } from "@/lib/queries/modalidades";
 import { mediaModalidades } from "@/content/media";
 import { metaDescripciones, modalidadesContenido } from "@/content/modalidades";
+import { articulosDeDisciplina } from "@/content/blog";
 import { sesionesRegulares } from "@/content/horario-regular";
 import { precios } from "@/content/precios";
 import { profesoresDe } from "@/content/profesores";
@@ -72,6 +73,7 @@ export default async function ModalidadPage({ params }: Params) {
 
   // Enlaces cruzados: solo a disciplinas que existen y están activas.
   const relacionadas = (contenido?.relacionadas ?? []).filter((r) => nombrePorSlug.has(r.slug));
+  const delBlog = articulosDeDisciplina(m.slug);
 
   // Material audiovisual de ESTA disciplina, si se llegó a grabar. Puede no
   // haberlo: ver la cabecera de content/media.ts.
@@ -286,6 +288,36 @@ export default async function ModalidadPage({ params }: Params) {
                           </p>
                           <span className="mt-4 inline-block font-body text-[13px] font-bold text-neon group-hover:underline">
                             Ver {nombrePorSlug.get(r.slug)} &rarr;
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Reveal>
+              )}
+
+              {/* Del blog: el enlace de vuelta del artículo a su disciplina.
+                  Sin artículos de esta disciplina no se pinta nada. */}
+              {delBlog.length > 0 && (
+                <Reveal as="section" className="space-y-5">
+                  <h2 className="font-display text-3xl text-text-strong">
+                    Del blog, sobre {m.nombre.toLowerCase()}
+                  </h2>
+                  <ul className="grid list-none grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-4 p-0">
+                    {delBlog.map((a) => (
+                      <li key={a.slug}>
+                        <Link
+                          href={`/blog/${a.slug}`}
+                          className="group flex h-full flex-col rounded-lg border border-white/8 bg-bg-panel p-5 text-inherit no-underline shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-neon/30 hover:shadow-card"
+                        >
+                          <h3 className="font-display text-xl text-text-strong transition-colors group-hover:text-neon">
+                            {a.titulo}
+                          </h3>
+                          <p className="mt-2 font-body text-[14px] leading-relaxed text-text-muted">
+                            {a.resumen}
+                          </p>
+                          <span className="mt-4 inline-block font-body text-[13px] font-bold text-neon group-hover:underline">
+                            Leer la guía &rarr;
                           </span>
                         </Link>
                       </li>

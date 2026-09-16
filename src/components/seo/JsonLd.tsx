@@ -108,6 +108,42 @@ export function localBusinessLd() {
 }
 
 /**
+ * Schema.org BlogPosting de un artículo de /blog. El editor es la escuela
+ * (`orgRef`, nodo del layout raíz); el autor, la persona que firma. Fechas en
+ * YYYY-MM-DD: schema.org acepta la fecha sin hora.
+ */
+export function blogPostingLd(a: {
+  slug: string;
+  titulo: string;
+  description: string;
+  publicado: string;
+  actualizado: string;
+  autor: { nombre: string; profesorSlug?: string };
+  imagen: string;
+}) {
+  const url = `${site.url}/blog/${a.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#articulo`,
+    headline: a.titulo,
+    description: a.description,
+    url,
+    mainEntityOfPage: url,
+    datePublished: a.publicado,
+    dateModified: a.actualizado,
+    inLanguage: "es-ES",
+    image: a.imagen.startsWith("http") ? a.imagen : `${site.url}${a.imagen}`,
+    author: {
+      "@type": "Person",
+      name: a.autor.nombre,
+      ...(a.autor.profesorSlug ? { url: `${site.url}/profesores/${a.autor.profesorSlug}` } : {}),
+    },
+    publisher: orgRef(),
+  };
+}
+
+/**
  * Schema.org BreadcrumbList. `items` en orden jerárquico, del inicio a la
  * página actual; la última entrada es la propia página.
  */

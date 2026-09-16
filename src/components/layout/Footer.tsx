@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/layout/Logo";
 import { WaTrackedLink } from "@/components/ui/WaTrackedLink";
 import { site } from "@/lib/site";
+import { articulos } from "@/content/blog";
 
 // min-h-11 (44px): con py-[9px] la píldora se quedaba en 40px de alto, por
 // debajo del objetivo táctil mínimo en móvil.
@@ -14,6 +15,10 @@ const COL_LABEL =
 const EXPLORA: ReadonlyArray<readonly [string, string]> = [
   ["/clases", "Clases"],
   ["/eventos", "Eventos"],
+  // El blog solo se enlaza cuando hay algo publicado: mientras esté vacío va en
+  // `noindex` (lib/indexable.ts) y enlazarlo desde las 28 páginas sería mandar
+  // a todo el mundo a un estado vacío.
+  ...(articulos.length > 0 ? ([["/blog", "Blog"]] as const) : []),
   ["/sobre-nosotros", "Sobre nosotros"],
   ["/contacto", "Contacto"],
 ];

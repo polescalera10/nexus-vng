@@ -15,6 +15,7 @@ const PAGES = [
   "/eventos",
   "/horarios",
   "/faq",
+  "/blog",
 ];
 
 /** Diferencia entre el ancho del documento y el del viewport. */

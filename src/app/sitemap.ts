@@ -5,6 +5,7 @@ import { listProfesorSlugs } from "@/content/profesores";
 import { getModalidadesSitemap } from "@/lib/queries/modalidades";
 import { getEventosSitemap } from "@/lib/queries/eventos";
 import { listadoIndexable } from "@/lib/indexable";
+import { articulos } from "@/content/blog";
 
 /**
  * Sitemap: SOLO URLs canónicas e indexables.
@@ -51,6 +52,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // /eventos solo entra si hay algo publicado: vacía va en `noindex` (ver
   // eventos/page.tsx) y una URL con noindex en el sitemap es una contradicción.
   if (listadoIndexable(eventos.length)) staticPaths.push("/eventos");
+  // Misma regla para el blog mientras no haya artículos.
+  if (listadoIndexable(articulos.length)) staticPaths.push("/blog");
 
   return [
     ...staticPaths.map((path) => ({
@@ -68,6 +71,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...eventos.map(({ slug, updatedAt }) => ({
       url: `${base}/eventos/${slug}`,
       lastModified: updatedAt ? new Date(updatedAt) : ultimaActualizacion("/eventos"),
+    })),
+    // `lastmod` real del artículo: la fecha que dice el propio contenido.
+    ...articulos.map((a) => ({
+      url: `${base}/blog/${a.slug}`,
+      lastModified: new Date(`${a.actualizado}T00:00:00Z`),
     })),
   ];
 }
