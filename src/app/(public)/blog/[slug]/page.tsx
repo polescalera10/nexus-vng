@@ -68,7 +68,10 @@ export default async function ArticuloPage({ params }: Params) {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-        <article className="rounded-lg border border-white/8 bg-bg-panel p-6 shadow-soft sm:p-8">
+        {/* min-w-0: sin él, la columna de la rejilla crece hasta el ancho
+            mínimo de una tabla del artículo y la página desborda en móvil
+            aunque la tabla tenga su propio scroll. */}
+        <article className="min-w-0 rounded-lg border border-white/8 bg-bg-panel p-6 shadow-soft sm:p-8">
           <p className="font-body text-[13px] text-text-muted">
             Por{" "}
             {a.autor.profesorSlug ? (

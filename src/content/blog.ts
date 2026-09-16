@@ -12,6 +12,10 @@
  * (lib/indexable.ts), y el enlace del pie no se pinta.
  */
 
+// Cada artículo vive en su fichero (`content/blog/<slug>.ts`), generado desde
+// su borrador en `docs/borradores/`. Aquí solo se registran.
+import { salsaCubanaOBachata } from "@/content/blog/salsa-cubana-o-bachata";
+
 export type Articulo = {
   slug: string;
   /** H1 visible. */
@@ -35,7 +39,7 @@ export type Articulo = {
   cuerpo: string;
 };
 
-export const articulos: Articulo[] = [];
+export const articulos: Articulo[] = [salsaCubanaOBachata];
 
 /** Más reciente primero. */
 export function articulosOrdenados(lista: readonly Articulo[] = articulos): Articulo[] {
