@@ -98,9 +98,9 @@ Descripción corta (≤300 caracteres), para los campos con límite:
 |---|---|---|---|---|
 | Bing Places | https://www.bingplaces.com (importa desde Google Business Profile) | Gratis | [ ] | |
 | Apple Business Connect | https://businessconnect.apple.com | Gratis | [ ] | |
-| salsaybachata.net | https://salsaybachata.net/profesionales/ | Gratis ("para siempre") | [ ] | |
-| sientelbaile.com | https://sientelbaile.com/add-listing/ | Sin precio publicado: comprobar antes de enviar | [ ] | |
-| go&dance | https://www.goandance.com (cuenta profesional → crear local) | Local gratis; comisión solo si vendes plazas | [ ] | |
+| salsaybachata.net | https://salsaybachata.net/profesionales/ | Gratis ("para siempre") | [x] enviado 16-09 | |
+| ~~sientelbaile.com~~ | https://sientelbaile.com/add-listing/ | De pago (confirmado por Pol): descartado | — | |
+| go&dance | https://www.goandance.com (cuenta profesional → crear local) | Local gratis; comisión solo si vendes plazas | [x] enviado 16-09 | |
 | Cylex | https://www.cylex.es | Gratis | [ ] | |
 | Infobel | https://www.infobel.com/es/spain | Gratis | [ ] | |
 | Hotfrog | https://www.hotfrog.es | Ficha básica gratis | [ ] | |
