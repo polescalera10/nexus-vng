@@ -10,6 +10,10 @@ import {
 import { trackLead } from "@/lib/analytics";
 import { submitLead, type LeadFormState } from "@/lib/actions/leads";
 import type { leadOrigenes } from "@/lib/validation/lead";
+import type { Locale } from "@/i18n/locales";
+import { tFormulario } from "@/i18n/textos/comun";
+
+type Textos = (typeof tFormulario)["es"];
 
 const initial: LeadFormState = { status: "idle" };
 
@@ -20,7 +24,7 @@ const FIELD =
 const LABEL = "mb-1.5 block font-body text-[13px] font-semibold text-text-body";
 const ERR = "mt-1 font-body text-xs font-semibold text-neon";
 
-function SubmitButton({ waiting }: { waiting: boolean }) {
+function SubmitButton({ waiting, t }: { waiting: boolean; t: Textos }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -28,7 +32,7 @@ function SubmitButton({ waiting }: { waiting: boolean }) {
       disabled={pending || waiting}
       className="inline-flex items-center justify-center gap-2 rounded-md bg-neon px-7 py-[15px] font-body text-base font-bold text-ink shadow-neon transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
     >
-      {pending ? "Enviando…" : waiting ? "Un momento…" : "Enviar"}
+      {pending ? t.enviando : waiting ? t.unMomento : t.enviar}
     </button>
   );
 }
@@ -42,13 +46,16 @@ export function LeadForm({
   withModalidad = false,
   withMensaje = true,
   hiddenModalidad,
+  locale = "es",
 }: {
+  locale?: Locale;
   origen: (typeof leadOrigenes)[number];
   withModalidad?: boolean;
   withMensaje?: boolean;
   /** Valor fijo de `modalidad_interes` enviado oculto (p. ej. trazabilidad de landing de campaña). No combinar con `withModalidad`. */
   hiddenModalidad?: string;
 }) {
+  const t = tFormulario[locale];
   const [state, formAction] = useActionState(submitLead, initial);
   const [captcha, setCaptcha] = useState<TurnstileStatus>(TURNSTILE_SITE_KEY ? "pending" : "ready");
 
@@ -66,7 +73,7 @@ export function LeadForm({
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neon/10 text-2xl text-neon">
           ✓
         </div>
-        <p className="font-display text-2xl text-text-strong">¡Mensaje enviado!</p>
+        <p className="font-display text-2xl text-text-strong">{t.enviado}</p>
         <p className="mt-2 font-body text-[15px] text-text-muted">{state.message}</p>
       </div>
     );
@@ -75,6 +82,7 @@ export function LeadForm({
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       <input type="hidden" name="origen" value={origen} />
+      <input type="hidden" name="locale" value={locale} />
       {hiddenModalidad && <input type="hidden" name="modalidad_interes" value={hiddenModalidad} />}
       {/* Honeypot anti-spam: oculto a usuarios, visible a bots. */}
       <input
@@ -88,15 +96,15 @@ export function LeadForm({
 
       <div>
         <label htmlFor="lf-nombre" className={LABEL}>
-          Nombre
+          {t.nombre}
         </label>
-        <input id="lf-nombre" name="nombre" required className={FIELD} placeholder="Tu nombre" />
+        <input id="lf-nombre" name="nombre" required className={FIELD} placeholder={t.tuNombre} />
         {state.errors?.nombre && <p className={ERR}>{state.errors.nombre[0]}</p>}
       </div>
 
       <div>
         <label htmlFor="lf-telefono" className={LABEL}>
-          Teléfono
+          {t.telefono}
         </label>
         <input
           id="lf-telefono"
@@ -111,7 +119,7 @@ export function LeadForm({
 
       <div>
         <label htmlFor="lf-email" className={LABEL}>
-          Email <span className="font-normal text-text-faint">(opcional)</span>
+          {t.email} <span className="font-normal text-text-faint">{t.opcional}</span>
         </label>
         <input id="lf-email" name="email" type="email" className={FIELD} placeholder="tu@email.com" />
         {state.errors?.email && <p className={ERR}>{state.errors.email[0]}</p>}
@@ -120,13 +128,13 @@ export function LeadForm({
       {withModalidad && (
         <div>
           <label htmlFor="lf-modalidad" className={LABEL}>
-            Modalidad de interés <span className="font-normal text-text-faint">(opcional)</span>
+            {t.modalidad} <span className="font-normal text-text-faint">{t.opcional}</span>
           </label>
           <input
             id="lf-modalidad"
             name="modalidad_interes"
             className={FIELD}
-            placeholder="Salsa, bachata…"
+            placeholder={t.modalidadPlaceholder}
           />
         </div>
       )}
@@ -134,14 +142,14 @@ export function LeadForm({
       {withMensaje && (
         <div>
           <label htmlFor="lf-mensaje" className={LABEL}>
-            Mensaje <span className="font-normal text-text-faint">(opcional)</span>
+            {t.mensaje} <span className="font-normal text-text-faint">{t.opcional}</span>
           </label>
           <textarea
             id="lf-mensaje"
             name="mensaje"
             rows={4}
             className={`${FIELD} resize-y`}
-            placeholder="Cuéntanos qué buscas"
+            placeholder={t.mensajePlaceholder}
           />
           {state.errors?.mensaje && <p className={ERR}>{state.errors.mensaje[0]}</p>}
         </div>
@@ -158,17 +166,17 @@ export function LeadForm({
           className="accent-neon mt-0.5 h-4 w-4 shrink-0"
         />
         <span className="font-body text-text-muted text-[13px] leading-snug">
-          He leído y acepto la{" "}
+          {t.consentimiento.antes}{" "}
           <a
             href="/privacidad"
+            hrefLang={locale === "ca" ? "es" : undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="text-neon font-semibold underline"
           >
-            política de privacidad
+            {t.consentimiento.enlace}
           </a>{" "}
-          y el tratamiento de mis datos para gestionar mi solicitud y recibir información de NEXUS
-          VNG.
+          {t.consentimiento.despues}
         </span>
       </label>
       {state.errors?.consentimiento && <p className={ERR}>{state.errors.consentimiento[0]}</p>}
@@ -179,16 +187,15 @@ export function LeadForm({
         </p>
       )}
 
-      <TurnstileField onStatus={setCaptcha} resetSignal={state} />
+      <TurnstileField onStatus={setCaptcha} resetSignal={state} locale={locale} />
       {captcha === "error" && (
         <p role="alert" className={ERR}>
-          No hemos podido cargar la verificación anti-spam (a veces la bloquea un bloqueador de
-          anuncios). Desactívalo para esta web o escríbenos por WhatsApp.
+          {t.captchaError}
         </p>
       )}
 
       <div className="mt-1">
-        <SubmitButton waiting={captcha === "pending"} />
+        <SubmitButton waiting={captcha === "pending"} t={t} />
       </div>
     </form>
   );

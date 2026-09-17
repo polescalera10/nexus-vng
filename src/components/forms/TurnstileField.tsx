@@ -65,7 +65,10 @@ function loadTurnstileScript(): Promise<void> {
 export function TurnstileField({
   onStatus,
   resetSignal,
+  locale = "es",
 }: {
+  /** Idioma del reto, si llega a mostrarse. */
+  locale?: "es" | "ca";
   onStatus: (status: TurnstileStatus) => void;
   resetSignal: unknown;
 }) {
@@ -90,7 +93,7 @@ export function TurnstileField({
           "response-field-name": TURNSTILE_RESPONSE_FIELD,
           appearance: "interaction-only",
           theme: "dark",
-          language: "es",
+          language: locale,
           "refresh-expired": "auto",
           callback: () => onStatusRef.current("ready"),
           "expired-callback": () => onStatusRef.current("pending"),
@@ -106,7 +109,7 @@ export function TurnstileField({
       if (widgetId.current && window.turnstile) window.turnstile.remove(widgetId.current);
       widgetId.current = null;
     };
-  }, []);
+  }, [locale]);
 
   const isFirstSignal = useRef(true);
   useEffect(() => {

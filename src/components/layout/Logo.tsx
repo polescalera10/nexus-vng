@@ -10,7 +10,10 @@ export function Logo({
   size = 34,
   onDark = true,
   priority = false,
+  href = "/",
 }: {
+  /** Inicio del idioma de la página (`/` o `/ca`). */
+  href?: string;
   /** Alto del logo en px. */
   size?: number;
   onDark?: boolean;
@@ -22,7 +25,7 @@ export function Logo({
   priority?: boolean;
 }) {
   return (
-    <Link href="/" className="flex items-center gap-[10px] no-underline">
+    <Link href={href} className="flex items-center gap-[10px] no-underline">
       <Image
         src="/images/nexus-logo.png"
         alt="NEXUS"

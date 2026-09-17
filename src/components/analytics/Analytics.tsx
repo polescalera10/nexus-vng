@@ -1,6 +1,7 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { CONSENT_STORAGE_KEY, GA_MEASUREMENT_ID } from "@/lib/analytics";
 import { CookieBanner } from "@/components/analytics/CookieBanner";
+import type { Locale } from "@/i18n/locales";
 
 /**
  * Script de arranque de Consent Mode v2.
@@ -31,14 +32,14 @@ try{if(window.localStorage.getItem('${CONSENT_STORAGE_KEY}')==='granted'){gtag('
  * previews quedan limpios por defecto). No se monta en `area-privada/`: el uso
  * interno del panel no debe contaminar las métricas de marketing.
  */
-export function Analytics() {
+export function Analytics({ locale = "es" }: { locale?: Locale }) {
   if (!GA_MEASUREMENT_ID) return null;
 
   return (
     <>
       <ConsentBootstrap />
       <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
-      <CookieBanner />
+      <CookieBanner locale={locale} />
     </>
   );
 }

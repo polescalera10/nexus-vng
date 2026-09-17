@@ -7,6 +7,24 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { TURNSTILE_ERROR_MESSAGE, verifyTurnstile } from "@/lib/turnstile";
 import { TURNSTILE_RESPONSE_FIELD } from "@/lib/turnstile-shared";
 import { interestLeadSchema, leadEstadoSchema, leadSchema } from "@/lib/validation/lead";
+import { esLocale, type Locale } from "@/i18n/locales";
+import { ERRORES_CA, tServidor } from "@/i18n/textos/comun";
+
+/** Idioma del formulario (campo oculto). Cualquier otro valor cuenta como castellano. */
+function idiomaDe(formData: FormData): Locale {
+  const v = formData.get("locale");
+  return esLocale(v) ? v : "es";
+}
+
+/** Los mensajes de Zod están en castellano; en catalán se traducen por texto. */
+function erroresEn(errores: Record<string, string[] | undefined>, locale: Locale): Record<string, string[]> {
+  const salida: Record<string, string[]> = {};
+  for (const [campo, lista] of Object.entries(errores)) {
+    if (!lista) continue;
+    salida[campo] = locale === "ca" ? lista.map((m) => ERRORES_CA[m] ?? m) : lista;
+  }
+  return salida;
+}
 
 export type LeadFormState = {
   status: "idle" | "success" | "error";
@@ -43,6 +61,8 @@ async function leadsWriteClient() {
  * El webhook n8n NUNCA se expone al cliente: se llama desde aquí, en el servidor.
  */
 export async function submitLead(_prev: LeadFormState, formData: FormData): Promise<LeadFormState> {
+  const locale = idiomaDe(formData);
+  const t = tServidor[locale];
   const raw = {
     nombre: formData.get("nombre"),
     telefono: formData.get("telefono"),
@@ -58,20 +78,20 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Revisa los campos marcados.",
-      errors: parsed.error.flatten().fieldErrors,
+      message: t.revisa,
+      errors: erroresEn(parsed.error.flatten().fieldErrors, locale),
     };
   }
 
   // Honeypot: si viene relleno, fingimos éxito y no hacemos nada.
   if (parsed.data.website) {
-    return { status: "success", message: "¡Gracias! Te escribimos enseguida." };
+    return { status: "success", message: t.gracias };
   }
 
   // Turnstile después de Zod y del honeypot: un formulario mal rellenado no
   // gasta el token (que es de un solo uso) ni una llamada a Cloudflare.
   const captcha = await verifyTurnstile(formData.get(TURNSTILE_RESPONSE_FIELD));
-  if (!captcha.ok) return { status: "error", message: TURNSTILE_ERROR_MESSAGE };
+  if (!captcha.ok) return { status: "error", message: locale === "ca" ? t.captcha : TURNSTILE_ERROR_MESSAGE };
 
   // `consentimiento` solo se valida: no hay columna para él en `leads` (mismo
   // criterio que `submitInterestLead`); viaja a n8n como booleano.
@@ -92,7 +112,7 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
     console.error("[submitLead] insert error:", error.message);
     return {
       status: "error",
-      message: "No hemos podido guardar tu mensaje. Inténtalo de nuevo o escríbenos por WhatsApp.",
+      message: t.errorMensaje,
     };
   }
 
@@ -105,7 +125,7 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
 
   return {
     status: "success",
-    message: "¡Gracias! Te escribimos por WhatsApp enseguida.",
+    message: t.graciasWhatsapp,
   };
 }
 
@@ -137,6 +157,8 @@ export async function submitInterestLead(
   _prev: LeadFormState,
   formData: FormData,
 ): Promise<LeadFormState> {
+  const locale = idiomaDe(formData);
+  const t = tServidor[locale];
   const raw = {
     nombre: formData.get("nombre"),
     telefono: formData.get("telefono"),
@@ -152,18 +174,18 @@ export async function submitInterestLead(
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Revisa los campos marcados.",
-      errors: parsed.error.flatten().fieldErrors,
+      message: t.revisa,
+      errors: erroresEn(parsed.error.flatten().fieldErrors, locale),
     };
   }
 
   // Honeypot: si viene relleno, fingimos éxito y no hacemos nada.
   if (parsed.data.website) {
-    return { status: "success", message: "¡Gracias! Te escribimos enseguida." };
+    return { status: "success", message: t.gracias };
   }
 
   const captcha = await verifyTurnstile(formData.get(TURNSTILE_RESPONSE_FIELD));
-  if (!captcha.ok) return { status: "error", message: TURNSTILE_ERROR_MESSAGE };
+  if (!captcha.ok) return { status: "error", message: locale === "ca" ? t.captcha : TURNSTILE_ERROR_MESSAGE };
 
   const { website: _hp, consentimiento: _c, ...lead } = parsed.data;
 
@@ -183,8 +205,7 @@ export async function submitInterestLead(
     console.error("[submitInterestLead] insert error:", error.message);
     return {
       status: "error",
-      message:
-        "No hemos podido guardar tu solicitud. Inténtalo de nuevo o escríbenos por WhatsApp.",
+      message: t.errorSolicitud,
     };
   }
 
@@ -199,7 +220,7 @@ export async function submitInterestLead(
 
   return {
     status: "success",
-    message: "¡Gracias! Hemos recibido tu solicitud y te escribimos enseguida.",
+    message: t.graciasSolicitud,
   };
 }
 

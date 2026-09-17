@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { ResenasGoogle as Datos } from "@/lib/google-reviews";
 import { MAX_RESENAS } from "@/lib/google-reviews";
+import { BCP47, type Locale } from "@/i18n/locales";
+import { tResenas } from "@/i18n/textos/comun";
+
+type Textos = (typeof tResenas)["es"];
 
 /** Cada cuánto avanza el carrusel solo. */
 export const AUTOPLAY_MS = 6000;
@@ -24,16 +28,16 @@ function Estrellas({ n, className = "", label }: { n: number; className?: string
   );
 }
 
-export function formatNota(nota: number) {
-  return nota.toLocaleString("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+export function formatNota(nota: number, locale: Locale = "es") {
+  return nota.toLocaleString(BCP47[locale], { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 /** "septiembre de 2026": estable aunque la página se regenere solo cada hora. */
-function formatMes(iso: string) {
+function formatMes(iso: string, locale: Locale) {
   const d = new Date(iso);
   return Number.isNaN(d.getTime())
     ? null
-    : d.toLocaleDateString("es-ES", { month: "long", year: "numeric", timeZone: "Europe/Madrid" });
+    : d.toLocaleDateString(BCP47[locale], { month: "long", year: "numeric", timeZone: "Europe/Madrid" });
 }
 
 function Icono({ tipo }: { tipo: "izq" | "der" | "pausa" | "play" }) {
@@ -87,7 +91,15 @@ export const LINEAS_VISIBLES = 6;
  * recorta en el HTML: está entero, literal (Directiva Ómnibus); el corte es
  * solo visual.
  */
-function TextoResena({ texto, onAbrir }: { texto: string; onAbrir: (abierto: boolean) => void }) {
+function TextoResena({
+  texto,
+  onAbrir,
+  t,
+}: {
+  texto: string;
+  onAbrir: (abierto: boolean) => void;
+  t: Textos;
+}) {
   const id = useId();
   const caja = useRef<HTMLParagraphElement>(null);
   const [abierto, setAbierto] = useState(false);
@@ -135,7 +147,7 @@ function TextoResena({ texto, onAbrir }: { texto: string; onAbrir: (abierto: boo
           aria-controls={id}
           className="mt-1 inline-flex min-h-11 items-center self-start font-body text-sm font-semibold text-neon hover:underline"
         >
-          {abierto ? "Leer menos" : "Leer más"}
+          {abierto ? t.leerMenos : t.leerMas}
         </button>
       ) : (
         // Mismo hueco que el botón, para que todas las tarjetas midan igual.
@@ -160,7 +172,8 @@ function TextoResena({ texto, onAbrir }: { texto: string; onAbrir: (abierto: boo
  *   · mientras avanza solo, los lectores de pantalla no anuncian cada cambio.
  * Texto literal de cada autor y el criterio de selección a la vista (Ómnibus).
  */
-export function ResenasGoogle({ datos }: { datos: Datos }) {
+export function ResenasGoogle({ datos, locale = "es" }: { datos: Datos; locale?: Locale }) {
+  const t = tResenas[locale];
   const bloque = useRef<HTMLElement>(null);
   const lista = useRef<HTMLUListElement>(null);
   const [extremos, setExtremos] = useState({ inicio: true, fin: false });
@@ -244,7 +257,7 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
   return (
     <section
       ref={bloque}
-      aria-roledescription="carrusel"
+      aria-roledescription={t.carrusel}
       aria-labelledby="resenas-google-titulo"
       className="mt-[clamp(40px,6vw,64px)] space-y-6"
       onMouseEnter={() => setEncima(true)}
@@ -267,14 +280,14 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h3 id="resenas-google-titulo" className="font-display text-[clamp(28px,4vw,40px)] leading-none text-text-strong">
-            Lo que dicen en Google
+            {t.titulo}
           </h3>
           {datos.nota !== null && (
             <p className="mt-3 flex flex-wrap items-center gap-3 font-body text-sm text-text-muted">
-              <span className="font-display text-3xl leading-none text-text-strong">{formatNota(datos.nota)}</span>
+              <span className="font-display text-3xl leading-none text-text-strong">{formatNota(datos.nota, locale)}</span>
               {/* Las estrellas redondean (4,8 → 5): la etiqueta dice la nota real. */}
-              <Estrellas n={Math.round(datos.nota)} label={`Nota media ${formatNota(datos.nota)} de 5`} />
-              {datos.total !== null && <span>{datos.total} reseñas</span>}
+              <Estrellas n={Math.round(datos.nota)} label={t.notaMedia(formatNota(datos.nota, locale))} />
+              {datos.total !== null && <span>{t.total(datos.total)}</span>}
             </p>
           )}
         </div>
@@ -285,16 +298,16 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
                 type="button"
                 onClick={() => setPausado((p) => !p)}
                 aria-pressed={pausado}
-                aria-label={pausado ? "Reanudar el paso automático de reseñas" : "Pausar el paso automático de reseñas"}
+                aria-label={pausado ? t.reanudar : t.pausar}
                 className={botonRedondo}
               >
                 <Icono tipo={pausado ? "play" : "pausa"} />
               </button>
             )}
-            <button type="button" onClick={() => mover(-1)} disabled={extremos.inicio} aria-label="Reseña anterior" className={botonRedondo}>
+            <button type="button" onClick={() => mover(-1)} disabled={extremos.inicio} aria-label={t.anterior} className={botonRedondo}>
               <Icono tipo="izq" />
             </button>
-            <button type="button" onClick={() => mover(1)} disabled={extremos.fin} aria-label="Reseña siguiente" className={botonRedondo}>
+            <button type="button" onClick={() => mover(1)} disabled={extremos.fin} aria-label={t.siguiente} className={botonRedondo}>
               <Icono tipo="der" />
             </button>
           </div>
@@ -305,7 +318,7 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
       <ul
         ref={lista}
         tabIndex={0}
-        aria-label="Reseñas"
+        aria-label={t.lista}
         aria-live={autoplayActivo ? "off" : "polite"}
         onPointerDown={gesto}
         onWheel={gesto}
@@ -313,12 +326,12 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
         className="-mx-1 flex snap-x snap-mandatory list-none gap-4 overflow-x-auto px-1 pb-3 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-neon [&::-webkit-scrollbar]:hidden"
       >
         {datos.resenas.map((r, i) => {
-          const mes = r.publicada ? formatMes(r.publicada) : null;
+          const mes = r.publicada ? formatMes(r.publicada, locale) : null;
           return (
             <li
               key={`${r.autor}-${i}`}
-              aria-roledescription="diapositiva"
-              aria-label={`${i + 1} de ${datos.resenas.length}`}
+              aria-roledescription={t.diapositiva}
+              aria-label={t.posicion(i + 1, datos.resenas.length)}
               className="flex shrink-0 basis-[85%] snap-start flex-col rounded-lg border border-white/8 bg-bg-panel p-5 shadow-soft sm:basis-[calc(50%-8px)] lg:basis-[calc((100%-32px)/3)]"
             >
               <div className="flex items-center gap-3">
@@ -339,17 +352,16 @@ export function ResenasGoogle({ datos }: { datos: Datos }) {
                   )}
                 </div>
               </div>
-              <Estrellas n={r.estrellas} className="mt-3" />
+              <Estrellas n={r.estrellas} className="mt-3" label={t.estrellas(r.estrellas)} />
               {/* Texto literal del autor: sin recortar ni retocar (Directiva Ómnibus). */}
-              <TextoResena texto={r.texto} onAbrir={alAbrir} />
+              <TextoResena texto={r.texto} onAbrir={alAbrir} t={t} />
             </li>
           );
         })}
       </ul>
 
       <p className="max-w-[70ch] font-body text-[13px] leading-relaxed text-text-muted">
-        Reseñas publicadas por alumnos en nuestra ficha de Google, con el texto tal como lo escribieron. Mostramos
-        hasta {MAX_RESENAS} de las más recientes que llevan comentario, sin filtrar por puntuación.
+        {t.aviso(MAX_RESENAS)}
       </p>
     </section>
   );

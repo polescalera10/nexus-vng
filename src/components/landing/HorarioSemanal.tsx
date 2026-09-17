@@ -1,5 +1,8 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { diasSemana, familiaColor, horarioRegular } from "@/content/horario-regular";
+import { Negritas } from "@/components/ui/Negritas";
+import type { Locale } from "@/i18n/locales";
+import { tDias, tEstilo, tHorario } from "@/i18n/textos/comun";
 
 /**
  * Parrilla semanal del curso regular (temporada 26·27).
@@ -12,28 +15,30 @@ import { diasSemana, familiaColor, horarioRegular } from "@/content/horario-regu
  * nunca la página (regla mobile-first del proyecto). `tabIndex` la hace
  * accesible por teclado.
  */
-export function HorarioSemanal({ leyenda = true }: { leyenda?: boolean }) {
+export function HorarioSemanal({ leyenda = true, locale = "es" }: { leyenda?: boolean; locale?: Locale }) {
+  const t = tHorario[locale];
+  const dias = tDias[locale];
+  const estilo = tEstilo[locale].estilo;
   return (
     <div className="space-y-6">
       <p className="font-body text-text-faint text-[13px] md:hidden" aria-hidden="true">
-        Desliza la tabla para ver toda la semana →
+        {t.desliza}
       </p>
 
       <Reveal
         className="focus-visible:outline-neon overflow-x-auto"
         role="region"
-        aria-label="Horario semanal de clases"
+        aria-label={t.region}
         tabIndex={0}
       >
         <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-2">
           <caption className="sr-only">
-            Horario del curso regular de NEXUS VNG en Vilanova i la Geltrú, temporada 26·27, de
-            lunes a viernes.
+            {t.caption}
           </caption>
           <thead>
             <tr>
               <th className="font-body text-text-faint w-[68px] px-2 py-2 text-left text-[11px] font-bold tracking-wider uppercase">
-                Hora
+                {t.hora}
               </th>
               {diasSemana.map((dia) => (
                 <th
@@ -41,7 +46,7 @@ export function HorarioSemanal({ leyenda = true }: { leyenda?: boolean }) {
                   scope="col"
                   className="bg-bg-elevated font-display text-text-strong rounded-sm px-3 py-2 text-center text-base"
                 >
-                  {dia}
+                  {dias[dia] ?? dia}
                 </th>
               ))}
             </tr>
@@ -62,7 +67,7 @@ export function HorarioSemanal({ leyenda = true }: { leyenda?: boolean }) {
                         <p
                           className={`font-body text-sm leading-tight font-bold ${familiaColor[clase.familia]}`}
                         >
-                          {clase.estilo}
+                          {estilo(clase.estilo)}
                         </p>
                         <p className="font-body text-text-muted mt-1 text-[12px]">{clase.profes}</p>
                       </div>
@@ -80,12 +85,7 @@ export function HorarioSemanal({ leyenda = true }: { leyenda?: boolean }) {
       {leyenda && (
         <Reveal>
           <p className="font-body text-text-faint text-[13px]">
-            El número indica el nivel: <strong className="text-text-muted">0</strong> desde cero
-            absoluto, <strong className="text-text-muted">1</strong> iniciación,{" "}
-            <strong className="text-text-muted">2</strong> intermedio. Los grupos{" "}
-            <strong className="text-text-muted">Cía</strong> son de compañía: montaje coreográfico
-            y actuaciones, con la misma tarifa que el resto. ¿No ves tu hueco? Escríbenos y lo
-            encontramos.
+            <Negritas texto={t.leyenda} className="text-text-muted" />
           </p>
         </Reveal>
       )}

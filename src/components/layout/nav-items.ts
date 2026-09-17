@@ -3,6 +3,8 @@
  * Fuente única para la cabecera de escritorio y el menú móvil, de modo que
  * ambos no se desincronicen.
  */
+import type { Locale } from "@/i18n/locales";
+
 export type NavLink = { href: string; label: string };
 
 /** Nav de la landing (cabecera transparente sobre el hero). */
@@ -24,3 +26,18 @@ export const NAV_SITE: readonly NavLink[] = [
   { href: "/eventos", label: "Eventos" },
   { href: "/faq", label: "FAQ" },
 ];
+
+/**
+ * Nav de las páginas en catalán. Solo las páginas que existen en catalán:
+ * el resto se enlaza desde el pie, marcado como «en castellà».
+ */
+export const NAV_CA: readonly NavLink[] = [
+  { href: "/ca/classes", label: "Classes" },
+  { href: "/ca/horaris", label: "Horaris" },
+  { href: "/ca/contacte", label: "Contacte" },
+];
+
+export function navEn(locale: Locale, variante: "landing" | "site"): readonly NavLink[] {
+  if (locale === "ca") return NAV_CA;
+  return variante === "landing" ? NAV_LANDING : NAV_SITE;
+}

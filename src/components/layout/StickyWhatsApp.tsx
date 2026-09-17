@@ -5,6 +5,8 @@ import { trackWhatsAppClick } from "@/lib/analytics";
 import { buildWaLinkFromText } from "@/lib/whatsapp";
 import { useWaPageContext } from "@/components/ui/WaPageContext";
 import { WaGlyph } from "@/components/ui/WaGlyph";
+import type { Locale } from "@/i18n/locales";
+import { tMenu } from "@/i18n/textos/comun";
 
 /**
  * Botón WhatsApp sticky, siempre accesible en móvil.
@@ -14,7 +16,7 @@ import { WaGlyph } from "@/components/ui/WaGlyph";
  * pulsa desde páginas distintas: el mensaje sale del contexto de la página
  * (intensivos, una modalidad concreta, un evento…), no de un texto fijo.
  */
-export function StickyWhatsApp() {
+export function StickyWhatsApp({ locale = "es" }: { locale?: Locale }) {
   const [shown, setShown] = useState(false);
   const page = useWaPageContext();
 
@@ -42,7 +44,7 @@ export function StickyWhatsApp() {
           className="absolute inset-0 -z-10 rounded-full bg-neon motion-safe:animate-[pulsering_2.6s_ease-out_infinite]"
         />
         <WaGlyph size={18} className="bg-ink" />
-        Reserva tu clase de prueba
+        {tMenu[locale].cta}
       </a>
     </div>
   );

@@ -1,22 +1,25 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { levels } from "@/content/landing";
+import { landingEn } from "@/content/por-idioma";
+import type { Locale } from "@/i18n/locales";
+import { tParaTi } from "@/i18n/textos/inicio";
 
-export function ParaTi() {
+export function ParaTi({ locale = "es" }: { locale?: Locale }) {
+  const t = tParaTi[locale];
+  const { levels } = landingEn(locale);
   return (
     <section className="bg-bg-base py-[clamp(64px,9vw,120px)]">
       <div className="container-nexus">
         <Reveal as="span" className="block font-body text-xs font-bold uppercase tracking-[0.18em] text-neon">
-          Esto es para ti
+          {t.kicker}
         </Reveal>
         <Reveal delay={0.06}>
           <h2 className="mt-3.5 max-w-[20ch] text-balance font-display text-[clamp(34px,5.5vw,66px)] leading-[0.98] text-text-strong">
-            Para quien nunca ha bailado. Y para quien ya no puede parar.
+            {t.titulo}
           </h2>
         </Reveal>
         <Reveal delay={0.12}>
           <p className="mt-5 max-w-[62ch] font-body text-[clamp(16px,1.4vw,19px)] leading-relaxed text-text-body">
-            Tenemos grupos por nivel real, desde cero absoluto hasta avanzado. Llegues con la edad, la
-            timidez o las dos manos izquierdas que sea: hay un sitio hecho para ti.
+            {t.texto}
           </p>
         </Reveal>
 

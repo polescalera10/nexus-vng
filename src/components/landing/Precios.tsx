@@ -1,5 +1,7 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { precios, preciosTiers } from "@/content/precios";
+import type { Locale } from "@/i18n/locales";
+import { tPrecios } from "@/i18n/textos/comun";
 
 /**
  * Bloque de precios del curso (35 € 1 estilo · +20 €/estilo extra · 100 €
@@ -8,12 +10,15 @@ import { precios, preciosTiers } from "@/content/precios";
  * landing de clases.
  */
 export function Precios({
-  title = "Precios claros, sin letra pequeña",
-  intro = "Eliges cuántos estilos quieres bailar cada semana. Cuantos más combines, mejor te sale — y con la tarifa plana no hay límite.",
+  locale = "es",
+  title = tPrecios[locale].titulo,
+  intro = tPrecios[locale].intro,
 }: {
+  locale?: Locale;
   title?: string;
   intro?: string;
 }) {
+  const t = tPrecios[locale];
   return (
     <section className="space-y-8">
       <Reveal>
@@ -36,26 +41,25 @@ export function Precios({
           >
             {tier.destacado && (
               <span className="mb-3 inline-flex w-fit items-center rounded-full bg-neon/15 px-3 py-1 font-body text-[11px] font-bold uppercase tracking-[0.12em] text-neon">
-                Más popular
+                {t.masPopular}
               </span>
             )}
-            <h3 className="font-display text-xl text-text-strong">{tier.estilos}</h3>
+            <h3 className="font-display text-xl text-text-strong">{t.tiers[idx]?.estilos ?? tier.estilos}</h3>
             <p className="mt-3 font-display text-[clamp(32px,5vw,44px)] leading-none text-gradient-nexus">
               {tier.prefijo}
               {tier.precio}&nbsp;€
               <span className="font-body text-sm font-semibold text-text-muted">
-                /{precios.periodo}
+                /{t.periodo}
               </span>
             </p>
-            <p className="mt-3 font-body text-[13px] leading-relaxed text-text-muted">{tier.nota}</p>
+            <p className="mt-3 font-body text-[13px] leading-relaxed text-text-muted">{t.tiers[idx]?.nota ?? tier.nota}</p>
           </Reveal>
         ))}
       </div>
 
       <Reveal>
         <p className="font-body text-[13px] text-text-faint">
-          Modelo: {precios.base} € por el primer estilo, +{precios.estiloExtra} € por cada estilo
-          adicional, y {precios.flat} € de tarifa plana con todos los estilos incluidos.
+          {t.modelo(precios.base, precios.estiloExtra, precios.flat)}
         </p>
       </Reveal>
     </section>

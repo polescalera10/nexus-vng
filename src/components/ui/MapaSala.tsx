@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { MapaFachada } from "@/components/ui/MapaFachada";
 import { aPixel, limitarZoom, teselasVisibles, urlTesela, ZOOM_MAX, ZOOM_MIN } from "@/lib/mapa";
 import { site } from "@/lib/site";
+import type { Locale } from "@/i18n/locales";
+import { tMapa } from "@/i18n/textos/comun";
 
 /** Clave pública de MapTiler, restringida en su panel a los dominios de la web. */
 const CLAVE = process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "";
@@ -27,12 +29,13 @@ const ZOOM_INICIAL = 16;
  *
  * Sin clave de MapTiler se queda la fachada de dos clics de Google Maps.
  */
-export function MapaSala() {
-  if (!CLAVE) return <MapaFachada />;
-  return <Visor clave={CLAVE} />;
+export function MapaSala({ locale = "es" }: { locale?: Locale }) {
+  if (!CLAVE) return <MapaFachada locale={locale} />;
+  return <Visor clave={CLAVE} locale={locale} />;
 }
 
-function Visor({ clave }: { clave: string }) {
+function Visor({ clave, locale }: { clave: string; locale: Locale }) {
+  const t = tMapa[locale];
   const caja = useRef<HTMLDivElement>(null);
   const [activo, setActivo] = useState(false);
   const [tam, setTam] = useState({ ancho: 0, alto: 0 });
@@ -106,7 +109,7 @@ function Visor({ clave }: { clave: string }) {
         ref={caja}
         role="application"
         aria-roledescription="mapa"
-        aria-label={`Mapa con la ubicación de ${site.name}: ${site.nap.streetAddress}, ${site.nap.postalCode} ${site.nap.addressLocality}. Flechas para moverlo, más y menos para el zoom.`}
+        aria-label={t.aria(site.name, `${site.nap.streetAddress}, ${site.nap.postalCode} ${site.nap.addressLocality}`)}
         tabIndex={0}
         onKeyDown={teclado}
         className="relative aspect-[4/3] cursor-grab touch-pan-y select-none overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-neon active:cursor-grabbing sm:aspect-video"
@@ -156,14 +159,14 @@ function Visor({ clave }: { clave: string }) {
         </div>
 
         <div className="absolute right-2 top-2 flex flex-col gap-1">
-          <BotonMapa etiqueta="Acercar" onClick={() => cambiarZoom(1)} disabled={zoom >= ZOOM_MAX}>
+          <BotonMapa etiqueta={t.acercar} onClick={() => cambiarZoom(1)} disabled={zoom >= ZOOM_MAX}>
             +
           </BotonMapa>
-          <BotonMapa etiqueta="Alejar" onClick={() => cambiarZoom(-1)} disabled={zoom <= ZOOM_MIN}>
+          <BotonMapa etiqueta={t.alejar} onClick={() => cambiarZoom(-1)} disabled={zoom <= ZOOM_MIN}>
             −
           </BotonMapa>
           <BotonMapa
-            etiqueta="Volver a la sala"
+            etiqueta={t.volver}
             onClick={() => {
               setDesp({ x: 0, y: 0 });
               setZoom(ZOOM_INICIAL);
@@ -194,7 +197,7 @@ function Visor({ clave }: { clave: string }) {
           rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center font-semibold text-neon no-underline hover:underline"
         >
-          Cómo llegar en Google Maps
+          {t.comoLlegar}
         </a>
       </figcaption>
     </figure>

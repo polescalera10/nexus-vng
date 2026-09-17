@@ -1,8 +1,10 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { WaLink } from "@/components/ui/WaLink";
-import { ctaFinal } from "@/content/landing";
+import { landingEn } from "@/content/por-idioma";
+import type { Locale } from "@/i18n/locales";
 
-export function CtaFinal() {
+export function CtaFinal({ locale = "es" }: { locale?: Locale }) {
+  const { ctaFinal } = landingEn(locale);
   return (
     <section className="relative overflow-hidden border-t border-white/5 bg-bg-panel py-[clamp(70px,10vw,130px)] text-white">
       {/* Foco de luz cian central: el último golpe de club antes del footer. */}
@@ -23,7 +25,7 @@ export function CtaFinal() {
           </p>
         </Reveal>
         <Reveal delay={0.18} className="mt-[30px] flex justify-center">
-          <WaLink origin="cta-final" variant="red" className="px-[34px] py-5 text-[clamp(16px,1.6vw,18px)]">
+          <WaLink origin="cta-final" locale={locale} variant="red" className="px-[34px] py-5 text-[clamp(16px,1.6vw,18px)]">
             {ctaFinal.cta}
           </WaLink>
         </Reveal>

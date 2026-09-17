@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { HeroFondo } from "@/components/ui/HeroFondo";
 import { Reveal } from "@/components/ui/Reveal";
+import type { Locale } from "@/i18n/locales";
 
 /**
  * Envoltorio de las páginas de soporte/SEO: cabecera sólida + banda de título
@@ -11,7 +12,9 @@ export function SupportPage({
   title,
   intro,
   children,
+  locale = "es",
 }: {
+  locale?: Locale;
   eyebrow?: string;
   title: string;
   intro?: string;
@@ -19,7 +22,7 @@ export function SupportPage({
 }) {
   return (
     <>
-      <SiteHeader />
+      <SiteHeader locale={locale} />
       <main>
         <section className="relative overflow-hidden border-b border-white/6 bg-bg-panel pb-[clamp(40px,7vw,80px)] pt-[clamp(40px,7vw,72px)] text-white">
           <HeroFondo />

@@ -3,6 +3,7 @@
 import { trackWhatsAppClick } from "@/lib/analytics";
 import { buildWaLink, buildWaLinkFromText, type WaOrigin } from "@/lib/whatsapp";
 import { useWaPageContext } from "@/components/ui/WaPageContext";
+import type { Locale } from "@/i18n/locales";
 
 /**
  * Enlace a WhatsApp sin estilos propios, para los sitios que ya traen su
@@ -14,17 +15,20 @@ export function WaTrackedLink({
   origin,
   extra,
   contextual = false,
+  locale = "es",
   className,
   children,
 }: {
   origin: WaOrigin;
   extra?: string;
   contextual?: boolean;
+  /** Idioma del mensaje de los CTA no contextuales (los contextuales lo sacan de la ruta). */
+  locale?: Locale;
   className?: string;
   children: React.ReactNode;
 }) {
   const page = useWaPageContext();
-  const href = contextual ? buildWaLinkFromText(page.message) : buildWaLink(origin, extra);
+  const href = contextual ? buildWaLinkFromText(page.message) : buildWaLink(origin, extra, locale);
   const label = contextual ? page.label : extra;
 
   return (

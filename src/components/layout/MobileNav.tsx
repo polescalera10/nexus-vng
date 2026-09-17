@@ -6,6 +6,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { WaLink } from "@/components/ui/WaLink";
 import type { NavLink } from "@/components/layout/nav-items";
+import type { Locale } from "@/i18n/locales";
+import { tMenu } from "@/i18n/textos/comun";
 
 const PANEL_ID = "mobile-nav-panel";
 
@@ -39,7 +41,8 @@ function MenuIcon({ open }: { open: boolean }) {
  * `transform`/`filter`/`backdrop-filter` que se añada por encima puede
  * volver a encogerlo.
  */
-export function MobileNav({ items }: { items: readonly NavLink[] }) {
+export function MobileNav({ items, locale = "es" }: { items: readonly NavLink[]; locale?: Locale }) {
+  const t = tMenu[locale];
   const [open, setOpen] = useState(false);
   // El portal solo existe en cliente: en SSR no hay `document.body`.
   const [mounted, setMounted] = useState(false);
@@ -126,7 +129,7 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls={PANEL_ID}
-        aria-label={open ? "Cerrar menú" : "Abrir menú"}
+        aria-label={open ? t.cerrar : t.abrir}
         data-testid="mobile-nav-toggle"
         className="hover:text-neon relative z-[70] -mr-2 flex size-11 items-center justify-center rounded-sm text-white transition-colors"
       >
@@ -145,7 +148,7 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Menú principal"
+            aria-label={t.principal}
             data-testid="mobile-nav-panel"
             className="panel-in bg-ink/98 fixed inset-0 z-[65] flex flex-col overflow-y-auto pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] backdrop-blur-lg md:hidden"
           >
@@ -169,7 +172,7 @@ export function MobileNav({ items }: { items: readonly NavLink[] }) {
 
             <div className="container-nexus mt-auto pt-10">
               <WaLink origin="nav" contextual variant="red" className="w-full px-6 py-4 text-base">
-                Reserva tu clase de prueba
+                {t.cta}
               </WaLink>
             </div>
           </div>,

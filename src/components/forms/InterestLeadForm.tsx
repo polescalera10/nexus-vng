@@ -9,6 +9,10 @@ import {
 } from "@/components/forms/TurnstileField";
 import { trackLead } from "@/lib/analytics";
 import { submitInterestLead, type LeadFormState } from "@/lib/actions/leads";
+import type { Locale } from "@/i18n/locales";
+import { tFormulario } from "@/i18n/textos/comun";
+
+type Textos = (typeof tFormulario)["es"];
 
 const initial: LeadFormState = { status: "idle" };
 
@@ -27,7 +31,7 @@ export type InterestOption = {
 };
 export type InterestGroup = { label: string; options: InterestOption[] };
 
-function SubmitButton({ label, waiting }: { label: string; waiting: boolean }) {
+function SubmitButton({ label, waiting, t }: { label: string; waiting: boolean; t: Textos }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -35,7 +39,7 @@ function SubmitButton({ label, waiting }: { label: string; waiting: boolean }) {
       disabled={pending || waiting}
       className="bg-neon font-body text-ink shadow-neon inline-flex w-full items-center justify-center gap-2 rounded-md px-7 py-[15px] text-base font-bold transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
     >
-      {pending ? "Enviando…" : waiting ? "Un momento…" : label}
+      {pending ? t.enviando : waiting ? t.unMomento : label}
     </button>
   );
 }
@@ -55,10 +59,12 @@ export function InterestLeadForm({
   groups,
   fixedIntereses,
   nivel,
-  submitLabel = "Reservar mi plaza",
-  interesesLabel = "¿Qué te interesa? Marca todo lo que quieras",
+  locale = "es",
+  submitLabel = tFormulario[locale].reservarPlaza,
+  interesesLabel = tFormulario[locale].interesesLabel,
   interesesHelp,
 }: {
+  locale?: Locale;
   origen: "intensivos" | "curso-regular" | "socio-fundador";
   /** Casillas múltiples. Se omite cuando la oferta ya lo incluye todo. */
   groups?: InterestGroup[];
@@ -75,6 +81,7 @@ export function InterestLeadForm({
   /** Ayuda opcional bajo el `legend` (p. ej. cómo elegir el nivel). */
   interesesHelp?: string;
 }) {
+  const t = tFormulario[locale];
   const [state, formAction] = useActionState(submitInterestLead, initial);
   const [captcha, setCaptcha] = useState<TurnstileStatus>(TURNSTILE_SITE_KEY ? "pending" : "ready");
 
@@ -92,7 +99,7 @@ export function InterestLeadForm({
         <div className="bg-neon/10 text-neon mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-2xl">
           ✓
         </div>
-        <p className="font-display text-text-strong text-2xl">¡Solicitud recibida!</p>
+        <p className="font-display text-text-strong text-2xl">{t.recibida}</p>
         <p className="font-body text-text-muted mt-2 text-[15px]">{state.message}</p>
       </div>
     );
@@ -101,6 +108,7 @@ export function InterestLeadForm({
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       <input type="hidden" name="origen" value={origen} />
+      <input type="hidden" name="locale" value={locale} />
       {/* Honeypot anti-spam: oculto a usuarios, visible a bots. */}
       <input
         type="text"
@@ -113,14 +121,14 @@ export function InterestLeadForm({
 
       <div>
         <label htmlFor="il-nombre" className={LABEL}>
-          Nombre completo
+          {t.nombreCompleto}
         </label>
         <input
           id="il-nombre"
           name="nombre"
           required
           className={FIELD}
-          placeholder="Nombre y apellidos"
+          placeholder={t.nombreApellidos}
         />
         {state.errors?.nombre && <p className={ERR}>{state.errors.nombre[0]}</p>}
       </div>
@@ -128,7 +136,7 @@ export function InterestLeadForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="il-email" className={LABEL}>
-            Email
+            {t.email}
           </label>
           <input
             id="il-email"
@@ -143,7 +151,7 @@ export function InterestLeadForm({
 
         <div>
           <label htmlFor="il-telefono" className={LABEL}>
-            Teléfono
+            {t.telefono}
           </label>
           <input
             id="il-telefono"
@@ -253,17 +261,17 @@ export function InterestLeadForm({
           className="accent-neon mt-0.5 h-4 w-4 shrink-0"
         />
         <span className="font-body text-text-muted text-[13px] leading-snug">
-          He leído y acepto la{" "}
+          {t.consentimiento.antes}{" "}
           <a
             href="/privacidad"
+            hrefLang={locale === "ca" ? "es" : undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="text-neon font-semibold underline"
           >
-            política de privacidad
+            {t.consentimiento.enlace}
           </a>{" "}
-          y el tratamiento de mis datos para gestionar mi solicitud y recibir información de NEXUS
-          VNG.
+          {t.consentimiento.despues}
         </span>
       </label>
       {state.errors?.consentimiento && <p className={ERR}>{state.errors.consentimiento[0]}</p>}
@@ -277,16 +285,15 @@ export function InterestLeadForm({
         </p>
       )}
 
-      <TurnstileField onStatus={setCaptcha} resetSignal={state} />
+      <TurnstileField onStatus={setCaptcha} resetSignal={state} locale={locale} />
       {captcha === "error" && (
         <p role="alert" className={ERR}>
-          No hemos podido cargar la verificación anti-spam (a veces la bloquea un bloqueador de
-          anuncios). Desactívalo para esta web o escríbenos por WhatsApp.
+          {t.captchaError}
         </p>
       )}
 
       <div className="mt-1">
-        <SubmitButton label={submitLabel} waiting={captcha === "pending"} />
+        <SubmitButton label={submitLabel} waiting={captcha === "pending"} t={t} />
       </div>
     </form>
   );

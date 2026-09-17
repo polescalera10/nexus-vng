@@ -3,6 +3,8 @@ import { Logo } from "@/components/layout/Logo";
 import { WaTrackedLink } from "@/components/ui/WaTrackedLink";
 import { site } from "@/lib/site";
 import { articulos } from "@/content/blog";
+import type { Locale } from "@/i18n/locales";
+import { tIdioma, tPie } from "@/i18n/textos/comun";
 
 // min-h-11 (44px): con py-[9px] la píldora se quedaba en 40px de alto, por
 // debajo del objetivo táctil mínimo en móvil.
@@ -12,39 +14,66 @@ const PILL =
 const COL_LABEL =
   "font-body text-[11px] font-bold uppercase tracking-[0.16em] text-neon-mint/80";
 
-const EXPLORA: ReadonlyArray<readonly [string, string]> = [
-  ["/clases", "Clases"],
-  ["/eventos", "Eventos"],
-  // El blog solo se enlaza cuando hay algo publicado: mientras esté vacío va en
-  // `noindex` (lib/indexable.ts) y enlazarlo desde las 28 páginas sería mandar
-  // a todo el mundo a un estado vacío.
-  ...(articulos.length > 0 ? ([["/blog", "Blog"]] as const) : []),
-  ["/sobre-nosotros", "Sobre nosotros"],
-  ["/contacto", "Contacto"],
-];
+type Enlace = { href: string; label: string; soloEs?: boolean };
 
-const LEGAL: ReadonlyArray<readonly [string, string]> = [
-  ["/aviso-legal", "Aviso legal"],
-  ["/privacidad", "Privacidad"],
-  ["/cookies", "Cookies"],
-];
+// El blog solo se enlaza cuando hay algo publicado: mientras esté vacío va en
+// `noindex` (lib/indexable.ts) y enlazarlo desde las 28 páginas sería mandar
+// a todo el mundo a un estado vacío.
+const hayBlog = articulos.length > 0;
+
+function explora(locale: Locale): Enlace[] {
+  const t = tPie[locale];
+  if (locale === "es") {
+    return [
+      { href: "/clases", label: t.clases },
+      { href: "/eventos", label: t.eventos },
+      ...(hayBlog ? [{ href: "/blog", label: t.blog }] : []),
+      { href: "/sobre-nosotros", label: t.sobreNosotros },
+      { href: "/contacto", label: t.contacto },
+    ];
+  }
+  // En catalán: primero las páginas que existen en catalán y después las que
+  // solo están en castellano, marcadas como tales.
+  return [
+    { href: "/ca/classes", label: t.clases },
+    { href: "/ca/horaris", label: t.horarios },
+    { href: "/ca/contacte", label: t.contacto },
+    { href: "/socio-fundador", label: t.socioFundador, soloEs: true },
+    { href: "/profesores", label: t.profesores, soloEs: true },
+    { href: "/faq", label: t.faq, soloEs: true },
+    ...(hayBlog ? [{ href: "/blog", label: t.blog, soloEs: true }] : []),
+    { href: "/sobre-nosotros", label: t.sobreNosotros, soloEs: true },
+  ];
+}
+
+function legal(locale: Locale): Enlace[] {
+  const t = tPie[locale];
+  const soloEs = locale === "ca";
+  return [
+    { href: "/aviso-legal", label: t.avisoLegal, soloEs },
+    { href: "/privacidad", label: t.privacidad, soloEs },
+    { href: "/cookies", label: t.cookies, soloEs },
+  ];
+}
 
 /**
  * Footer global con NAP consistente (Name · Address · Phone) para SEO local.
  */
-export function Footer() {
+export function Footer({ locale = "es" }: { locale?: Locale }) {
+  const t = tPie[locale];
+  const marca = tIdioma[locale].soloEs;
   return (
     <footer className="border-t border-white/8 bg-ink pb-28 pt-[clamp(48px,6vw,72px)] text-white">
       <div className="container-nexus grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-7">
         <div>
           <Logo size={26} />
           <p className="mt-3.5 max-w-[38ch] font-body text-sm leading-relaxed text-white/60">
-            Escuela de salsa cubana y bachata. Dentro del gimnasio Aranha · {site.locality}.
+            {t.lema(site.locality)}
           </p>
         </div>
 
         <div>
-          <div className={COL_LABEL}>Dónde</div>
+          <div className={COL_LABEL}>{t.donde}</div>
           <address className="mt-3 font-mono text-[13px] not-italic leading-7 text-white/70">
             {site.nap.venue}
             {/* La calle solo se pinta cuando esté confirmada en lib/site.ts. */}
@@ -62,17 +91,19 @@ export function Footer() {
         </div>
 
         <div>
-          <div className={COL_LABEL}>Explora</div>
+          <div className={COL_LABEL}>{t.explora}</div>
           {/* En móvil los enlaces se separan hasta 44px de alto para poder
               pulsarlos con el pulgar; en sm+ vuelve la lista compacta. */}
           <ul className="mt-1 flex flex-col sm:mt-3 sm:gap-2">
-            {EXPLORA.map(([href, label]) => (
+            {explora(locale).map(({ href, label, soloEs }) => (
               <li key={href}>
                 <Link
                   href={href}
+                  hrefLang={soloEs ? "es" : undefined}
                   className="inline-flex min-h-11 items-center font-body text-[13px] text-white/70 no-underline transition-colors hover:text-neon sm:min-h-0"
                 >
                   {label}
+                  {soloEs && <span className="ml-1 text-white/40">{marca}</span>}
                 </Link>
               </li>
             ))}
@@ -80,7 +111,7 @@ export function Footer() {
         </div>
 
         <div>
-          <div className={COL_LABEL}>Síguenos</div>
+          <div className={COL_LABEL}>{t.siguenos}</div>
           <div className="mt-3 flex flex-wrap gap-2.5">
             {/* Los enlaces sociales solo se pintan si hay URL real en lib/site.ts. */}
             {site.social.instagram && (
@@ -103,7 +134,7 @@ export function Footer() {
                 TikTok
               </a>
             )}
-            <WaTrackedLink origin="footer" contextual className={PILL}>
+            <WaTrackedLink origin="footer" contextual locale={locale} className={PILL}>
               WhatsApp
             </WaTrackedLink>
           </div>
@@ -114,18 +145,20 @@ export function Footer() {
         <div className="my-4 mt-8 h-px bg-white/10" />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="font-body text-xs text-white/50">
-            © {new Date().getFullYear()} {site.name} · Hecho con ritmo
+            © {new Date().getFullYear()} {site.name} · {t.hecho}
           </p>
-          <div className="flex gap-4">
-            {LEGAL.map(([href, label]) => (
+          <div className="flex flex-wrap items-center gap-4">
+            {legal(locale).map(({ href, label, soloEs }) => (
               <Link
                 key={href}
                 href={href}
+                hrefLang={soloEs ? "es" : undefined}
                 className="font-body text-xs text-white/50 no-underline transition-colors hover:text-neon"
               >
                 {label}
               </Link>
             ))}
+            {t.legalesEnEs && <span className="font-body text-xs text-white/35">{t.legalesEnEs}</span>}
           </div>
         </div>
       </div>

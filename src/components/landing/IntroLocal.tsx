@@ -2,6 +2,10 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { disciplinasRegulares } from "@/content/horario-regular";
 import { site } from "@/lib/site";
+import { enlace } from "@/i18n/rutas";
+import type { Locale } from "@/i18n/locales";
+import { tIntro } from "@/i18n/textos/inicio";
+import { tEstilo } from "@/i18n/textos/comun";
 
 /**
  * Intro local, justo debajo del hero.
@@ -16,35 +20,43 @@ import { site } from "@/lib/site";
  * Las disciplinas salen del cartel real (`horario-regular.ts`), así que si
  * cambia la parrilla esta sección no se queda mintiendo.
  */
-export function IntroLocal() {
-  const disciplinas = disciplinasRegulares.join(", ").replace(/, ([^,]*)$/, " y $1");
+export function IntroLocal({ locale = "es" }: { locale?: Locale }) {
+  const t = tIntro[locale];
+  const disciplinas = disciplinasRegulares
+    .map(tEstilo[locale].estilo)
+    .join(", ")
+    .replace(/, ([^,]*)$/, ` ${t.y} $1`);
 
   return (
     <section className="bg-ink py-[clamp(48px,7vw,88px)]">
       <div className="container-nexus">
         <Reveal>
           <h2 className="font-display text-text-strong max-w-[24ch] text-balance text-[clamp(28px,4.2vw,48px)] leading-[1.05]">
-            Clases de salsa cubana y bachata en {site.locality}
+            {t.titulo(site.locality)}
           </h2>
           <div className="mt-5 max-w-[65ch] space-y-4">
             <p className="font-body text-text-body text-base leading-relaxed">
-              {site.name} es la escuela de baile del {site.nap.venue}, en{" "}
-              {site.locality} ({site.nap.addressRegion}). Clases de {disciplinas} en
-              grupos por nivel real, de lunes a viernes, desde cero absoluto hasta avanzado.
+              {t.p1({
+                nombre: site.name,
+                local: site.nap.venue,
+                localidad: site.locality,
+                region: site.nap.addressRegion,
+                disciplinas,
+              })}
             </p>
             <p className="font-body text-text-body text-base leading-relaxed">
-              Se puede empezar sin pareja, sin experiencia y sin saber qué estilo te pega:{" "}
-              <Link href="/clases" className="text-neon font-semibold underline underline-offset-2">
-                mira las disciplinas
+              {t.p2Antes}{" "}
+              <Link href={enlace("/clases", locale)} className="text-neon font-semibold underline underline-offset-2">
+                {t.verDisciplinas}
               </Link>
               ,{" "}
               <Link
-                href="/horarios"
+                href={enlace("/horarios", locale)}
                 className="text-neon font-semibold underline underline-offset-2"
               >
-                consulta los horarios
+                {t.verHorarios}
               </Link>{" "}
-              o escríbenos y te decimos qué grupo te encaja.
+              {t.p2Despues}
             </p>
           </div>
         </Reveal>

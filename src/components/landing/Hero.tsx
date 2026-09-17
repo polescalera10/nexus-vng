@@ -2,7 +2,9 @@ import { Header } from "@/components/layout/Header";
 import { RevealEager } from "@/components/ui/RevealEager";
 import { VideoLoop } from "@/components/ui/VideoLoop";
 import { WaLink } from "@/components/ui/WaLink";
-import { hero } from "@/content/landing";
+import { altEn, landingEn } from "@/content/por-idioma";
+import { BCP47, type Locale } from "@/i18n/locales";
+import { tResenas } from "@/i18n/textos/comun";
 import { heroVideo } from "@/content/media";
 
 /** Divide el titular en la última frase para destacarla con el degradado NEXUS. */
@@ -13,15 +15,23 @@ function splitTitle(title: string): [string, string | null] {
 }
 
 /** "5,0" — misma forma que el bloque de reseñas. */
-function formatNota(nota: number) {
-  return nota.toLocaleString("es-ES", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+function formatNota(nota: number, locale: Locale) {
+  return nota.toLocaleString(BCP47[locale], { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 /**
  * `valoracion` es la nota REAL de la ficha de Google (lib/google-reviews.ts).
  * Sin ella no se pinta el sello: nunca una cifra por defecto (Ómnibus).
  */
-export function Hero({ valoracion }: { valoracion?: { nota: number | null; total: number | null } | null }) {
+export function Hero({
+  valoracion,
+  locale = "es",
+}: {
+  valoracion?: { nota: number | null; total: number | null } | null;
+  locale?: Locale;
+}) {
+  const { hero } = landingEn(locale);
+  const t = tResenas[locale];
   const [lead, highlight] = splitTitle(hero.title);
 
   return (
@@ -34,7 +44,7 @@ export function Hero({ valoracion }: { valoracion?: { nota: number | null; total
           movil: { src: heroVideo.movil.src, poster: heroVideo.movil.poster },
           desktop: { src: heroVideo.desktop.src, poster: heroVideo.desktop.poster },
         }}
-        alt={heroVideo.alt}
+        alt={altEn("hero", heroVideo.alt, locale)}
         ancho={heroVideo.movil.ancho}
         alto={heroVideo.movil.alto}
         sizes="100vw"
@@ -50,7 +60,7 @@ export function Hero({ valoracion }: { valoracion?: { nota: number | null; total
           y el titular tiene que mantener el contraste AA. */}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,.72)_0%,rgba(10,10,10,.45)_35%,rgba(10,10,10,.7)_70%,rgba(10,10,10,.97)_100%)]" />
 
-      <Header />
+      <Header locale={locale} />
 
       {/* dvh (no vh): en móvil el 100vh cuenta la barra del navegador que se
           repliega, y el CTA quedaba empujado fuera de la pantalla al cargar. */}
@@ -90,7 +100,7 @@ export function Hero({ valoracion }: { valoracion?: { nota: number | null; total
           delay={0.24}
           className="mt-[30px] flex flex-wrap items-center gap-x-[22px] gap-y-4"
         >
-          <WaLink origin="hero" variant="red" className="px-7 py-[18px] text-base">
+          <WaLink origin="hero" locale={locale} variant="red" className="px-7 py-[18px] text-base">
             {hero.cta}
           </WaLink>
           <span className="font-body text-sm text-white/70">{hero.ctaNote}</span>
@@ -101,8 +111,8 @@ export function Hero({ valoracion }: { valoracion?: { nota: number | null; total
                 ★
               </span>
               <span>
-                <strong className="font-bold text-white">{formatNota(valoracion.nota)}</strong> en Google
-                {valoracion.total != null && <> · {valoracion.total} reseñas</>}
+                <strong className="font-bold text-white">{formatNota(valoracion.nota, locale)}</strong> {t.enGoogle}
+                {valoracion.total != null && <> · {t.total(valoracion.total)}</>}
               </span>
             </span>
           )}

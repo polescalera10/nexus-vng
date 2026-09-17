@@ -1,16 +1,20 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { steps } from "@/content/landing";
+import { landingEn } from "@/content/por-idioma";
+import type { Locale } from "@/i18n/locales";
+import { tComoEmpezar } from "@/i18n/textos/inicio";
 
-export function ComoEmpezar() {
+export function ComoEmpezar({ locale = "es" }: { locale?: Locale }) {
+  const t = tComoEmpezar[locale];
+  const { steps } = landingEn(locale);
   return (
     <section className="bg-bg-base py-[clamp(64px,9vw,120px)]">
       <div className="container-nexus">
         <Reveal as="span" className="block font-body text-xs font-bold uppercase tracking-[0.18em] text-neon">
-          Cómo empezar
+          {t.kicker}
         </Reveal>
         <Reveal delay={0.06}>
           <h2 className="mt-3.5 font-display text-[clamp(34px,5.5vw,66px)] leading-[0.98] text-text-strong">
-            Tres pasos y estás dentro
+            {t.titulo}
           </h2>
         </Reveal>
 

@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n/locales";
 import { normalizePhone } from "@/lib/phone";
 import { WHATSAPP_NUMBER } from "@/lib/site";
 
@@ -47,6 +48,22 @@ const MESSAGES: Record<WaOrigin, string> = {
 };
 
 /**
+ * Mismos mensajes para las páginas en catalán: quien escribe desde `/ca` ya
+ * dice en el primer mensaje en qué idioma quiere que le contesten. Solo los
+ * orígenes que existen en esas páginas; el resto cae al castellano.
+ */
+const MESSAGES_CA: Partial<Record<WaOrigin, string>> = {
+  hero: "Hola! M'agradaria informació de la classe de prova de ball 🙂",
+  sticky: "Hola! Vull reservar la meva classe de prova de ball 💃",
+  founding: "Hola! Vull la meva plaça fundadora de NEXUS VNG ✨",
+  "cta-final": "Hola! Comencem? M'agradaria apuntar-me a una classe de prova 🙂",
+  footer: "Hola! M'agradaria més informació sobre NEXUS VNG 🙂",
+  nav: "Hola! M'agradaria informació sobre les classes de ball 🙂",
+  contacto: "Hola! Us escric des del web de NEXUS VNG 🙂",
+  pagina: "Hola! M'agradaria més informació sobre les classes de NEXUS VNG 🙂",
+};
+
+/**
  * Construye un enlace wa.me con mensaje prerrellenado y URL-encoded.
  * @param origin  bloque/CTA de origen
  * @param extra   texto adicional (p. ej. el nombre de la modalidad, o el
@@ -77,8 +94,8 @@ export function buildStudentWaLink(phone: string, nombre?: string): string | nul
   return `https://wa.me/${number}?text=${encodeURIComponent(`${saludo} Te escribo desde NEXUS VNG 🙂`)}`;
 }
 
-export function buildWaLink(origin: WaOrigin, extra?: string): string {
-  const base = MESSAGES[origin];
+export function buildWaLink(origin: WaOrigin, extra?: string, locale: Locale = "es"): string {
+  const base = (locale === "ca" ? MESSAGES_CA[origin] : undefined) ?? MESSAGES[origin];
   const text = extra ? (base ? `${base} ${extra} 💃` : extra) : base;
   return buildWaLinkFromText(text);
 }

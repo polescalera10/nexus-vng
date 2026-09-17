@@ -2,7 +2,11 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { Countdown } from "@/components/ui/Countdown";
 import { WaLink } from "@/components/ui/WaLink";
-import { founding } from "@/content/landing";
+import { landingEn } from "@/content/por-idioma";
+import { tieneVersion } from "@/i18n/rutas";
+import type { Locale } from "@/i18n/locales";
+import { tIdioma } from "@/i18n/textos/comun";
+import { tFounding } from "@/i18n/textos/inicio";
 import { barraPct, tieneAforo, type FoundingSpots } from "@/lib/founding-spots";
 
 /**
@@ -13,7 +17,10 @@ import { barraPct, tieneAforo, type FoundingSpots } from "@/lib/founding-spots";
  * datos reales — la fecha en content/landing.ts y las plazas en `leads`
  * (`getFoundingSpots()`). Sin recuento fiable, el bloque de plazas desaparece.
  */
-export function Founding({ spots }: { spots: FoundingSpots }) {
+export function Founding({ spots, locale = "es" }: { spots: FoundingSpots; locale?: Locale }) {
+  const { founding } = landingEn(locale);
+  const t = tFounding[locale];
+  const soloEs = !tieneVersion("/socio-fundador", locale);
   const { price, priceOld, deadline } = founding;
   const hasSpots = tieneAforo(spots);
 
@@ -51,7 +58,7 @@ export function Founding({ spots }: { spots: FoundingSpots }) {
               <span className="font-display text-neon-mint text-[clamp(54px,9vw,76px)] leading-none">
                 {price}
               </span>
-              <span className="font-body text-[17px] text-white/65">/mes</span>
+              <span className="font-body text-[17px] text-white/65">{t.mes}</span>
               {/* Cuota estándar tachada: solo cuando exista la cifra real. */}
               {priceOld && (
                 <span className="font-body text-[19px] text-white/40 line-through">{priceOld}</span>
@@ -72,15 +79,13 @@ export function Founding({ spots }: { spots: FoundingSpots }) {
             {hasSpots && (
               <div className="mt-6">
                 <div className="font-body mb-2 flex justify-between text-xs text-white/65">
-                  <span>Plazas fundadoras</span>
-                  <span>
-                    Quedan {spots.left} / {spots.total}
-                  </span>
+                  <span>{t.plazas}</span>
+                  <span>{t.quedan(spots.left, spots.total)}</span>
                 </div>
                 <div
                   className="h-2 overflow-hidden rounded-full bg-white/8"
                   role="img"
-                  aria-label={`Quedan ${spots.left} de ${spots.total} plazas fundadoras`}
+                  aria-label={t.quedanAria(spots.left, spots.total)}
                 >
                   <div
                     className="from-neon-lime via-neon-mint to-neon h-full rounded-full bg-linear-to-r"
@@ -97,18 +102,21 @@ export function Founding({ spots }: { spots: FoundingSpots }) {
 
             <Link
               href="/socio-fundador"
+              hrefLang={soloEs ? "es" : undefined}
               className="bg-neon-lime font-body text-ink shadow-glow mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-md px-6 py-[18px] text-base font-bold no-underline transition-transform duration-200 hover:-translate-y-[3px] active:translate-y-0"
             >
               {founding.cta}
+              {soloEs && <span className="ml-2 text-sm font-semibold opacity-70">{tIdioma[locale].soloEs}</span>}
             </Link>
             <div className="mt-3 flex justify-center">
               <WaLink
                 origin="founding"
+                locale={locale}
                 variant="outline"
                 showGlyph={false}
                 className="min-h-11 px-5 py-2.5 text-[13px]"
               >
-                O pregúntanos por WhatsApp
+                {t.preguntar}
               </WaLink>
             </div>
             <p className="font-body mt-3 text-center text-xs text-white/50">{founding.finePrint}</p>

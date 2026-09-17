@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { site } from "@/lib/site";
+import type { Locale } from "@/i18n/locales";
+import { tMapa } from "@/i18n/textos/comun";
 
 /*
   El mapa marca las coordenadas de la ficha verificada de Google Business
@@ -20,7 +22,8 @@ export const MAPA_ENLACE_URL = site.google.mapsUrl;
  * El origen del iframe (`https://www.google.com`) está en `frame-src` de la CSP
  * (`next.config.ts`); si cambia la URL, cambia allí también.
  */
-export function MapaFachada() {
+export function MapaFachada({ locale = "es" }: { locale?: Locale }) {
+  const t = tMapa[locale];
   const [activo, setActivo] = useState(false);
 
   return (
@@ -29,7 +32,7 @@ export function MapaFachada() {
         {activo ? (
           <iframe
             src={MAPA_EMBED_URL}
-            title={`Mapa de ${site.name} en ${site.nap.venue}`}
+            title={t.iframe(site.name, site.nap.venue)}
             loading="lazy"
             referrerPolicy="strict-origin-when-cross-origin"
             className="absolute inset-0 size-full border-0"
@@ -48,9 +51,9 @@ export function MapaFachada() {
                 />
               </svg>
             </span>
-            <span className="px-6 font-body text-sm font-semibold text-text-strong">Ver el mapa</span>
+            <span className="px-6 font-body text-sm font-semibold text-text-strong">{t.ver}</span>
             <span className="px-6 text-center font-body text-xs text-text-muted">
-              Se carga desde Google Maps al pulsar
+              {t.cargaDesde}
             </span>
           </button>
         )}
@@ -62,7 +65,7 @@ export function MapaFachada() {
           rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center font-semibold text-neon no-underline hover:underline"
         >
-          Cómo llegar en Google Maps
+          {t.comoLlegar}
         </a>
       </figcaption>
     </figure>

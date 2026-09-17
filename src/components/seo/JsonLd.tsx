@@ -2,6 +2,10 @@ import { sesionesRegulares } from "@/content/horario-regular";
 import { precios } from "@/content/precios";
 import { mediaSobreNosotros } from "@/content/media";
 import { site } from "@/lib/site";
+import { BCP47, type Locale } from "@/i18n/locales";
+import { enlace } from "@/i18n/rutas";
+import { tInicioMeta } from "@/i18n/textos/inicio";
+import { tClases, tModalidad } from "@/i18n/textos/paginas";
 
 /** Día de la semana del cartel → schema.org DayOfWeek. */
 const DIA_SCHEMA: Record<string, string> = {
@@ -69,13 +73,14 @@ export const ORG_ID = `${site.url}/#organization`;
 export const orgRef = () => ({ "@id": ORG_ID });
 
 /** Schema.org LocalBusiness — global (footer / home). */
-export function localBusinessLd() {
+export function localBusinessLd(locale: Locale = "es") {
   return {
     "@context": "https://schema.org",
     "@type": "DanceSchool",
     "@id": ORG_ID,
     name: site.name,
-    description: site.description,
+    // Misma entidad en los dos idiomas (mismo @id); solo cambia el texto.
+    description: locale === "es" ? site.description : tInicioMeta[locale].escuela,
     url: site.url,
     address: {
       "@type": "PostalAddress",
@@ -182,18 +187,21 @@ export function courseLd(
   sesiones: Array<{ dia: string; hora: string; nivel?: string }> = [],
   /** Contenidos reales de la clase ("En clase aprenderás"), para `teaches`. */
   aprenderas: string[] = [],
+  locale: Locale = "es",
 ) {
+  // Cada idioma es su propio Course, con su URL: el @id sale de ella.
+  const url = `${site.url}${enlace(`/clases/${slug}`, locale)}`;
   // Niveles que existen de verdad en el cartel de esta disciplina.
   const niveles = [...new Set(sesiones.map((s) => s.nivel).filter(Boolean))] as string[];
 
   return {
     "@context": "https://schema.org",
     "@type": "Course",
-    "@id": `${site.url}/clases/${slug}#course`,
-    name: `Clases de ${nombre.toLowerCase()} en ${site.locality}`,
+    "@id": `${url}#course`,
+    name: tModalidad[locale].schemaNombre(nombre, site.locality),
     description: descripcion,
-    url: `${site.url}/clases/${slug}`,
-    inLanguage: "es-ES",
+    url,
+    inLanguage: BCP47[locale],
     about: nombre,
     image: `${site.url}/opengraph-image`,
     // Lo que se aprende, tal cual está escrito en la página: nada nuevo que
@@ -207,7 +215,7 @@ export function courseLd(
       price: precios.base,
       priceCurrency: "EUR",
       availability: "https://schema.org/InStock",
-      url: `${site.url}/clases/${slug}`,
+      url,
     },
     hasCourseInstance: sesiones.map((s) => ({
       "@type": "CourseInstance",
@@ -293,16 +301,16 @@ export function eventLd(e: {
  * de cursos en el SERP). Cada elemento apunta por `@id` a la ficha, que es
  * donde vive el `Course` completo.
  */
-export function courseListLd(modalidades: Array<{ slug: string; nombre: string }>) {
+export function courseListLd(modalidades: Array<{ slug: string; nombre: string }>, locale: Locale = "es") {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `Clases de baile en ${site.locality}`,
+    name: tClases[locale].listaSchema(site.locality),
     itemListElement: modalidades.map((m, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${site.url}/clases/${m.slug}`,
-      name: `Clases de ${m.nombre.toLowerCase()} en ${site.locality}`,
+      url: `${site.url}${enlace(`/clases/${m.slug}`, locale)}`,
+      name: tModalidad[locale].schemaNombre(m.nombre, site.locality),
     })),
   };
 }

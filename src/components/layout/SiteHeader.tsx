@@ -1,6 +1,7 @@
 import { Logo } from "@/components/layout/Logo";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { NAV_SITE } from "@/components/layout/nav-items";
+import { navEn } from "@/components/layout/nav-items";
+import type { Locale } from "@/i18n/locales";
 import { WaLink } from "@/components/ui/WaLink";
 import Link from "next/link";
 
@@ -11,13 +12,14 @@ import Link from "next/link";
  */
 // z-[75] en la cabecera: por encima del panel de MobileNav (z-[65], montado
 // en <body>) para que la hamburguesa siga visible y pulsable con el menú abierto.
-export function SiteHeader() {
+export function SiteHeader({ locale = "es" }: { locale?: Locale }) {
+  const items = navEn(locale, "site");
   return (
     <header className="bg-ink/95 sticky top-0 z-[75] border-b border-white/6 backdrop-blur">
       <div className="container-nexus flex items-center justify-between py-3 md:py-4">
-        <Logo size={34} priority />
+        <Logo size={34} priority href={locale === "ca" ? "/ca" : "/"} />
         <nav className="hidden items-center gap-6 md:flex">
-          {NAV_SITE.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -43,7 +45,7 @@ export function SiteHeader() {
             WhatsApp
           </WaLink>
         </div>
-        <MobileNav items={NAV_SITE} />
+        <MobileNav items={items} locale={locale} />
       </div>
     </header>
   );

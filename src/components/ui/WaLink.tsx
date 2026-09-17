@@ -3,6 +3,7 @@
 import { trackWhatsAppClick } from "@/lib/analytics";
 import { buildWaLink, buildWaLinkFromText, type WaOrigin } from "@/lib/whatsapp";
 import { useWaPageContext } from "@/components/ui/WaPageContext";
+import type { Locale } from "@/i18n/locales";
 import { WaGlyph } from "@/components/ui/WaGlyph";
 
 type Variant = "red" | "white" | "gold" | "outline";
@@ -37,6 +38,7 @@ export function WaLink({
   origin,
   extra,
   contextual = false,
+  locale = "es",
   children,
   variant = "red",
   showGlyph = true,
@@ -45,13 +47,15 @@ export function WaLink({
   origin: WaOrigin;
   extra?: string;
   contextual?: boolean;
+  /** Idioma del mensaje de los CTA no contextuales (los contextuales lo sacan de la ruta). */
+  locale?: Locale;
   children: React.ReactNode;
   variant?: Variant;
   showGlyph?: boolean;
   className?: string;
 }) {
   const page = useWaPageContext();
-  const href = contextual ? buildWaLinkFromText(page.message) : buildWaLink(origin, extra);
+  const href = contextual ? buildWaLinkFromText(page.message) : buildWaLink(origin, extra, locale);
   const label = contextual ? page.label : extra;
 
   return (

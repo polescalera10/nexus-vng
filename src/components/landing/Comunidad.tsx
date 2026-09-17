@@ -3,6 +3,9 @@ import { Reveal } from "@/components/ui/Reveal";
 import { ResenasGoogle } from "@/components/landing/ResenasGoogle";
 import { mediaMosaico } from "@/content/media";
 import type { ResenasGoogle as Resenas } from "@/lib/google-reviews";
+import { altEn } from "@/content/por-idioma";
+import type { Locale } from "@/i18n/locales";
+import { tComunidad } from "@/i18n/textos/inicio";
 
 /**
  * "El corazón son las personas": fotos reales de clase y, debajo, lo que dicen
@@ -14,22 +17,22 @@ import type { ResenasGoogle as Resenas } from "@/lib/google-reviews";
  * sin ellas la sección enseña solo las fotos, sin marcador ni nota inventada
  * (Directiva Ómnibus).
  */
-export function Comunidad({ resenas }: { resenas: Resenas | null }) {
+export function Comunidad({ resenas, locale = "es" }: { resenas: Resenas | null; locale?: Locale }) {
+  const t = tComunidad[locale];
   return (
     <section className="bg-bg-base py-[clamp(64px,9vw,120px)]">
       <div className="container-nexus">
         <Reveal as="span" className="block font-body text-xs font-bold uppercase tracking-[0.18em] text-neon">
-          El corazón
+          {t.kicker}
         </Reveal>
         <Reveal delay={0.06}>
           <h2 className="mt-3.5 max-w-[16ch] text-balance font-display text-[clamp(34px,5.5vw,66px)] leading-[0.98] text-text-strong">
-            El corazón son las personas
+            {t.titulo}
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mt-4 max-w-[58ch] font-body text-base leading-relaxed text-text-muted">
-            Fotos de clases reales de la escuela, en la sala de Vilanova. Ni banco de imágenes ni
-            modelos: es la gente que viene cada semana.
+            {t.texto}
           </p>
         </Reveal>
 
@@ -44,7 +47,7 @@ export function Comunidad({ resenas }: { resenas: Resenas | null }) {
             >
               <Image
                 src={img.src}
-                alt={img.alt}
+                alt={altEn(img.src, img.alt, locale)}
                 width={img.ancho}
                 height={img.alto}
                 sizes="(max-width: 640px) 33vw, 20vw"
@@ -54,7 +57,7 @@ export function Comunidad({ resenas }: { resenas: Resenas | null }) {
           ))}
         </Reveal>
 
-        {resenas && <ResenasGoogle datos={resenas} />}
+        {resenas && <ResenasGoogle datos={resenas} locale={locale} />}
       </div>
     </section>
   );

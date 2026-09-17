@@ -1,4 +1,5 @@
 import { modalidadesFallback } from "@/content/landing";
+import { idiomaDeRuta } from "@/i18n/rutas";
 
 /**
  * Mensaje de WhatsApp según LA PÁGINA que se está mirando.
@@ -79,6 +80,34 @@ const STATIC: Record<string, WaPageContext> = {
 };
 
 /**
+ * Páginas en catalán (piloto). La etiqueta lleva el prefijo `ca:` para poder
+ * separar en GA4 qué convierte cada idioma.
+ */
+const DEFAULT_CA: WaPageContext = {
+  label: "ca:general",
+  message: "Hola! Vinc del web de NEXUS VNG i m'agradaria més informació 🙂",
+};
+
+const STATIC_CA: Record<string, WaPageContext> = {
+  "/ca": {
+    label: "ca:home",
+    message: "Hola! Vinc del web i m'agradaria informació per començar les classes de ball 🙂",
+  },
+  "/ca/classes": {
+    label: "ca:clases",
+    message: "Hola! M'agradaria informació sobre les classes de ball 🙂",
+  },
+  "/ca/horaris": {
+    label: "ca:horarios",
+    message: "Hola! M'agradaria informació sobre els horaris de les classes 🙂",
+  },
+  "/ca/contacte": {
+    label: "ca:contacto",
+    message: "Hola! Us escric des del web i m'agradaria informació sobre les classes 🙂",
+  },
+};
+
+/**
  * Nombres de disciplina para el fallback por ruta. El nombre bueno viene de la
  * BD y lo inyecta la propia página; esto cubre el primer render y los enlaces
  * pulsados antes de hidratar.
@@ -88,8 +117,14 @@ const NOMBRE_POR_SLUG = new Map(modalidadesFallback.map((m) => [m.slug, m.nombre
 /** "Salsa cubana" → "…las clases de salsa cubana": en minúscula dentro de la frase. */
 const enFrase = (nombre: string) => nombre.toLocaleLowerCase("es-ES");
 
-export function waContextModalidad(slug: string, nombre?: string): WaPageContext {
+export function waContextModalidad(slug: string, nombre?: string, locale: "es" | "ca" = "es"): WaPageContext {
   const label = NOMBRE_POR_SLUG.get(slug) ?? slug.replace(/-/g, " ");
+  if (locale === "ca") {
+    return {
+      label: `ca:clase:${slug}`,
+      message: `Hola! M'agradaria informació sobre les classes de ${(nombre ?? label).toLocaleLowerCase("ca-ES")} 💃`,
+    };
+  }
   return {
     label: `clase:${slug}`,
     message: `¡Hola! Me gustaría info sobre las clases de ${enFrase(nombre ?? label)} 💃`,
@@ -121,6 +156,13 @@ function normalize(pathname: string | null | undefined): string {
 
 export function waContextForPath(pathname: string | null | undefined): WaPageContext {
   const path = normalize(pathname);
+  if (idiomaDeRuta(path) === "ca") {
+    const exacta = STATIC_CA[path];
+    if (exacta) return exacta;
+    const [, , seccion, slugCa] = path.split("/");
+    if (seccion === "classes" && slugCa) return waContextModalidad(slugCa, undefined, "ca");
+    return DEFAULT_CA;
+  }
   const exact = STATIC[path];
   if (exact) return exact;
 

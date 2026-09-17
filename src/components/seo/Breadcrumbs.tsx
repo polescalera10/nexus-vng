@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { JsonLd, breadcrumbLd } from "@/components/seo/JsonLd";
+import type { Locale } from "@/i18n/locales";
+import { tMigas } from "@/i18n/textos/comun";
 
 export type Crumb = { name: string; path: string };
 
@@ -11,12 +13,12 @@ export type Crumb = { name: string; path: string };
  * (/clases → /clases/salsa-cubana), que hasta ahora no se declaraba en ningún
  * sitio.
  */
-export function Breadcrumbs({ items }: { items: Crumb[] }) {
+export function Breadcrumbs({ items, locale = "es" }: { items: Crumb[]; locale?: Locale }) {
   const last = items.length - 1;
 
   return (
     <>
-      <nav aria-label="Migas de pan" className="font-body text-text-muted text-[13px]">
+      <nav aria-label={tMigas[locale].aria} className="font-body text-text-muted text-[13px]">
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {items.map((item, i) => (
             <li key={item.path} className="flex items-center gap-2">
