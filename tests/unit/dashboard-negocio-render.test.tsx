@@ -5,7 +5,7 @@ import {
   CuentaDelMes,
   Kpi,
   SemanaGrid,
-} from "@/app/area-privada/(dashboard)/admin/dashboard/_components/Bloques";
+} from "@/app/(es)/area-privada/(dashboard)/admin/dashboard/_components/Bloques";
 import {
   avisosDe,
   calcularNegocio,

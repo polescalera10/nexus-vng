@@ -12,7 +12,7 @@ vi.mock("@/lib/actions/gamificacion", () => ({
 }));
 
 const { Notificaciones } = await import(
-  "@/app/area-privada/(dashboard)/admin/_components/Notificaciones"
+  "@/app/(es)/area-privada/(dashboard)/admin/_components/Notificaciones"
 );
 
 const canje = (over: Partial<RedemptionListItem> = {}): RedemptionListItem =>

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { TabBar, type NavItem } from "@/app/area-privada/(dashboard)/DashboardNav";
+import { TabBar, type NavItem } from "@/app/(es)/area-privada/(dashboard)/DashboardNav";
 
 const pathname = vi.hoisted(() => ({ current: "/area-privada/admin" }));
 

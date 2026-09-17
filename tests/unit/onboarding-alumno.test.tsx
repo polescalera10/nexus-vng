@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Onboarding } from "@/app/area-privada/alumno/Onboarding";
+import { Onboarding } from "@/app/(es)/area-privada/alumno/Onboarding";
 
 const router = vi.hoisted(() => ({ refresh: vi.fn(), push: vi.fn() }));
 const marcar = vi.hoisted(() => vi.fn(async () => ({ ok: true })));

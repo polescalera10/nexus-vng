@@ -15,7 +15,7 @@ vi.mock("@/lib/actions/courses", () => ({
 }));
 
 const { SesionesDelMes } = await import(
-  "@/app/area-privada/(dashboard)/admin/_components/SesionesDelMes"
+  "@/app/(es)/area-privada/(dashboard)/admin/_components/SesionesDelMes"
 );
 
 describe("SesionesDelMes", () => {

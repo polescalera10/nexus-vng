@@ -22,7 +22,7 @@ vi.mock("@/lib/actions/courses", () => ({
 }));
 
 const { SessionList } = await import(
-  "@/app/area-privada/(dashboard)/admin/cursos/[id]/SessionList"
+  "@/app/(es)/area-privada/(dashboard)/admin/cursos/[id]/SessionList"
 );
 
 const SESSION = {

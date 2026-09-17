@@ -117,6 +117,11 @@ const nextConfig: NextConfig = {
      * el primer pintado más de lo que ahorra la petición que se quita.
      */
     inlineCss: false,
+    /**
+     * 404 con su propio `<html>` (`app/global-not-found.tsx`). Hace falta
+     * porque hay dos layouts raíz, uno por idioma: ver RootShell.tsx.
+     */
+    globalNotFound: true,
   },
   /**
    * Redirecciones permanentes de URLs retiradas. `/clases/lady-style` existía
