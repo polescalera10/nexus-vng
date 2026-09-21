@@ -128,3 +128,73 @@ Las páginas de entrada entraron en el índice en horas. Los artículos del blog
 | URLs indexadas | 31 de 47 | Subiendo hacia 44 |
 | Consultas con datos | 34 | Subiendo: las guías abren cola larga |
 | Clics de marca vs sin marca | 17 vs 0 | El objetivo es que aparezca la segunda columna |
+
+---
+
+# Parte 2 — Línea base de GA4 (mismos 28 días)
+
+Leída con la cuenta de servicio `claude-ga-lector`, propiedad `548146583`.
+
+## Canales
+
+| Canal | Sesiones | Usuarios |
+|---|---|---|
+| Organic Social | **133** | 114 |
+| Direct | 122 | 55 |
+| Organic Search | 92 | 35 |
+| Referral | 28 | 19 |
+| **AI Assistant** | **24** | 13 |
+
+**Instagram es el canal número uno**, por delante de la búsqueda. Direct tiene 122 sesiones de solo 55 usuarios: gente que vuelve, que es lo que se espera de alumnos consultando horarios.
+
+**24 sesiones desde asistentes de IA, todas de `chatgpt.com`**, con un solo artículo publicado. Entran por `/`, `/clases`, `/horarios`, `/clases/sexy-style`, `/clases/heels`, `/clases/reparto` y hasta por la ficha de Ana Aylén. ChatGPT ya está recomendando la escuela. Las 10 guías publicadas hoy juegan exactamente en ese tablero.
+
+## Conversión
+
+| Evento | 28 días |
+|---|---|
+| `whatsapp_click` | **91** |
+| `form_start` | 60 |
+| `generate_lead` | **42** |
+
+- **22,8 % de las sesiones acaban en un clic a WhatsApp** (91 sobre 399). Es una tasa muy alta.
+- El formulario convierte al **70 %** una vez empezado (42 de 60). El problema no es el formulario.
+
+## Dónde se convierte
+
+| Página | Clics a WhatsApp |
+|---|---|
+| **`/clases`** | **47** |
+| `/` | 9 |
+| `/clases/salsa-cubana` | 7 |
+| `/clases/sexy-style` | 6 |
+| `/horarios` | 5 |
+| `/profesores` | 5 |
+| `/clases/bachata` | 4 |
+| `/clases/reparto` | 3 |
+
+**`/clases` se lleva el 52 % de todas las conversiones del sitio.** Es la página de verdad, muy por encima de la home. Y es también donde aterriza el tráfico social.
+
+## Página de entrada del tráfico de búsqueda
+
+| Página | Sesiones |
+|---|---|
+| `/` | 49 |
+| `/clases` | 16 |
+| `/clases/bachata` | 12 |
+| `/intensivos` | 4 |
+| resto | 1–3 |
+
+Toda la captación orgánica entra por tres URLs. Las 15 nuevas están hechas para ensanchar justo eso.
+
+## Lo que hay que saber al leer estos números
+
+1. **Consent Mode v2 arranca en `denied`.** Hasta que el visitante acepta el banner solo llegan pings sin cookies, así que GA4 infracuenta siempre. GSC dice 87 clics orgánicos y GA4 dice 92 sesiones de Organic Search: cuadran, pero no siempre lo harán.
+2. **Las 4 dimensiones personalizadas se crearon hoy y no son retroactivas.** `cta_origin` y `cta_label` empezarán a tener datos a partir de ahora, así que el desglose de qué página de entrada trae cada lead no estará disponible hasta dentro de unos días.
+3. **Los eventos clave se marcaron hoy.** Las conversiones históricas no se recalculan: el informe de conversiones empieza a contar desde hoy.
+
+## Conclusión que cruza las dos fuentes
+
+La web **convierte muy bien y recibe poco**. 22,8 % de clic a WhatsApp y 70 % de cierre de formulario con solo 92 sesiones de búsqueda en 28 días.
+
+El cuello de botella no es la web ni el copy: es que las consultas comerciales están en la página 2. Cada puesto que se suba se traduce casi en línea recta en leads, porque la conversión ya está resuelta.
