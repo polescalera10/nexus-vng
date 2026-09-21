@@ -13,6 +13,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { getModalidades, getModalidadBySlug } from "@/lib/queries/modalidades";
 import { mediaModalidades } from "@/content/media";
 import { articulosDeDisciplina } from "@/content/blog";
+import { EnlacesDeEntrada } from "@/components/seo/EnlacesDeEntrada";
 import { sesionesRegulares } from "@/content/horario-regular";
 import { precios } from "@/content/precios";
 import { profesoresDe } from "@/content/profesores";
@@ -318,6 +319,18 @@ export async function Modalidad({ slug, locale }: { slug: string; locale: Locale
                       </li>
                     ))}
                   </ul>
+                </Reveal>
+              )}
+
+              {/* Enlace de vuelta hacia las páginas de entrada que hablan de
+                  esta disciplina (content/paginas-seo). Solo en castellano:
+                  esas URLs no tienen versión catalana. */}
+              {locale === "es" && (
+                <Reveal as="div">
+                  <EnlacesDeEntrada
+                    href={`/clases/${m.slug}`}
+                    titulo={`Antes de apuntarte a ${nombre.toLocaleLowerCase("es-ES")}`}
+                  />
                 </Reveal>
               )}
             </>

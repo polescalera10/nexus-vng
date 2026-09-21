@@ -26,6 +26,11 @@ function explora(locale: Locale): Enlace[] {
   if (locale === "es") {
     return [
       { href: "/clases", label: t.clases },
+      // Las dos páginas de entrada con más intención de compra. Van en el pie
+      // porque el pie está en las 40 URLs: es el enlace interno más barato que
+      // hay y las saca de la profundidad 3 a la que las dejaría solo el blog.
+      { href: "/precios-clases-de-baile-vilanova", label: t.precios },
+      { href: "/aprender-a-bailar-desde-cero", label: t.empezar },
       { href: "/eventos", label: t.eventos },
       ...(hayBlog ? [{ href: "/blog", label: t.blog }] : []),
       { href: "/sobre-nosotros", label: t.sobreNosotros },
@@ -38,6 +43,7 @@ function explora(locale: Locale): Enlace[] {
     { href: "/ca/classes", label: t.clases },
     { href: "/ca/horaris", label: t.horarios },
     { href: "/ca/contacte", label: t.contacto },
+    { href: "/precios-clases-de-baile-vilanova", label: t.precios, soloEs: true },
     { href: "/socio-fundador", label: t.socioFundador, soloEs: true },
     { href: "/profesores", label: t.profesores, soloEs: true },
     { href: "/faq", label: t.faq, soloEs: true },

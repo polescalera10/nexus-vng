@@ -9,6 +9,8 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd, blogPostingLd } from "@/components/seo/JsonLd";
 import { getArticulo, listArticuloSlugs } from "@/content/blog";
 import { modalidadesContenido } from "@/content/modalidades";
+import { EnlacesDeEntrada } from "@/components/seo/EnlacesDeEntrada";
+import { paginasQueEnlazanA } from "@/content/paginas-seo";
 import { formatDate } from "@/lib/format";
 
 /*
@@ -117,6 +119,10 @@ export default async function ArticuloPage({ params }: Params) {
             </WaLink>
           </div>
 
+          {/* Páginas de entrada que mandan a este artículo: el enlace de
+              vuelta, derivado de `enlaces` en content/paginas-seo. */}
+          <EnlacesDeEntradaAside slug={a.slug} />
+
           {disciplinas.length > 0 && (
             <nav className="rounded-lg border border-white/8 bg-bg-panel p-6">
               <h2 className="font-display text-xl text-text-strong">De esto hablamos aquí</h2>
@@ -149,5 +155,24 @@ export default async function ArticuloPage({ params }: Params) {
         })}
       />
     </SupportPage>
+  );
+}
+
+/**
+ * `EnlacesDeEntrada` en formato de barra lateral.
+ *
+ * El componente compartido pinta una rejilla de tarjetas, que encaja al pie de
+ * una ficha pero no en la columna estrecha del artículo. Aquí se reutiliza su
+ * fuente de datos y se pinta como lista.
+ */
+function EnlacesDeEntradaAside({ slug }: { slug: string }) {
+  // Sin páginas que enlacen aquí, `EnlacesDeEntrada` devuelve null y el marco
+  // se quedaría como una caja vacía. Se comprueba antes de pintarlo.
+  if (paginasQueEnlazanA(`/blog/${slug}`).length === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-white/8 bg-bg-panel p-6 [&_h2]:text-xl [&_h3]:text-base">
+      <EnlacesDeEntrada href={`/blog/${slug}`} titulo="Y si quieres apuntarte" />
+    </div>
   );
 }

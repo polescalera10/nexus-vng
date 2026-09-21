@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { WaLink } from "@/components/ui/WaLink";
 import { JsonLd, faqLd } from "@/components/seo/JsonLd";
 import { faqGrupos, faqTodas } from "@/content/faq-completa";
+import { EnlacesDeEntrada } from "@/components/seo/EnlacesDeEntrada";
 
 export const metadata: Metadata = {
   title: "Preguntas frecuentes sobre clases de baile",
@@ -91,6 +92,9 @@ export default function FaqPage() {
             )}
           </section>
         ))}
+
+        {/* Las preguntas que tienen página propia, con su respuesta larga. */}
+        <EnlacesDeEntrada href="/faq" titulo="Con más detalle" />
 
         <div className="flex flex-col items-center gap-3">
           <WaLink origin="pagina" contextual variant="red" className="px-7 py-[15px]">

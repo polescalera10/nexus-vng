@@ -16,6 +16,14 @@ const PAGES = [
   "/horarios",
   "/faq",
   "/blog",
+  // Páginas de entrada SEO (content/paginas-seo). Llevan tabla en el cuerpo,
+  // que es justo lo que desborda a 320px si la columna no tiene `min-w-0`.
+  "/clases-de-salsa-en-vilanova",
+  "/clases-de-baile-sin-pareja",
+  "/aprender-a-bailar-desde-cero",
+  "/precios-clases-de-baile-vilanova",
+  "/clases-de-baile-sant-pere-de-ribes",
+  "/clases-de-baile-sitges",
 ];
 
 /** Diferencia entre el ancho del documento y el del viewport. */

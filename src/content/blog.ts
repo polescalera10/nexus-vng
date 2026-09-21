@@ -15,6 +15,15 @@
 // Cada artículo vive en su fichero (`content/blog/<slug>.ts`), generado desde
 // su borrador en `docs/borradores/`. Aquí solo se registran.
 import { salsaCubanaOBachata } from "@/content/blog/salsa-cubana-o-bachata";
+import { primeraClaseDeBaile } from "@/content/blog/primera-clase-de-baile";
+import { ruedaDeCasino } from "@/content/blog/rueda-de-casino";
+import { zapatosParaBailar } from "@/content/blog/zapatos-para-bailar";
+import { dondeBailarGarraf } from "@/content/blog/donde-bailar-garraf";
+import { cuantoSeTardaEnAprender } from "@/content/blog/cuanto-se-tarda-en-aprender";
+import { tiposDeBachata } from "@/content/blog/tipos-de-bachata";
+import { beneficiosDeBailar } from "@/content/blog/beneficios-de-bailar";
+import { bailarAPartirDeLos40 } from "@/content/blog/bailar-a-partir-de-los-40";
+import { comoElegirEscuelaDeBaile } from "@/content/blog/como-elegir-escuela-de-baile";
 
 export type Articulo = {
   slug: string;
@@ -39,7 +48,18 @@ export type Articulo = {
   cuerpo: string;
 };
 
-export const articulos: Articulo[] = [salsaCubanaOBachata];
+export const articulos: Articulo[] = [
+  salsaCubanaOBachata,
+  primeraClaseDeBaile,
+  ruedaDeCasino,
+  zapatosParaBailar,
+  dondeBailarGarraf,
+  cuantoSeTardaEnAprender,
+  tiposDeBachata,
+  beneficiosDeBailar,
+  bailarAPartirDeLos40,
+  comoElegirEscuelaDeBaile,
+];
 
 /** Más reciente primero. */
 export function articulosOrdenados(lista: readonly Articulo[] = articulos): Articulo[] {

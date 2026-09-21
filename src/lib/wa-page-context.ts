@@ -1,4 +1,5 @@
 import { modalidadesFallback } from "@/content/landing";
+import { getPaginaSeo } from "@/content/paginas-seo";
 import { idiomaDeRuta } from "@/i18n/rutas";
 
 /**
@@ -131,6 +132,20 @@ export function waContextModalidad(slug: string, nombre?: string, locale: "es" |
   };
 }
 
+/**
+ * Contexto de una página de entrada SEO (`/[slug]`).
+ *
+ * El mensaje lo escribe la propia página (`waMensaje`), no este archivo: cada
+ * una ataca una consulta distinta y el primer mensaje del chat tiene que
+ * decirlo ("no tengo pareja", "vivo en Ribes"). Si el slug no existe en el
+ * registro, se cae al mensaje neutro en vez de inventar uno.
+ */
+export function waContextPaginaSeo(slug: string): WaPageContext {
+  const pagina = getPaginaSeo(slug);
+  if (!pagina) return DEFAULT;
+  return { label: `entrada:${slug}`, message: pagina.waMensaje };
+}
+
 export function waContextEvento(slug: string, titulo?: string): WaPageContext {
   return {
     label: `evento:${slug}`,
@@ -167,7 +182,9 @@ export function waContextForPath(pathname: string | null | undefined): WaPageCon
   if (exact) return exact;
 
   const [, section, slug] = path.split("/");
-  if (!slug) return DEFAULT;
+  // Páginas de entrada SEO: son de primer nivel, así que aquí `section` ya es
+  // su slug entero y no hay segundo segmento.
+  if (!slug) return section ? waContextPaginaSeo(section) : DEFAULT;
   if (section === "clases") return waContextModalidad(slug);
   if (section === "eventos") return waContextEvento(slug);
   if (section === "profesores") return waContextProfesor(slug);

@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { HorarioSemanal } from "@/components/landing/HorarioSemanal";
 import { Negritas } from "@/components/ui/Negritas";
 import { WaLink } from "@/components/ui/WaLink";
+import { EnlacesDeEntrada } from "@/components/seo/EnlacesDeEntrada";
 import { modalidadesFallback } from "@/content/landing";
 import { modalidadesContenido } from "@/content/modalidades";
 import { landingEn, nombreModalidad } from "@/content/por-idioma";
@@ -163,6 +164,12 @@ export function Horarios({ locale }: { locale: Locale }) {
             <p className="font-body text-text-faint mt-3 text-[13px]">{t.nota}</p>
           </aside>
         </section>
+
+        {/* Enlace de vuelta a las páginas de entrada que mandan aquí
+            (content/paginas-seo). Solo en castellano: no tienen versión ca. */}
+        {locale === "es" && (
+          <EnlacesDeEntrada href="/horarios" titulo="Antes de mirar el cartel" />
+        )}
       </div>
     </SupportPage>
   );

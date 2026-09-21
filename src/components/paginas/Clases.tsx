@@ -9,6 +9,7 @@ import { Precios } from "@/components/landing/Precios";
 import { InterestLeadForm, type InterestGroup } from "@/components/forms/InterestLeadForm";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd, courseListLd } from "@/components/seo/JsonLd";
+import { EnlacesDeEntrada } from "@/components/seo/EnlacesDeEntrada";
 import { cursoRegularGrupos, sesionesRegulares } from "@/content/horario-regular";
 import { portadaAnchaModalidad } from "@/content/media";
 import { altEn, descripcionModalidad, nombreModalidad } from "@/content/por-idioma";
@@ -225,6 +226,16 @@ export async function Clases({ locale }: { locale: Locale }) {
             <Precios locale={locale} />
           </div>
         </section>
+
+        {/* Páginas de entrada que enlazan al catálogo. El enlace de vuelta
+            (content/paginas-seo), solo en castellano: no tienen versión ca. */}
+        {locale === "es" && (
+          <section className="bg-bg-base py-[clamp(48px,8vw,88px)]">
+            <div className="container-nexus">
+              <EnlacesDeEntrada href="/clases" titulo="Las dudas de antes de elegir clase" />
+            </div>
+          </section>
+        )}
 
         {/* Formulario */}
         <section id="apuntarme" className="bg-bg-base scroll-mt-24 py-[clamp(48px,8vw,96px)]">

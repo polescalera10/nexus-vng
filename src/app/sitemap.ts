@@ -6,6 +6,7 @@ import { getModalidadesSitemap } from "@/lib/queries/modalidades";
 import { getEventosSitemap } from "@/lib/queries/eventos";
 import { listadoIndexable } from "@/lib/indexable";
 import { articulos } from "@/content/blog";
+import { paginasSeo } from "@/content/paginas-seo";
 
 /**
  * Sitemap: SOLO URLs canónicas e indexables.
@@ -76,6 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...articulos.map((a) => ({
       url: `${base}/blog/${a.slug}`,
       lastModified: new Date(`${a.actualizado}T00:00:00Z`),
+    })),
+    // Páginas de entrada SEO: son de primer nivel y llevan su propia fecha,
+    // así que no pasan por `actualizaciones.ts` (mismo criterio que el blog).
+    ...paginasSeo.map((p) => ({
+      url: `${base}/${p.slug}`,
+      lastModified: new Date(`${p.actualizado}T00:00:00Z`),
     })),
   ];
 }
