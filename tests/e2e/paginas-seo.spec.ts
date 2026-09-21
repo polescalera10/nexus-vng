@@ -17,6 +17,7 @@ const PAGINAS = [
   { path: "/precios-clases-de-baile-vilanova", h1: "Precios de las clases de baile en Vilanova i la Geltrú" },
   { path: "/clases-de-baile-sant-pere-de-ribes", h1: "Clases de baile en Sant Pere de Ribes" },
   { path: "/clases-de-baile-sitges", h1: "Clases de baile cerca de Sitges" },
+  { path: "/clases-de-baile-en-tacones", h1: "Clases de baile en tacones en Vilanova i la Geltrú" },
 ];
 
 for (const { path, h1 } of PAGINAS) {

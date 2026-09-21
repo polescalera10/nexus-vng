@@ -45,6 +45,7 @@ import { desdeCero } from "@/content/paginas-seo/aprender-a-bailar-desde-cero";
 import { preciosBaile } from "@/content/paginas-seo/precios-clases-de-baile-vilanova";
 import { santPereDeRibes } from "@/content/paginas-seo/clases-de-baile-sant-pere-de-ribes";
 import { sitges } from "@/content/paginas-seo/clases-de-baile-sitges";
+import { enTacones } from "@/content/paginas-seo/clases-de-baile-en-tacones";
 
 export type EnlaceSeo = {
   /** Ruta interna ("/clases/salsa-cubana"). */
@@ -107,6 +108,7 @@ export const paginasSeo: PaginaSeo[] = [
   preciosBaile,
   santPereDeRibes,
   sitges,
+  enTacones,
 ];
 
 export function getPaginaSeo(slug: string): PaginaSeo | undefined {

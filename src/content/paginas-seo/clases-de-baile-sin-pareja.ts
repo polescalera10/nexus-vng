@@ -111,9 +111,9 @@ Esa es la otra mitad de la pregunta, y es la que de verdad importa. La rotación
       texto: "Si además de venir solo es la primera vez que bailas, empieza por aquí.",
     },
     {
-      href: "/clases/lady-style-salsa",
-      label: "Lady style salsa",
-      texto: "Una de las clases que se bailan en solitario de principio a fin.",
+      href: "/clases-de-baile-en-tacones",
+      label: "Clases de baile en tacones",
+      texto: "Heels, sexy style y lady style: las tres, en solitario y con tacón.",
     },
     {
       href: "/blog/primera-clase-de-baile-que-esperar",

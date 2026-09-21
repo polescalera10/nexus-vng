@@ -43,6 +43,29 @@ export type ModalidadContenido = {
   estilos: string[];
   /** Enlaces cruzados al final de la página: 2–3 disciplinas y por qué. */
   relacionadas: { slug: string; text: string }[];
+  /**
+   * Título y H1 propios, cuando la plantilla "Clases de {nombre} en {ciudad}"
+   * manda la señal equivocada.
+   *
+   * Por qué existe (21-09-2026): Search Console enseñó que
+   * `/clases/cia-bachata-lady` se llevaba 62 impresiones en posición 14,4
+   * mientras `/clases/lady-style-bachata` se quedaba en 10. Las dos llevaban
+   * "bachata lady" en el title, así que Google elegía entre ellas — y elegía la
+   * de COMPAÑÍA, que es un grupo por audición y no vende clases a nadie que
+   * llegue de una búsqueda. El grupo de compañía no compite por la consulta de
+   * clase: se presenta como lo que es.
+   *
+   * Regla: si se añade aquí un title, que NO repita la consulta que ya tiene
+   * otra ficha. Lo comprueba `tests/unit/modalidad-seo.test.ts`.
+   */
+  seo?: {
+    /** Title SEO sin el sufijo " · NEXUS VNG": ≤48 caracteres. */
+    title?: string;
+    /** H1 visible. */
+    h1?: string;
+    /** Aviso al principio de la página para quien ha llegado por error. */
+    aviso?: { texto: string; enlace: { href: string; label: string } };
+  };
 };
 
 /**
@@ -376,6 +399,12 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
   },
 
   "lady-style-bachata": {
+    // La gente busca "bachata lady", no "lady style bachata". El title lleva
+    // las dos formas: esta es la ficha que tiene que quedarse esa consulta.
+    seo: {
+      title: "Clases de bachata lady en Vilanova",
+      h1: "Clases de bachata lady (lady style) en Vilanova i la Geltrú",
+    },
     lead:
       "El lenguaje corporal de la bachata, entrenado en solitario. Ondas, cadera, brazos y musicalidad para que tu bachata se vea como suena.",
     queEsTitle: "¿Qué es Lady Style Bachata?",
@@ -555,6 +584,15 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
   },
 
   "cia-salsa": {
+    // Mismo caso que la compañía de bachata lady: proyecto, no clase.
+    seo: {
+      title: "Compañía de salsa en Vilanova i la Geltrú",
+      h1: "Compañía de salsa en Vilanova i la Geltrú",
+      aviso: {
+        texto: "¿Buscabas las clases de salsa? Esta página es el grupo de compañía, al que se entra por audición.",
+        enlace: { href: "/clases-de-salsa-en-vilanova", label: "Ir a las clases de salsa" },
+      },
+    },
     lead:
       "El grupo de compañía de salsa: montaje coreográfico, ensayo continuo y actuaciones. No es una clase suelta — es un proyecto de temporada.",
     queEsTitle: "¿Qué es la Cía Salsa?",
@@ -615,6 +653,16 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
   },
 
   "cia-bachata-lady": {
+    // No es una clase: es un proyecto de temporada con audición. Que el title
+    // lo diga, para dejar de robarle "bachata lady" a la ficha que sí capta.
+    seo: {
+      title: "Compañía de bachata lady en Vilanova",
+      h1: "Compañía de bachata lady en Vilanova i la Geltrú",
+      aviso: {
+        texto: "¿Buscabas la clase de bachata lady? Esta página es el grupo de compañía, al que se entra por audición.",
+        enlace: { href: "/clases/lady-style-bachata", label: "Ir a las clases de bachata lady" },
+      },
+    },
     lead:
       "El grupo de compañía de bachata lady: montaje coreográfico, ensayo continuo y actuaciones. Un proyecto de temporada, no una clase suelta.",
     queEsTitle: "¿Qué es la Cía Bachata Lady?",

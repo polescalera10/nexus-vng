@@ -24,6 +24,7 @@ const PAGES = [
   "/precios-clases-de-baile-vilanova",
   "/clases-de-baile-sant-pere-de-ribes",
   "/clases-de-baile-sitges",
+  "/clases-de-baile-en-tacones",
 ];
 
 /** Diferencia entre el ancho del documento y el del viewport. */

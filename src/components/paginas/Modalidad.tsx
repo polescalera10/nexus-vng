@@ -79,7 +79,7 @@ export async function Modalidad({ slug, locale }: { slug: string; locale: Locale
          mismo es la señal on-page más básica y aquí el h1 se la estaba
          saltando. El nombre corto se mantiene como kicker. */
       eyebrow={nombre}
-      title={t.h1(nombre, site.locality)}
+      title={contenido?.seo?.h1 ?? t.h1(nombre, site.locality)}
       intro={contenido?.lead ?? m.descripcion ?? undefined}
     >
       {/* Los CTA globales (sticky, cabecera, footer) escriben sobre ESTA disciplina. */}
@@ -92,6 +92,22 @@ export async function Modalidad({ slug, locale }: { slug: string; locale: Locale
           { name: nombre, path: ruta },
         ]}
       />
+
+      {/* Aviso de desvío: quien busca la CLASE y cae en el grupo de compañía
+          tiene aquí el enlace bueno antes de leer nada más. */}
+      {contenido?.seo?.aviso && locale === "es" && (
+        <div className="mt-6 rounded-lg border border-neon/25 bg-bg-elevated/60 p-4">
+          <p className="font-body text-[15px] leading-relaxed text-text-body">
+            {contenido.seo.aviso.texto}{" "}
+            <Link
+              href={contenido.seo.aviso.enlace.href}
+              className="font-semibold text-neon no-underline hover:underline"
+            >
+              {contenido.seo.aviso.enlace.label} &rarr;
+            </Link>
+          </p>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <div className="space-y-12">

@@ -32,9 +32,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   */
   const base = t.title(m.nombre);
   const titleLargo = `${base}Vilanova i la Geltrú`;
+  // Una ficha puede reclamar su propio title cuando la plantilla manda la
+  // señal equivocada (grupos de compañía: ver `seo` en content/modalidades.ts).
+  const title = contenido?.seo?.title ?? (titleLargo.length <= 48 ? titleLargo : `${base}Vilanova`);
 
   return {
-    title: titleLargo.length <= 48 ? titleLargo : `${base}Vilanova`,
+    title,
     description,
     alternates: { canonical: `/clases/${m.slug}` },
     openGraph: { title: t.ogTitle(m.nombre), description: ogDescription, images: ogImages },
