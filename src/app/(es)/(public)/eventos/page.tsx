@@ -73,7 +73,13 @@ export default async function EventosPage() {
         ]}
       />
 
-      <ul className="mt-8 grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-6 p-0 list-none">
+      {/*
+        Las columnas se topan en 420px en vez de estirarse (`1fr`): con un solo
+        evento publicado, una tarjeta a todo el ancho y una portada en 4:5 daba
+        un cartel de más de mil píxeles de alto. `justify-center` centra la fila
+        cuando no llega a llenar el ancho.
+      */}
+      <ul className="mt-8 grid list-none grid-cols-[repeat(auto-fit,minmax(min(300px,100%),420px))] justify-center gap-6 p-0">
         {eventos.map((e) => {
           const cover = safeImageSrc(e.cover_image_url);
 
@@ -83,13 +89,24 @@ export default async function EventosPage() {
                 href={`/eventos/${e.slug}`}
                 className="group overflow-hidden rounded-lg border border-white/8 bg-bg-panel shadow-soft hover:border-neon/30 hover:shadow-card hover:-translate-y-1 transition-all duration-300 block no-underline text-inherit"
               >
-                {/* Cabecera de la tarjeta con imagen o fallback */}
-                <div className="overflow-hidden h-48 relative bg-bg-elevated">
+                {/*
+                  Cabecera con la portada entera, nunca recortada: la de un
+                  evento es el cartel, y un `object-cover` en una franja baja se
+                  come el título, la fecha y el precio — justo lo que hay que
+                  leer desde el listado. La caja va en 4:5, que es el formato en
+                  el que salen los carteles de Instagram: ahí el cartel llena el
+                  hueco sin barras, y una foto apaisada se centra sobre el panel
+                  en vez de perder los bordes.
+
+                  Por lo mismo no hay zoom al pasar por encima: con `contain`,
+                  agrandar la imagen la saca de la caja y vuelve a recortarla.
+                */}
+                <div className="relative aspect-[4/5] overflow-hidden bg-bg-elevated">
                   {cover ? (
                     <img
                       src={cover}
                       alt={e.titulo}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      className="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-90"
                     />
                   ) : (
                     <PhotoPlaceholder
