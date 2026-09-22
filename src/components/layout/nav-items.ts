@@ -1,29 +1,24 @@
 /**
  * Enlaces de navegación del sitio público.
- * Fuente única para la cabecera de escritorio y el menú móvil, de modo que
- * ambos no se desincronicen.
+ * Fuente única para la cabecera de la landing, la de las páginas de soporte y
+ * el menú móvil: una sola lista para que no se desincronicen (hasta el
+ * 22-09-2026 la landing enseñaba «Horarios» y las de soporte «Intensivos»).
  */
 import type { Locale } from "@/i18n/locales";
 
 export type NavLink = { href: string; label: string };
 
-/** Nav de la landing (cabecera transparente sobre el hero). */
-export const NAV_LANDING: readonly NavLink[] = [
+/**
+ * Nav del sitio en castellano. `/intensivos` NO va aquí: la edición de agosto
+ * terminó y la página se queda solo como histórico (la enlazan las páginas SEO
+ * y el sitemap), no como una oferta activa.
+ */
+export const NAV_ES: readonly NavLink[] = [
   { href: "/clases", label: "Clases" },
   { href: "/socio-fundador", label: "Socio fundador" },
   { href: "/profesores", label: "Profesores" },
   { href: "/eventos", label: "Eventos" },
   { href: "/horarios", label: "Horarios" },
-  { href: "/faq", label: "FAQ" },
-];
-
-/** Nav de las páginas de soporte (cabecera sólida). */
-export const NAV_SITE: readonly NavLink[] = [
-  { href: "/clases", label: "Clases" },
-  { href: "/socio-fundador", label: "Socio fundador" },
-  { href: "/intensivos", label: "Intensivos" },
-  { href: "/profesores", label: "Profesores" },
-  { href: "/eventos", label: "Eventos" },
   { href: "/faq", label: "FAQ" },
 ];
 
@@ -37,7 +32,6 @@ export const NAV_CA: readonly NavLink[] = [
   { href: "/ca/contacte", label: "Contacte" },
 ];
 
-export function navEn(locale: Locale, variante: "landing" | "site"): readonly NavLink[] {
-  if (locale === "ca") return NAV_CA;
-  return variante === "landing" ? NAV_LANDING : NAV_SITE;
+export function navEn(locale: Locale): readonly NavLink[] {
+  return locale === "ca" ? NAV_CA : NAV_ES;
 }

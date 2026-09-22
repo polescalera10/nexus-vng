@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Datos fijos de los e2e del área privada. Solo existen en el Supabase LOCAL
@@ -6,6 +7,11 @@ import type { Page } from "@playwright/test";
  * el repo a propósito y no vale para nada fuera de ese contenedor.
  */
 
+/**
+ * Los usuarios se siguen creando con contraseña (la API de administración de
+ * Auth la pide para crear la identidad), pero el login de la web ya no la
+ * acepta: se entra por enlace. Ver `entrarComo`.
+ */
 export const E2E_PASSWORD = "e2e-solo-local-Nexus-1";
 
 export const USERS = {
@@ -47,10 +53,29 @@ export const IDS = {
   pointEvent: "e2e00000-0000-4000-8000-000000000061",
 } as const;
 
-/** Rellena y envía el login por contraseña (hay que estar ya en /area-privada). */
-export async function fillPasswordLogin(page: Page, email: string, password = E2E_PASSWORD) {
-  await page.getByRole("tab", { name: "Contraseña" }).click();
-  await page.locator("#email").fill(email);
-  await page.locator("#password").fill(password);
-  await page.getByRole("button", { name: "Entrar" }).click();
+/**
+ * Entra en el panel como `email`. El login de la web es solo por enlace, así
+ * que no hay formulario que rellenar: se pide un magic link por la API de
+ * administración y se abre el callback igual que haría el correo. Recorre el
+ * mismo camino que un usuario real (verifyOtp + cookie de sesión del servidor),
+ * sin depender de Inbucket.
+ */
+export async function entrarComo(page: Page, email: string, next = "/area-privada") {
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+
+  const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
+  const tokenHash = data?.properties?.hashed_token;
+  if (error || !tokenHash) {
+    throw new Error(`[e2e] generateLink ${email}: ${error?.message ?? "sin token"}`);
+  }
+
+  const callback = new URL("/area-privada/callback", "http://localhost");
+  callback.searchParams.set("token_hash", tokenHash);
+  callback.searchParams.set("type", "magiclink");
+  callback.searchParams.set("next", next);
+  await page.goto(`${callback.pathname}${callback.search}`);
 }

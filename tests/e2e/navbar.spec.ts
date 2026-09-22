@@ -118,7 +118,9 @@ test.describe("navegación en móvil", () => {
     await page.getByTestId("mobile-nav-toggle").click();
 
     const panel = page.getByTestId("mobile-nav-panel");
-    await expect(panel.getByRole("link", { name: "Intensivos" })).toBeVisible();
+    // Misma lista que en la landing: una sola fuente en nav-items.ts.
+    await expect(panel.getByRole("link", { name: "Socio fundador" })).toBeVisible();
+    await expect(panel.getByRole("link", { name: "Horarios" })).toBeVisible();
   });
 
   test("con el menú abierto el fondo no se desplaza", async ({ page }) => {

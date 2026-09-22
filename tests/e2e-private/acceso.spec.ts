@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { fillPasswordLogin, storageStatePath, USERS } from "./fixtures";
+import { entrarComo, storageStatePath, USERS } from "./fixtures";
 
 /**
  * Login, cierre de sesión y reparto por rol. Es la puerta de todo el panel:
@@ -13,27 +13,35 @@ test.describe("sin sesión", () => {
     await expect(page.getByRole("heading", { name: "Área privada" })).toBeVisible();
   });
 
-  test("con la contraseña mal no entra", async ({ page }) => {
+  test("el login es solo por enlace: no hay contraseña", async ({ page }) => {
     await page.goto("/area-privada");
-    await fillPasswordLogin(page, USERS.admin.email, "no-es-la-contraseña");
+    await expect(page.getByRole("tab", { name: "Contraseña" })).toHaveCount(0);
+    await expect(page.locator("#password")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Enviarme el enlace" })).toBeVisible();
+  });
+
+  test("con un email que no es de nadie no manda enlace", async ({ page }) => {
+    await page.goto("/area-privada");
+    await page.locator("#email").fill("no-existe-e2e@example.com");
+    await page.getByRole("button", { name: "Enviarme el enlace" }).click();
     // Filtrado por texto: Next monta su propio role="alert" vacío (el anunciador
     // de rutas) en todas las páginas.
     await expect(
-      page.getByRole("alert").filter({ hasText: "Email o contraseña incorrectos." }),
+      page.getByRole("alert").filter({ hasText: "No hemos podido enviar el enlace" }),
     ).toBeVisible();
     await expect(page).toHaveURL(/\/area-privada$/);
   });
 
   test("tras entrar vuelve a la página que se pidió", async ({ page }) => {
     await page.goto("/area-privada/admin/leads");
-    await fillPasswordLogin(page, USERS.admin.email);
+    await expect(page).toHaveURL(/redirect=%2Farea-privada%2Fadmin%2Fleads$/);
+    await entrarComo(page, USERS.admin.email, "/area-privada/admin/leads");
     await expect(page).toHaveURL(/\/area-privada\/admin\/leads$/);
     await expect(page.getByRole("heading", { name: "Leads", level: 1 })).toBeVisible();
   });
 
   test("cerrar sesión devuelve al login y el panel ya no abre", async ({ page }) => {
-    await page.goto("/area-privada");
-    await fillPasswordLogin(page, USERS.salida.email);
+    await entrarComo(page, USERS.salida.email);
     await expect(page).toHaveURL(/\/area-privada\/alumno$/);
 
     // En móvil y en escritorio hay un botón distinto (cabecera / barra lateral):

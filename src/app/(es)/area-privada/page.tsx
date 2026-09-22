@@ -31,7 +31,8 @@ export default async function AreaPrivadaLoginPage({
         <div className="rounded-xl border border-text-strong/8 bg-bg-panel p-8 shadow-card">
           <h1 className="font-display text-3xl text-text-strong">Área privada</h1>
           <p className="mb-6 mt-1 font-body text-sm text-text-muted">
-            Accede con tu cuenta de alumno, profesor o admin.
+            Pon el email de tu cuenta de alumno, profesor o admin y te
+            mandamos un enlace para entrar.
           </p>
           <LoginForm initialError={sp.error === "enlace"} redirectTo={redirectTo} />
         </div>

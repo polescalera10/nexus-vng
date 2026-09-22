@@ -14,7 +14,7 @@ import Link from "next/link";
 // z-[75] en la cabecera: por encima del panel de MobileNav (z-[65], montado
 // en <body>) para que la hamburguesa siga visible y pulsable con el menú abierto.
 export function Header({ locale = "es" }: { locale?: Locale }) {
-  const items = navEn(locale, "landing");
+  const items = navEn(locale);
   return (
     <header className="absolute inset-x-0 top-0 z-[75]">
       <div className="container-nexus flex items-center justify-between py-4 md:py-6">
