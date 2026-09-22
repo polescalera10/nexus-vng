@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 
 /**
@@ -54,18 +55,27 @@ export const IDS = {
 } as const;
 
 /**
- * Entra en el panel como `email`. El login de la web es solo por enlace, así
- * que no hay formulario que rellenar: se pide un magic link por la API de
- * administración y se abre el callback igual que haría el correo. Recorre el
- * mismo camino que un usuario real (verifyOtp + cookie de sesión del servidor),
- * sin depender de Inbucket.
+ * Entra en el panel como `email`, sin pasar por el formulario: el login de la
+ * web es solo por enlace y el correo no llega a un test.
+ *
+ * Se pide un enlace con la API de administración, se canjea AQUÍ (en Node) con
+ * el mismo `@supabase/ssr` que usa la app y se meten en el navegador las
+ * cookies tal cual las escribiría el servidor. Así la clave de la cookie, el
+ * troceado y el formato salen de la librería, no de una copia a mano.
+ *
+ * Lo que este atajo NO cubre es la ruta `/area-privada/callback`: en el
+ * servidor de los e2e la redirección sale con host `localhost` mientras que
+ * `baseURL` es `127.0.0.1`, así que la cookie de sesión se quedaría por el
+ * camino. La parte del formulario (qué se envía y qué avisa) está cubierta en
+ * `tests/unit/login-form.test.tsx`.
  */
 export async function entrarComo(page: Page, email: string, next = "/area-privada") {
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 
   const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
   const tokenHash = data?.properties?.hashed_token;
@@ -73,9 +83,39 @@ export async function entrarComo(page: Page, email: string, next = "/area-privad
     throw new Error(`[e2e] generateLink ${email}: ${error?.message ?? "sin token"}`);
   }
 
-  const callback = new URL("/area-privada/callback", "http://localhost");
-  callback.searchParams.set("token_hash", tokenHash);
-  callback.searchParams.set("type", "magiclink");
-  callback.searchParams.set("next", next);
-  await page.goto(`${callback.pathname}${callback.search}`);
+  const escritas: { name: string; value: string; options?: { maxAge?: number } }[] = [];
+  const servidor = createServerClient(url, anon, {
+    cookies: {
+      getAll: () => [],
+      setAll: (cookies) => {
+        escritas.push(...cookies);
+      },
+    },
+  });
+
+  const verificado = await servidor.auth.verifyOtp({ type: "magiclink", token_hash: tokenHash });
+  if (verificado.error || !verificado.data.session) {
+    throw new Error(`[e2e] verifyOtp ${email}: ${verificado.error?.message ?? "sin sesión"}`);
+  }
+  if (escritas.length === 0) {
+    throw new Error(`[e2e] verifyOtp ${email}: no escribió ninguna cookie de sesión`);
+  }
+
+  // Mismo host que `baseURL` en playwright.private.config.ts: una cookie de
+  // 127.0.0.1 no viaja a localhost aunque sea el mismo servidor.
+  const base = new URL(`http://127.0.0.1:${process.env.E2E_PRIVATE_PORT ?? 3300}`);
+  await page.context().addCookies(
+    escritas.map(({ name, value, options }) => ({
+      name,
+      value,
+      domain: base.hostname,
+      path: "/",
+      expires: Math.floor(Date.now() / 1000) + (options?.maxAge ?? 3600),
+      httpOnly: false,
+      secure: base.protocol === "https:",
+      sameSite: "Lax" as const,
+    })),
+  );
+
+  await page.goto(next);
 }

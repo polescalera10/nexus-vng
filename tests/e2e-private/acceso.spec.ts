@@ -32,7 +32,7 @@ test.describe("sin sesión", () => {
     await expect(page).toHaveURL(/\/area-privada$/);
   });
 
-  test("tras entrar vuelve a la página que se pidió", async ({ page }) => {
+  test("con sesión, la página privada que se pidió abre", async ({ page }) => {
     await page.goto("/area-privada/admin/leads");
     await expect(page).toHaveURL(/redirect=%2Farea-privada%2Fadmin%2Fleads$/);
     await entrarComo(page, USERS.admin.email, "/area-privada/admin/leads");
