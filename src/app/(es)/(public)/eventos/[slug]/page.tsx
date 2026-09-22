@@ -92,6 +92,7 @@ export default async function EventoDetailPage({ params }: Params) {
    * 3600) no puede colar una inscripción tardía.
    */
   const inscripcionAbierta = admiteInscripcion(e);
+  const portada = safeImageSrc(e.cover_image_url);
 
   return (
     <SupportPage
@@ -110,6 +111,26 @@ export default async function EventoDetailPage({ params }: Params) {
           ]}
         />
       </div>
+
+      {/*
+        El cartel, entero y arriba: es donde están la fecha, la hora, el precio
+        y la sala, y hasta ahora solo se usaba para la miniatura de redes — quien
+        llegaba desde el listado lo perdía al entrar. Va acotado a 420px y
+        centrado porque es vertical (4:5): a todo el ancho de la ficha sería una
+        pantalla entera de imagen antes de leer una sola línea.
+      */}
+      {portada && (
+        <figure className="mb-10">
+          <img
+            src={portada}
+            alt={`Cartel de ${e.titulo}`}
+            width={1080}
+            height={1350}
+            className="mx-auto w-full max-w-[420px] rounded-lg border border-white/8 shadow-card"
+          />
+        </figure>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         {/* Contenido en Markdown */}
         <article className="bg-bg-panel rounded-lg border border-white/8 p-8 shadow-soft">
@@ -171,15 +192,12 @@ export default async function EventoDetailPage({ params }: Params) {
           aria-labelledby="inscripcion-titulo"
           className="mt-12 scroll-mt-24 rounded-lg border border-white/8 bg-bg-panel p-6 shadow-card sm:p-8"
         >
-          <h2 id="inscripcion-titulo" className="font-display text-3xl text-text-strong">
-            Apúntate a la masterclass
-          </h2>
-          <p className="mt-2 max-w-[60ch] font-body text-[15px] leading-relaxed text-text-muted">
-            Plazas limitadas. Déjanos tus datos y te escribimos para confirmarte la plaza.
-          </p>
-          <div className="mt-6 max-w-[640px]">
-            <MasterclassLeadForm eventoSlug={e.slug} eventoTitulo={e.titulo} />
-          </div>
+          {/* El título y el texto los pone el formulario: cambian al enviarlo. */}
+          <MasterclassLeadForm
+            eventoSlug={e.slug}
+            eventoTitulo={e.titulo}
+            tituloId="inscripcion-titulo"
+          />
         </section>
       )}
 
