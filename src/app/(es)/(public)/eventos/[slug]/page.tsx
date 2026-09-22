@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import { SupportPage } from "@/components/layout/SupportPage";
 import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
 import { WaLink } from "@/components/ui/WaLink";
+import { MasterclassLeadForm } from "@/components/forms/MasterclassLeadForm";
 import { SetWaPageContext } from "@/components/ui/WaPageContext";
 import { waContextEvento } from "@/lib/wa-page-context";
 import { getEventoBySlug, getEventoSlugs } from "@/lib/queries/eventos";
+import { admiteInscripcion } from "@/lib/eventos";
 import { JsonLd, eventLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ogImages, metaDescripcion, primeraImagenMarkdown } from "@/lib/seo";
@@ -83,6 +85,14 @@ export default async function EventoDetailPage({ params }: Params) {
     ...(e.capacidad !== null ? [{ label: "Aforo", value: `${e.capacidad} plazas` }] : []),
   ];
 
+  /*
+   * El formulario solo se pinta en masterclasses que no han terminado. La misma
+   * regla la aplica la Server Action (`admiteInscripcion`), así que una página
+   * cacheada que se quede colgada hasta una hora tras el evento (revalidate =
+   * 3600) no puede colar una inscripción tardía.
+   */
+  const inscripcionAbierta = admiteInscripcion(e);
+
   return (
     <SupportPage
       eyebrow={`Evento · ${EVENTO_TIPO_LABELS[e.tipo].toUpperCase()}`}
@@ -111,9 +121,18 @@ export default async function EventoDetailPage({ params }: Params) {
           <div className="rounded-lg border border-white/8 bg-bg-panel p-6 shadow-card h-fit">
             <h2 className="font-display text-2xl text-text-strong">¿Te animas a venir?</h2>
             <p className="mt-2 font-body text-[15px] text-text-muted leading-relaxed">
-              Reserva tu plaza o consúltanos cualquier duda sobre este evento directamente por WhatsApp. Te responderemos encantados de inmediato.
+              {inscripcionAbierta
+                ? "Rellena el formulario del final y te confirmamos la plaza. Si prefieres preguntar antes, escríbenos por WhatsApp."
+                : "Reserva tu plaza o consúltanos cualquier duda sobre este evento directamente por WhatsApp. Te responderemos encantados de inmediato."}
             </p>
-            {e.cta_url ? (
+            {inscripcionAbierta ? (
+              <a
+                href="#inscripcion"
+                className="mt-6 inline-flex w-full items-center justify-center rounded-sm bg-neon py-[15px] font-body text-sm font-bold text-ink no-underline"
+              >
+                Apuntarme a la masterclass
+              </a>
+            ) : e.cta_url ? (
               <a
                 href={e.cta_url}
                 target="_blank"
@@ -142,13 +161,28 @@ export default async function EventoDetailPage({ params }: Params) {
                   <strong>{d.label}:</strong> {d.value}
                 </li>
               ))}
-              <li>
-                <strong>Nivel:</strong> abierto a todos los niveles de baile.
-              </li>
             </ul>
           </div>
         </aside>
       </div>
+      {inscripcionAbierta && (
+        <section
+          id="inscripcion"
+          aria-labelledby="inscripcion-titulo"
+          className="mt-12 scroll-mt-24 rounded-lg border border-white/8 bg-bg-panel p-6 shadow-card sm:p-8"
+        >
+          <h2 id="inscripcion-titulo" className="font-display text-3xl text-text-strong">
+            Apúntate a la masterclass
+          </h2>
+          <p className="mt-2 max-w-[60ch] font-body text-[15px] leading-relaxed text-text-muted">
+            Plazas limitadas. Déjanos tus datos y te escribimos para confirmarte la plaza.
+          </p>
+          <div className="mt-6 max-w-[640px]">
+            <MasterclassLeadForm eventoSlug={e.slug} eventoTitulo={e.titulo} />
+          </div>
+        </section>
+      )}
+
       <JsonLd
         data={eventLd({
           titulo: e.titulo,

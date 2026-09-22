@@ -6,7 +6,14 @@ import { postToN8n } from "@/lib/n8n/client";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { TURNSTILE_ERROR_MESSAGE, verifyTurnstile } from "@/lib/turnstile";
 import { TURNSTILE_RESPONSE_FIELD } from "@/lib/turnstile-shared";
-import { interestLeadSchema, leadEstadoSchema, leadSchema } from "@/lib/validation/lead";
+import {
+  interestLeadSchema,
+  leadEstadoSchema,
+  leadSchema,
+  masterclassLeadSchema,
+} from "@/lib/validation/lead";
+import { getEventoBySlug } from "@/lib/queries/eventos";
+import { admiteInscripcion } from "@/lib/eventos";
 import { esLocale, type Locale } from "@/i18n/locales";
 import { ERRORES_CA, tServidor } from "@/i18n/textos/comun";
 
@@ -222,6 +229,93 @@ export async function submitInterestLead(
     status: "success",
     message: t.graciasSolicitud,
   };
+}
+
+/**
+ * Server Action del formulario de inscripción a una MASTERCLASS (al final de la
+ * ficha pública del evento). Guarda nombre completo, teléfono y email, los tres
+ * obligatorios, con el consentimiento RGPD.
+ *
+ * El `evento_slug` del campo oculto NO se guarda tal cual como etiqueta: se usa
+ * para releer la ficha (pública y de tipo `masterclass`) y de ahí salen el
+ * título que se escribe en el CRM y la comprobación de que el evento existe y
+ * no ha pasado. Un slug inventado no crea un lead huérfano ni mete texto
+ * arbitrario en la bandeja.
+ */
+export async function submitMasterclassLead(
+  _prev: LeadFormState,
+  formData: FormData,
+): Promise<LeadFormState> {
+  const locale = idiomaDe(formData);
+  const t = tServidor[locale];
+  const raw = {
+    nombre: formData.get("nombre"),
+    telefono: formData.get("telefono"),
+    email: formData.get("email") ?? "",
+    evento_slug: formData.get("evento_slug") ?? "",
+    consentimiento: formData.get("consentimiento") ?? "",
+    website: formData.get("website") ?? "",
+  };
+
+  const parsed = masterclassLeadSchema.safeParse(raw);
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: t.revisa,
+      errors: erroresEn(parsed.error.flatten().fieldErrors, locale),
+    };
+  }
+
+  // Honeypot: si viene relleno, fingimos éxito y no hacemos nada.
+  if (parsed.data.website) {
+    return { status: "success", message: t.gracias };
+  }
+
+  const captcha = await verifyTurnstile(formData.get(TURNSTILE_RESPONSE_FIELD));
+  if (!captcha.ok)
+    return { status: "error", message: locale === "ca" ? t.captcha : TURNSTILE_ERROR_MESSAGE };
+
+  const evento = await getEventoBySlug(parsed.data.evento_slug);
+  if (!evento || !admiteInscripcion(evento)) {
+    console.error(
+      "[submitMasterclassLead] evento no publicado, no es masterclass o ya terminó:",
+      parsed.data.evento_slug,
+    );
+    return { status: "error", message: t.errorSolicitud };
+  }
+
+  const { website: _hp, consentimiento: _c, ...lead } = parsed.data;
+
+  // `modalidad_interes` es la columna legible del CRM y admite 80 caracteres
+  // (CHECK `leads_modalidad_len`): con el prefijo, el título se recorta.
+  const etiqueta = `Masterclass · ${evento.titulo}`.slice(0, 80);
+
+  const supabase = await leadsWriteClient();
+  const { error } = await supabase.from("leads").insert({
+    nombre: lead.nombre,
+    telefono: lead.telefono,
+    email: lead.email,
+    origen: "masterclass",
+    evento_slug: evento.slug,
+    modalidad_interes: etiqueta,
+    mensaje: null,
+  });
+
+  if (error) {
+    console.error("[submitMasterclassLead] insert error:", error.message);
+    return { status: "error", message: t.errorSolicitud };
+  }
+
+  await postToN8n({
+    ...lead,
+    origen: "masterclass",
+    evento_titulo: evento.titulo,
+    evento_fecha: evento.fecha,
+    consentimiento: true,
+    recibido_en: new Date().toISOString(),
+  }).catch((e) => console.error("[submitMasterclassLead] webhook n8n falló:", e));
+
+  return { status: "success", message: t.graciasSolicitud };
 }
 
 /** Resultado de las mutaciones rápidas del panel (fuera de useActionState). */

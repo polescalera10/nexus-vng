@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { interestLeadSchema, leadSchema } from "@/lib/validation/lead";
+import {
+  interestLeadSchema,
+  leadSchema,
+  masterclassLeadSchema,
+} from "@/lib/validation/lead";
 
 /** Lead válido mínimo, para mutar campo a campo en cada caso. */
 const validLead = {
@@ -136,6 +140,54 @@ describe("interestLeadSchema", () => {
   it("mantiene el honeypot como barrera anti-spam", () => {
     expect(
       interestLeadSchema.safeParse({ ...validInterest, website: "spam" }).success,
+    ).toBe(false);
+  });
+});
+
+const validMasterclass = {
+  nombre: "Ana Ruiz",
+  telefono: "+34600000000",
+  email: "ana@nexus.es",
+  evento_slug: "masterclass-bachazouk-de-0-a-1",
+  consentimiento: "on",
+  website: "",
+};
+
+describe("masterclassLeadSchema", () => {
+  it("acepta una inscripción completa", () => {
+    expect(masterclassLeadSchema.safeParse(validMasterclass).success).toBe(true);
+  });
+
+  it("exige los tres datos de contacto", () => {
+    for (const campo of ["nombre", "telefono", "email"] as const) {
+      expect(
+        masterclassLeadSchema.safeParse({ ...validMasterclass, [campo]: "" }).success,
+      ).toBe(false);
+    }
+  });
+
+  it("exige el consentimiento RGPD explícito", () => {
+    const parsed = masterclassLeadSchema.safeParse({ ...validMasterclass, consentimiento: "" });
+    expect(parsed.success).toBe(false);
+    expect(parsed.error?.flatten().fieldErrors.consentimiento?.[0]).toBe(
+      "Debes aceptar el tratamiento de datos para continuar",
+    );
+  });
+
+  it("solo admite slugs con el formato de `eventos` (mismo CHECK que la BD)", () => {
+    for (const evento_slug of ["Masterclass", "con espacio", "-empieza-mal", "doble--guion", ""]) {
+      expect(masterclassLeadSchema.safeParse({ ...validMasterclass, evento_slug }).success).toBe(
+        false,
+      );
+    }
+    expect(
+      masterclassLeadSchema.safeParse({ ...validMasterclass, evento_slug: "a".repeat(81) }).success,
+    ).toBe(false);
+  });
+
+  it("mantiene el honeypot como barrera anti-spam", () => {
+    expect(
+      masterclassLeadSchema.safeParse({ ...validMasterclass, website: "spam" }).success,
     ).toBe(false);
   });
 });

@@ -80,6 +80,7 @@ export function LeadCard({ lead }: { lead: Lead }) {
     LEAD_ORIGEN_LABELS[lead.origen] ?? lead.origen,
     lead.modalidad_interes,
     lead.intereses?.length ? lead.intereses.join(", ") : null,
+    lead.evento_slug,
   ]
     .filter(Boolean)
     .join(" · ");

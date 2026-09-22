@@ -28,8 +28,8 @@ export type DatosNegocio = {
   embudo: EmbudoFila[];
 };
 
-/** Origen de lead que NO cuenta como curso regular. */
-const ORIGENES_FUERA = ["intensivos"];
+/** Origen de lead que NO cuenta como curso regular (productos sueltos). */
+const ORIGENES_FUERA = ["intensivos", "masterclass"];
 
 export async function getDatosNegocio(): Promise<DatosNegocio> {
   const supabase = await createClient();

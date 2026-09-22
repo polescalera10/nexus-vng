@@ -180,6 +180,7 @@ export const LEAD_ORIGEN_LABELS: Record<string, string> = {
   intensivos: "Intensivos",
   "curso-regular": "Curso regular",
   "socio-fundador": "Socio fundador",
+  masterclass: "Masterclass",
 };
 
 export const CYCLE_TYPE_LABELS: Record<string, string> = {

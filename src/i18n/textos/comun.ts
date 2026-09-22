@@ -359,6 +359,7 @@ export const ERRORES_CA: Record<string, string> = {
   "El teléfono solo puede tener números y símbolos": "El telèfon només pot tenir números i símbols",
   "Email no válido": "El correu electrònic no és vàlid",
   "Necesitamos tu email": "Necessitem el teu correu electrònic",
+  "Evento no válido": "L'esdeveniment no és vàlid",
   "Mensaje demasiado largo": "El missatge és massa llarg",
   "Marca al menos una opción que te interese": "Marca com a mínim una opció que t'interessi",
   "Demasiadas opciones marcadas": "Hi ha massa opcions marcades",
