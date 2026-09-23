@@ -286,9 +286,11 @@ export async function submitMasterclassLead(
 
   const { website: _hp, consentimiento: _c, ...lead } = parsed.data;
 
-  // `modalidad_interes` es la columna legible del CRM y admite 80 caracteres
-  // (CHECK `leads_modalidad_len`): con el prefijo, el título se recorta.
-  const etiqueta = `Masterclass · ${evento.titulo}`.slice(0, 80);
+  // `modalidad_interes` es la columna legible del CRM (80 caracteres, CHECK
+  // `leads_modalidad_len`). Va el título a secas: el "Masterclass" lo pone ya
+  // la etiqueta del origen en la tarjeta, y repetirlo dejaba un
+  // "Masterclass · Masterclass · Bachazouk de 0 a 1".
+  const etiqueta = evento.titulo.slice(0, 80);
 
   const supabase = await leadsWriteClient();
   const { error } = await supabase.from("leads").insert({
