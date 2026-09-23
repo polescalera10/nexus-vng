@@ -283,12 +283,24 @@ export async function convertLeadToStudent(
  * mano: teléfono no convertible a E.164 o nombre inservible.
  */
 /**
- * Enlazar un lead con un alumno que YA existe, sin crear ficha ni matricular.
+ * Cerrar un lead de alguien que YA es alumno, sin crear ficha ni matricular.
  *
  * Es el caso normal de las masterclass: quien se apunta suele ser alumno de la
  * casa. "Convertir a alumno" le creaba una segunda ficha con el mismo teléfono
  * —dos cuotas, dos filas en las listas— y encima le buscaba clases regulares
- * que no había pedido. Aquí solo se cierra el lead apuntando a quien ya es.
+ * que no había pedido.
+ *
+ * `leads.student_id` NO significa "este lead es esta persona", sino "de este
+ * lead salió esta ficha": por eso 0029 lo protege con un índice único
+ * (`leads_student_unique`, un alumno no proviene de dos leads). Una alumna que
+ * ya entró por el formulario del curso regular tiene ese hueco ocupado, así
+ * que apuntar ahí su inscripción a la masterclass reventaba con un 23505 y
+ * salía "No se ha podido enlazar con la ficha".
+ *
+ * De modo que se enlaza solo cuando el hueco está libre; si no, el lead se
+ * cierra igual como `convertido` y quien es ya se ve en la tarjeta, que lo
+ * reconoce por teléfono y nombre. Ni se toca el índice ni se inventa una
+ * segunda procedencia para la misma ficha.
  */
 export async function linkLeadToStudent(
   leadId: string,
@@ -300,9 +312,11 @@ export async function linkLeadToStudent(
 
   const supabase = await createClient();
 
-  const [{ data: lead }, { data: student }] = await Promise.all([
+  const [{ data: lead }, { data: student }, { data: leadDeOrigen }] = await Promise.all([
     supabase.from("leads").select("id, student_id").eq("id", leadId).maybeSingle(),
     supabase.from("students").select("id").eq("id", studentId).maybeSingle(),
+    // El lead del que salió la ficha, si lo hay: es quien ocupa el único hueco.
+    supabase.from("leads").select("id").eq("student_id", studentId).maybeSingle(),
   ]);
 
   if (!lead) return { ok: false, message: "Ese lead ya no existe." };
@@ -313,7 +327,8 @@ export async function linkLeadToStudent(
   const { error } = await supabase
     .from("leads")
     .update({
-      student_id: student.id,
+      // Solo si la ficha no viene ya de otro lead (índice único de 0029).
+      ...(leadDeOrigen ? {} : { student_id: student.id }),
       converted_at: new Date().toISOString(),
       estado: "convertido",
     })

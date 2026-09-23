@@ -42,7 +42,8 @@ export function YaEsAlumno({
     >
       <p>
         <strong className="text-text-strong">{alumno.full_name}</strong> ya tiene ficha de
-        alumno con este teléfono o email. No crees otra: enlaza el lead con la suya.
+        alumno con este teléfono o email. No crees otra: cierra el lead y sigue trabajando
+        sobre la ficha que ya existe.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
@@ -51,7 +52,7 @@ export function YaEsAlumno({
           disabled={isPending}
           className="inline-flex min-h-11 items-center justify-center rounded-sm bg-accent px-3.5 font-body text-[13px] font-bold text-ink transition-colors hover:bg-accent/85 disabled:opacity-55 sm:min-h-9"
         >
-          Enlazar con su ficha
+          Cerrar el lead: ya es alumno
         </button>
         <Link
           href={`/area-privada/admin/alumnos/${alumno.id}`}

@@ -197,14 +197,17 @@ export function LeadCard({
             <Link href={`/area-privada/admin/alumnos/${alumno.id}`} className={action}>
               Ver ficha
             </Link>
-            <button
-              type="button"
-              onClick={() => link(alumno.id)}
-              disabled={isPending}
-              className={convertAction}
-            >
-              Ya es alumno: enlazar
-            </button>
+            {/* Ya cerrado: no hay nada que enlazar otra vez. */}
+            {estado !== "convertido" && (
+              <button
+                type="button"
+                onClick={() => link(alumno.id)}
+                disabled={isPending}
+                className={convertAction}
+              >
+                Ya es alumno: cerrar lead
+              </button>
+            )}
           </>
         ) : askingRole ? (
           <>
