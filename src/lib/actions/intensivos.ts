@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionRole, isAdminSession } from "@/lib/auth";
-import { INTENSIVO_PRECIO } from "@/content/intensivos";
+import { getSesionSuelta } from "@/lib/queries/sesiones-sueltas";
 import {
   altaPuertaSchema,
   marcaIntensivoSchema,
@@ -11,10 +11,15 @@ import {
 } from "@/lib/validation/intensivo";
 
 /**
- * Mutaciones del control de intensivos.
+ * Mutaciones del control de sesiones sueltas (intensivos y masterclass).
  * La barrera real es la RLS (migración 0024: solo admin y profesor tocan
  * `intensivo_registros`); aquí se valida con Zod y se comprueba el rol para
  * devolver un error legible en vez de un fallo de política.
+ *
+ * `sesion` ya no es un enum cerrado (los slugs de masterclass nacen en
+ * `eventos`), así que cada mutación comprueba contra el catálogo que la sesión
+ * existe antes de escribir: si no, cualquiera con rol de profesor podría
+ * sembrar filas con un `sesion` inventado que no sale en ninguna pantalla.
  */
 
 export type IntensivoResult = { ok: boolean; message?: string; registroId?: string };
@@ -47,6 +52,10 @@ export async function guardarMarcaIntensivo(
   const parsed = marcaIntensivoSchema.safeParse(input);
   if (!parsed.success) return { ok: false, message: "Datos no válidos." };
   const marca = parsed.data;
+
+  if (!(await getSesionSuelta(marca.sesion))) {
+    return { ok: false, message: "Esa sesión no existe." };
+  }
 
   // Sin pago no hay método de pago: evita dejar "bizum" colgando al desmarcar.
   const metodoPago = marca.pagado ? marca.metodoPago : null;
@@ -128,6 +137,9 @@ export async function anadirAsistentePuerta(
   }
   const alta = parsed.data;
 
+  const sesion = await getSesionSuelta(alta.sesion);
+  if (!sesion) return { ok: false, message: "Esa sesión no existe." };
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("intensivo_registros")
@@ -140,7 +152,7 @@ export async function anadirAsistentePuerta(
       asistio: true,
       pagado: alta.pagado,
       metodo_pago: alta.pagado ? alta.metodoPago : null,
-      importe: INTENSIVO_PRECIO,
+      importe: sesion.precio,
     })
     .select("id")
     .single();

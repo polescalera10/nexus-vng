@@ -27,7 +27,7 @@ const NAV: Record<"admin" | "profesor", NavItem[]> = {
     { href: "/area-privada/admin/eventos", label: "Eventos", icon: "eventos" },
     {
       href: "/area-privada/admin/intensivos",
-      label: "Intensivos",
+      label: "Intensivos y masterclass",
       icon: "intensivos",
       short: "Intens.",
     },

@@ -2,14 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { getListaIntensivo } from "@/lib/queries/intensivos";
-import { getIntensivoSesion, intensivoTitulo } from "@/content/intensivos";
-import { formatDate, todayInMadrid } from "@/lib/format";
+import { getSesionSuelta } from "@/lib/queries/sesiones-sueltas";
+import { formatDate, formatEuros, todayInMadrid } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
 import { ListaIntensivo } from "./ListaIntensivo";
 
 /**
- * Lista de una sesión de intensivo: quién se apuntó por la web, quién vino y
- * quién ha pagado. Es la pantalla que se usa en la puerta de la sala.
+ * Lista de una sesión suelta —intensivo o masterclass—: quién se apuntó por la
+ * web, quién vino y quién ha pagado. Es la pantalla que se usa en la puerta de
+ * la sala, así que da igual de dónde salga la sesión: se ve igual.
  */
 export const dynamic = "force-dynamic";
 
@@ -17,18 +18,18 @@ type Params = Promise<{ sesion: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
   const { sesion: slug } = await params;
-  const sesion = getIntensivoSesion(slug);
-  return { title: sesion ? `${intensivoTitulo(sesion)} · Intensivos` : "Intensivos" };
+  const sesion = await getSesionSuelta(slug);
+  return { title: sesion ? `${sesion.titulo} · Intensivos` : "Intensivos" };
 }
 
 export default async function SesionIntensivoPage({ params }: { params: Params }) {
   await requireRole("admin");
 
   const { sesion: slug } = await params;
-  const sesion = getIntensivoSesion(slug);
+  const sesion = await getSesionSuelta(slug);
   if (!sesion) notFound();
 
-  const asistentes = await getListaIntensivo(sesion.value);
+  const asistentes = await getListaIntensivo(sesion.slug, sesion.precio);
   const esHoy = sesion.fechaIso === todayInMadrid();
 
   return (
@@ -49,21 +50,21 @@ export default async function SesionIntensivoPage({ params }: { params: Params }
         >
           <path d="m15 6-6 6 6 6" />
         </svg>
-        Intensivos
+        Intensivos y masterclass
       </Link>
 
       <div className="mt-1 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-[clamp(28px,4.5vw,44px)] text-text-strong">
-          {intensivoTitulo(sesion)}
+          {sesion.titulo}
         </h1>
         {esHoy && <Badge variant="success">Hoy</Badge>}
       </div>
       <p className="mt-1 font-body text-sm text-text-muted">
-        {formatDate(sesion.fechaIso)} · {sesion.hora} · {sesion.profes}
+        {formatDate(sesion.fechaIso)} · {sesion.detalle} · {formatEuros(sesion.precio)}
       </p>
 
       <div className="mt-6">
-        <ListaIntensivo sesion={sesion.value} asistentes={asistentes} />
+        <ListaIntensivo sesion={sesion.slug} asistentes={asistentes} precio={sesion.precio} />
       </div>
     </>
   );

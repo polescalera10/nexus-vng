@@ -67,10 +67,24 @@ describe("marcaIntensivoSchema", () => {
     if (parsed.success) expect(parsed.data.importe).toBe(INTENSIVO_PRECIO);
   });
 
-  it("rechaza una sesión que no está en el cartel", () => {
+  /*
+   * El slug era un enum con las 8 sesiones del cartel. Desde que las
+   * masterclass comparten esta pantalla ya no se puede: sus slugs nacen en
+   * `eventos` y no existen al compilar. Zod comprueba la FORMA; que la sesión
+   * exista de verdad lo comprueba la Server Action contra el catálogo
+   * (`getSesionSuelta`) antes de escribir.
+   */
+  it("acepta cualquier slug bien formado: la existencia la valida la acción", () => {
     expect(
-      marcaIntensivoSchema.safeParse({ ...base, sesion: "intensivo-falso" }).success,
-    ).toBe(false);
+      marcaIntensivoSchema.safeParse({ ...base, sesion: "masterclass-bachazouk-de-0-a-1" })
+        .success,
+    ).toBe(true);
+  });
+
+  it("rechaza un slug mal formado", () => {
+    for (const sesion of ["Intensivo Salsa", "con espacio", "-empieza-mal", "ab", "x".repeat(81)]) {
+      expect(marcaIntensivoSchema.safeParse({ ...base, sesion }).success).toBe(false);
+    }
   });
 
   it("acepta una fila de puerta (sin lead) y datos de contacto vacíos", () => {

@@ -3,7 +3,6 @@
 import { useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { anadirAsistentePuerta } from "@/lib/actions/intensivos";
-import { INTENSIVO_PRECIO } from "@/content/intensivos";
 import { formatEuros } from "@/lib/format";
 
 /**
@@ -13,8 +12,12 @@ import { formatEuros } from "@/lib/format";
  * obligatorio, y hay dos salidas en un tap: apuntarlo sin más, o apuntarlo ya
  * cobrado (que es lo que pasa el 90 % de las veces en la puerta). El método
  * por defecto es efectivo; se cambia luego desde la fila si pagó por Bizum.
+ *
+ * El importe lo manda la sesión (20 € en los intensivos, el precio del evento
+ * en una masterclass): estaba fijo a 20 € y con las masterclass dentro eso
+ * anunciaba en el botón un cobro que no era el de la clase.
  */
-export function AltaPuertaForm({ sesion }: { sesion: string }) {
+export function AltaPuertaForm({ sesion, precio }: { sesion: string; precio: number }) {
   const [abierto, setAbierto] = useState(false);
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -133,7 +136,7 @@ export function AltaPuertaForm({ sesion }: { sesion: string }) {
           disabled={nombre.trim().length < 2}
           className="flex-1"
         >
-          Cobrado {formatEuros(INTENSIVO_PRECIO)}
+          Cobrado {formatEuros(precio)}
         </Button>
       </div>
     </div>

@@ -79,9 +79,12 @@ function MarkButton({
 export function ListaIntensivo({
   sesion,
   asistentes,
+  precio,
 }: {
   sesion: string;
   asistentes: IntensivoAsistente[];
+  /** Importe que se propone al cobrar en puerta. */
+  precio: number;
 }) {
   // Solo se guardan aquí las filas que Pol ha tocado en esta pantalla; el
   // resto se leen del servidor. Así un alta en puerta (que llega por refresco
@@ -160,7 +163,7 @@ export function ListaIntensivo({
 
   return (
     <div>
-      <AltaPuertaForm sesion={sesion} />
+      <AltaPuertaForm sesion={sesion} precio={precio} />
 
       {asistentes.length > 6 && (
         <input
