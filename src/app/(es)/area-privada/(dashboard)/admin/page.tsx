@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
-import { getActivityFeed, getDashboardStats, listLeads } from "@/lib/queries/activity";
+import {
+  getActivityFeed,
+  getDashboardStats,
+  listLeads,
+  matchStudentsForLeads,
+} from "@/lib/queries/activity";
 import { getCoberturaDelMes } from "@/lib/queries/courses";
 import { getRedemptions } from "@/lib/queries/gamificacion";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -28,6 +33,11 @@ export default async function AdminPage() {
       getCoberturaDelMes(),
       getRedemptions("solicitado"),
     ]);
+
+  // Quién de esos leads ya tiene ficha: la tarjeta ofrece enlazar en vez de
+  // crear una segunda (lo normal en las masterclass, donde casi todos son de
+  // casa). Va después del Promise.all porque depende de los leads.
+  const yaAlumnos = await matchStudentsForLeads(leadsNuevos);
 
   return (
     <>
@@ -84,7 +94,7 @@ export default async function AdminPage() {
         ) : (
           <ul className="divide-y divide-text-strong/8 rounded-lg border border-text-strong/8 bg-bg-panel shadow-soft">
             {leadsNuevos.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} />
+              <LeadCard key={lead.id} lead={lead} alumno={yaAlumnos.get(lead.id)} />
             ))}
           </ul>
         )}

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useOptimistic, useState, useTransition } from "react";
 import { Badge } from "@/components/ui/Badge";
-import { quickConvertLead } from "@/lib/actions/lead-conversion";
+import { linkLeadToStudent, quickConvertLead } from "@/lib/actions/lead-conversion";
 import { updateLeadEstado } from "@/lib/actions/leads";
 import { LEAD_ESTADO_LABELS, LEAD_ORIGEN_LABELS, formatRelative } from "@/lib/format";
 import { buildLeadWaLink } from "@/lib/whatsapp";
@@ -33,7 +33,18 @@ const NEXT_ACTIONS: Record<LeadEstado, LeadEstado[]> = {
   descartado: ["nuevo"],
 };
 
-export function LeadCard({ lead }: { lead: Lead }) {
+export function LeadCard({
+  lead,
+  alumno,
+}: {
+  lead: Lead;
+  /**
+   * Alumno que YA existe con la identidad de este lead (nombre + teléfono o
+   * email). La mayoría de quien se apunta a una masterclass es de la casa: sin
+   * esto, "Convertir a alumno" le abría una segunda ficha.
+   */
+  alumno?: { id: string; full_name: string } | null;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [estado, setEstado] = useOptimistic(lead.estado);
@@ -45,6 +56,19 @@ export function LeadCard({ lead }: { lead: Lead }) {
       setEstado(next);
       const res = await updateLeadEstado(lead.id, next);
       if (!res.ok) console.error("[LeadCard]", res.message);
+    });
+  }
+
+  /** Cierra el lead apuntando a la ficha que ya existe: no crea nada. */
+  function link(studentId: string) {
+    setConvertError(null);
+    startTransition(async () => {
+      const res = await linkLeadToStudent(lead.id, studentId);
+      if (res.ok) {
+        router.push(`/area-privada/admin/alumnos/${res.studentId}`);
+        return;
+      }
+      setConvertError(res.message);
     });
   }
 
@@ -129,6 +153,11 @@ export function LeadCard({ lead }: { lead: Lead }) {
       </p>
 
       {meta && <p className="mt-1 font-body text-[13px] text-text-muted">{meta}</p>}
+      {!lead.student_id && alumno && (
+        <p className="mt-1 font-body text-[13px] font-semibold text-accent">
+          Ya es alumno: {alumno.full_name}
+        </p>
+      )}
       {lead.mensaje && (
         <p className="mt-1.5 font-body text-sm text-text-body">“{lead.mensaje}”</p>
       )}
@@ -158,6 +187,25 @@ export function LeadCard({ lead }: { lead: Lead }) {
           <Link href={`/area-privada/admin/alumnos/${lead.student_id}`} className={action}>
             Ver alumno
           </Link>
+        ) : alumno ? (
+          /*
+           * Ya está en la escuela: ni ficha nueva ni matrículas. Solo se
+           * enlaza el lead con quien ya es, que es lo que pasa casi siempre
+           * con las masterclass.
+           */
+          <>
+            <Link href={`/area-privada/admin/alumnos/${alumno.id}`} className={action}>
+              Ver ficha
+            </Link>
+            <button
+              type="button"
+              onClick={() => link(alumno.id)}
+              disabled={isPending}
+              className={convertAction}
+            >
+              Ya es alumno: enlazar
+            </button>
+          </>
         ) : askingRole ? (
           <>
             <span className="inline-flex min-h-11 items-center font-body text-[13px] text-text-muted sm:min-h-9">

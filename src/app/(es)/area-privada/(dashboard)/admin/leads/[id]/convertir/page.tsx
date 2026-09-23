@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
-import { getLeadById } from "@/lib/queries/activity";
+import { getLeadById, matchStudentsForLeads } from "@/lib/queries/activity";
 import { matchLeadCourses } from "@/lib/leads/course-match";
 import { getCourseOptions } from "@/lib/queries/courses";
 import { toE164 } from "@/lib/phone";
 import { LEAD_ORIGEN_LABELS } from "@/lib/format";
 import { ConvertLeadForm } from "./ConvertLeadForm";
+import { YaEsAlumno } from "./YaEsAlumno";
 
 export const metadata = { title: "Convertir lead · NEXUS VNG" };
 export const dynamic = "force-dynamic";
@@ -23,6 +24,11 @@ export default async function ConvertirLeadPage({
   if (!lead) notFound();
 
   const phone = toE164(lead.telefono) ?? (lead.telefono ?? "").trim();
+  // ¿Esta persona ya está en la escuela? Casi siempre lo está cuando el lead
+  // viene de una masterclass, y crearle otra ficha deja dos cuotas abiertas.
+  const yaEsAlumno = lead.student_id
+    ? null
+    : (await matchStudentsForLeads([lead])).get(lead.id);
   // Aquí solo cabe un curso, así que se preselecciona el primero que pidió;
   // el resto se añade desde Editar alumno. `modalidad_interes` no entra: es la
   // campaña ("Curso regular"), no una clase.
@@ -64,6 +70,8 @@ export default async function ConvertirLeadPage({
           .
         </p>
       )}
+
+      {yaEsAlumno && <YaEsAlumno leadId={lead.id} alumno={yaEsAlumno} />}
 
       {!phone && (
         <p

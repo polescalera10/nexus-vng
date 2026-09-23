@@ -1,4 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  matchLeadsToStudents,
+  type LeadLike,
+  type StudentLike,
+} from "@/lib/leads/student-match";
 import { LEAD_ORIGEN_LABELS, formatDate } from "@/lib/format";
 import type { Lead } from "@/types/database";
 
@@ -329,6 +334,31 @@ export async function getActivityFeed(limit = 25): Promise<ActivityItem[]> {
   return items
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
     .slice(0, limit);
+}
+
+/**
+ * Para una tanda de leads, el alumno que ya existe con esa misma identidad.
+ *
+ * Se traen todos los alumnos (incluidos los dados de baja: una antigua alumna
+ * que se apunta a una masterclass sigue siendo ella, y crearle una ficha nueva
+ * la duplicaría igual) y el cruce se hace en JS, con la regla de identidad de
+ * `lib/leads/student-match.ts`.
+ */
+export async function matchStudentsForLeads(
+  leads: LeadLike[],
+): Promise<Map<string, StudentLike>> {
+  if (leads.length === 0) return new Map();
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("students")
+    .select("id, full_name, phone, email");
+
+  if (error) {
+    console.error("[matchStudentsForLeads] error:", error.message);
+    return new Map();
+  }
+  return matchLeadsToStudents(leads, data ?? []);
 }
 
 /** Un lead por id (ficha de conversión). */

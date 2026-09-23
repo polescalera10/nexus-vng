@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
-import { listLeads } from "@/lib/queries/activity";
+import { listLeads, matchStudentsForLeads } from "@/lib/queries/activity";
 import { leadEstados } from "@/lib/validation/lead";
 import { LEAD_ESTADO_LABELS } from "@/lib/format";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -41,6 +41,9 @@ export default async function LeadsPage({
       : "nuevo";
 
   const leads = await listLeads({ estado, limit: 100 });
+  // Quién de estos ya tiene ficha: la tarjeta ofrece enlazar en vez de crear
+  // una segunda (lo normal en las masterclass, donde casi todos son de casa).
+  const yaAlumnos = await matchStudentsForLeads(leads);
 
   return (
     <>
@@ -80,7 +83,7 @@ export default async function LeadsPage({
         ) : (
           <ul className="divide-y divide-text-strong/8 rounded-lg border border-text-strong/8 bg-bg-panel shadow-soft">
             {leads.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} />
+              <LeadCard key={lead.id} lead={lead} alumno={yaAlumnos.get(lead.id)} />
             ))}
           </ul>
         )}

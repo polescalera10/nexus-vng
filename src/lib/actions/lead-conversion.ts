@@ -6,6 +6,7 @@ import { isAdminSession } from "@/lib/auth";
 import { roleCapacity } from "@/lib/enrollment-capacity";
 import { buildConversionQuery } from "@/lib/leads/conversion-notice";
 import { matchLeadCourses } from "@/lib/leads/course-match";
+import { matchLeadsToStudents } from "@/lib/leads/student-match";
 import { toE164 } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
 import { leadConversionSchema } from "@/lib/validation/lead-conversion";
@@ -281,6 +282,54 @@ export async function convertLeadToStudent(
  * Solo se delega en la pantalla larga cuando falta algo que hay que escribir a
  * mano: teléfono no convertible a E.164 o nombre inservible.
  */
+/**
+ * Enlazar un lead con un alumno que YA existe, sin crear ficha ni matricular.
+ *
+ * Es el caso normal de las masterclass: quien se apunta suele ser alumno de la
+ * casa. "Convertir a alumno" le creaba una segunda ficha con el mismo teléfono
+ * —dos cuotas, dos filas en las listas— y encima le buscaba clases regulares
+ * que no había pedido. Aquí solo se cierra el lead apuntando a quien ya es.
+ */
+export async function linkLeadToStudent(
+  leadId: string,
+  studentId: string,
+): Promise<QuickConversionResult> {
+  if (!(await isAdminSession())) {
+    return { ok: false, message: "No tienes permiso para convertir leads." };
+  }
+
+  const supabase = await createClient();
+
+  const [{ data: lead }, { data: student }] = await Promise.all([
+    supabase.from("leads").select("id, student_id").eq("id", leadId).maybeSingle(),
+    supabase.from("students").select("id").eq("id", studentId).maybeSingle(),
+  ]);
+
+  if (!lead) return { ok: false, message: "Ese lead ya no existe." };
+  if (!student) return { ok: false, message: "Esa ficha de alumno ya no existe." };
+  // Doble clic o dos pestañas: no es un error, ya está hecho.
+  if (lead.student_id) return { ok: true, studentId: lead.student_id, query: "" };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      student_id: student.id,
+      converted_at: new Date().toISOString(),
+      estado: "convertido",
+    })
+    .eq("id", leadId);
+
+  if (error) {
+    console.error("[linkLeadToStudent]", error.message);
+    return { ok: false, message: "No se ha podido enlazar con la ficha." };
+  }
+
+  revalidatePath("/area-privada/admin");
+  revalidatePath("/area-privada/admin/leads");
+  revalidatePath("/area-privada/admin/alumnos");
+  return { ok: true, studentId: student.id, query: "" };
+}
+
 export async function quickConvertLead(
   leadId: string,
   role: EnrollmentRole,
@@ -333,6 +382,25 @@ export async function quickConvertLead(
   // `students.email` admite null: un lead sin email se convierte igual y el
   // email se pide luego (sin él no habrá acceso al área privada, nada más).
   const email = (lead.email ?? "").trim().toLowerCase() || null;
+
+  /*
+   * Red de seguridad contra la ficha duplicada. La tarjeta ya ofrece "enlazar"
+   * cuando reconoce a la persona, pero esta acción no puede fiarse de que la
+   * pantalla lo haya hecho: una ficha repetida se arregla a mano, cuota a
+   * cuota, y con las masterclass (donde casi todo el que se apunta es de casa)
+   * pasaría cada semana.
+   */
+  const { data: alumnos } = await supabase
+    .from("students")
+    .select("id, full_name, phone, email");
+  const yaEs = matchLeadsToStudents([lead], alumnos ?? []).get(lead.id);
+  if (yaEs) {
+    return {
+      ok: false,
+      needsForm: true,
+      message: `${yaEs.full_name} ya tiene ficha de alumno. Enlaza el lead con ella en vez de crear otra.`,
+    };
+  }
 
   const { data: student, error: studentError } = await supabase
     .from("students")
