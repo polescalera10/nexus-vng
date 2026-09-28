@@ -50,6 +50,8 @@ import os
 import pathlib
 import subprocess
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -120,13 +122,31 @@ def token() -> str:
     return json.load(urllib.request.urlopen(req, timeout=30))["access_token"]
 
 
-def _post(url: str, tok: str, body: dict) -> dict:
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(body).encode(),
-        headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
-    )
-    return json.load(urllib.request.urlopen(req, timeout=60))
+def _post(url: str, tok: str, body: dict, intentos: int = 3) -> dict:
+    """POST con reintentos ante cortes de red.
+
+    El 28-09-2026 la Data API de GA4 no respondió en 60 s una vez y el
+    reintento inmediato fue bien: sin esto, la rutina habría mandado el correo
+    de ERROR por un fallo pasajero. Un 4xx (permisos, petición mal formada) no
+    se reintenta: repetirlo no lo arregla.
+    """
+    for n in range(1, intentos + 1):
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(body).encode(),
+            headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
+        )
+        try:
+            return json.load(urllib.request.urlopen(req, timeout=60))
+        except urllib.error.HTTPError as e:
+            if e.code < 500 or n == intentos:
+                raise
+        except (TimeoutError, urllib.error.URLError, ConnectionError):
+            if n == intentos:
+                raise
+        print(f"Reintentando ({n}/{intentos - 1}): {url.split('/')[2]}", file=sys.stderr)
+        time.sleep(5 * n)
+    raise AssertionError("inalcanzable")
 
 
 # --------------------------------------------------------------------------- #

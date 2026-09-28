@@ -2,40 +2,53 @@ import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 
 /**
- * "¿Con cuál te identificas?" — puente entre la home y las landings por dolor.
+ * "¿Con cuál te identificas?" — puente entre la home y las páginas que
+ * responden a la duda concreta del visitante.
  *
- * Cumple dos funciones. Para el visitante: le lleva directo a la página que
- * habla de SU situación en vez de obligarle a leer la landing genérica. Para
- * Google: las 30 landings de campaña solo recibían enlaces desde el sitemap;
- * sin enlaces internos reales eran páginas huérfanas y no recibían autoridad.
+ * Hasta el 28-09-2026 enlazaba a seis landings de campaña (`/l/[icp]/[dolor]`),
+ * que están en `noindex` desde el 14-08. La home es la página que Google
+ * rastrea más a menudo (cada pocos días; las fichas, cada dos semanas o más),
+ * así que esos seis enlaces eran el mejor sitio del dominio para descubrir
+ * páginas nuevas y se estaban gastando en URLs que nunca van a indexarse.
+ * Ahora apuntan a páginas de entrada y guías del blog que responden a la misma
+ * duda. Las `/l/` siguen vivas para campañas; no dependen de este bloque.
  *
- * Se enlazan seis, una por cada perfil (ICP), no las treinta: la home no es un
- * índice, y treinta enlaces al mismo destino comercial huelen a spam.
+ * Regla: cada destino tiene que ser indexable y estar en el sitemap. Lo
+ * comprueba `tests/unit/punto-de-partida.test.ts`, que también falla si un
+ * slug cambia y el enlace se queda en un 404.
  */
-const CASOS = [
+export const CASOS = [
   {
     label: "Nunca he bailado y creo que no tengo ritmo",
-    href: "/l/empezar/dos-pies-izquierdos",
+    href: "/aprender-a-bailar-desde-cero",
   },
   {
     label: "Quiero apuntarme, pero iría solo/a",
-    href: "/l/social/vengo-solo",
+    href: "/clases-de-baile-sin-pareja",
   },
   {
-    label: "Buscamos un plan en pareja que no sea otra cena",
-    href: "/l/pareja/es-para-nosotros",
+    label: "No sé si empezar por salsa o por bachata",
+    href: "/blog/salsa-cubana-o-bachata-cual-empezar",
   },
   {
-    label: "Ya bailo, pero siento que me he estancado",
-    href: "/l/nivel/techo",
+    label: "Quiero bailar con tacones, pero no sé andar con ellos",
+    href: "/clases-de-baile-en-tacones",
   },
   {
     label: "Odio el gimnasio y necesito moverme de otra forma",
-    href: "/l/expresion/odio-el-gym",
+    href: "/blog/beneficios-de-bailar-para-adultos",
   },
   {
     label: "Creo que se me ha pasado la edad",
-    href: "/l/empezar/ya-soy-mayor",
+    href: "/blog/empezar-a-bailar-a-partir-de-los-40",
+  },
+  {
+    label: "Vivo en Sant Pere de Ribes",
+    href: "/clases-de-baile-sant-pere-de-ribes",
+  },
+  {
+    label: "Vivo en Sitges",
+    href: "/clases-de-baile-sitges",
   },
 ] as const;
 
