@@ -68,9 +68,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Versión FIJA, no `latest`: la 2.118.0 (25-09-2026) cambió el formato de
+      # `supabase gen types` y el paso de tipos empezó a fallar con un diff de
+      # todo el fichero sin que cambiara ninguna migración. Subirla es una
+      # decisión: al hacerlo, regenerar database.generated.ts en el mismo commit.
       - uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 2.117.0
 
       - name: Levantar Postgres con todas las migraciones y el seed
         run: bash scripts/db-reset-local.sh
@@ -120,9 +124,13 @@ jobs:
       - name: Instalar (lockfile congelado)
         run: pnpm install --frozen-lockfile
 
+      # Versión FIJA, no `latest`: la 2.118.0 (25-09-2026) cambió el formato de
+      # `supabase gen types` y el paso de tipos empezó a fallar con un diff de
+      # todo el fichero sin que cambiara ninguna migración. Subirla es una
+      # decisión: al hacerlo, regenerar database.generated.ts en el mismo commit.
       - uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 2.117.0
 
       - name: Supabase local completo con todas las migraciones
         run: bash scripts/db-reset-local.sh --full
