@@ -6,9 +6,9 @@ import { formatTime, WEEKDAYS } from "@/lib/format";
  * El formulario público guarda en `leads.intereses` la etiqueta legible de la
  * clase — "Salsa 1 · Miércoles 20:30" — y los cursos del panel se dieron de
  * alta para reproducirla exactamente (`name` = el estilo, sin día ni hora).
- * Esa etiqueta es la clave de cruce, y hace falta entera: hay dos "Bachata 1"
- * en el horario (lunes 18:30 y miércoles 21:30), así que casar solo por
- * nombre elegiría uno al azar.
+ * Esa etiqueta es la clave de cruce, y hace falta entera: hay dos "Bachata 0"
+ * en el horario (lunes 18:30 y jueves 21:30), así que casar solo por nombre
+ * elegiría uno al azar.
  *
  * Quedan sueltos dos formatos que ya no genera nadie pero siguen en la base:
  * los slugs de la versión vieja del formulario (`reparto`, `cia-salsa`…) y los

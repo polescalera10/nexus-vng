@@ -39,7 +39,7 @@ export const santPereDeRibes: PaginaSeo = {
     ancho: 1200,
     alto: 900,
   },
-  actualizado: "2026-09-21",
+  actualizado: "2026-09-29",
   cuerpo: `La escuela se llama NEXUS VNG y la mayoría de sus alumnos vienen de Vilanova i la Geltrú, pero **la sala está en Sant Pere de Ribes**: ${site.nap.venue}, ${site.nap.streetAddress}, ${site.nap.postalCode}.
 
 Es el mismo cartel de clases, los mismos profes y los mismos precios. La diferencia, si vives en Ribes, es que no tienes que coger el coche para ir a otro municipio.
@@ -70,7 +70,7 @@ El cartel completo con días y horas está en [horarios](/horarios).
 
 ## Qué día encaja con qué
 
-El cartel reparte las disciplinas de forma que casi cualquier agenda encuentra hueco. Los grupos de nivel cero están concentrados el mismo día y seguidos, así que quien empieza puede probar los dos bailes de pareja en una sola tarde. Las clases en solitario se reparten entre el martes y el miércoles, y los grupos de compañía cierran la semana.
+El cartel reparte las disciplinas de forma que casi cualquier agenda encuentra hueco. Los grupos de nivel cero de salsa y bachata van el jueves y seguidos, así que quien empieza puede probar los dos bailes de pareja en una sola tarde. La bachata desde cero se repite además el lunes. Las clases en solitario se reparten entre el martes y el miércoles, y los grupos de compañía cierran la semana.
 
 Si un día te va bien y otro no, dilo al escribir: a veces hay el mismo estilo en dos franjas distintas.
 

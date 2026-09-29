@@ -57,7 +57,7 @@ export const altsCa: Record<string, string> = {
 
 /** Frase corta de cada profe en las fichas de disciplina. */
 export const claimsCa: Record<string, string> = {
-  davide: "Bachata en parella, d'iniciació a intermedi.",
+  davide: "Bachata en parella, des de zero fins a intermedi.",
   martina: "Bachata, lady style i els grups de companyia.",
   pol: "Salsa cubana i bachata, des de zero absolut.",
   yuri: "Heels i sexy style: tècnica, línies i actitud.",

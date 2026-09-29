@@ -4,7 +4,7 @@ metaTitle: "Salsa cubana o bachata: por cuál empezar"
 description: "¿Salsa cubana o bachata? En qué se diferencian, cuál cuesta menos al principio y cómo elegir si empiezas de cero en Vilanova i la Geltrú."
 slug: "salsa-cubana-o-bachata-cual-empezar"
 date: "2026-09-16"
-lastUpdated: "2026-09-16"
+lastUpdated: "2026-09-29"
 author: "Pol, profesor de salsa cubana y bachata en NEXUS VNG"
 disciplinas: ["salsa-cubana", "bachata"]
 image: "/media/clases/salsa-cubana-ancha.jpg"
@@ -63,7 +63,7 @@ Así funcionan los grupos de iniciación en nuestra sala:
 - **No necesitas pareja.** Puedes venir solo o sola.
 - **La rotación es voluntaria, pero la recomendamos.** Nadie te obliga a cambiar de pareja. Aun así, rotar ayuda mucho a aprender. Cada persona baila con una energía distinta, y eso te obliga a entender el paso en vez de memorizar a una sola pareja.
 
-Esta temporada los dos grupos de iniciación van seguidos, los jueves, con Martina y Pol: Salsa 0 a las 20:30 y Bachata 0 a las 21:30. Todas las franjas están en [el horario de la temporada](/horarios).
+Esta temporada los dos grupos de iniciación van seguidos, los jueves, con Martina y Pol: Salsa 0 a las 20:30 y Bachata 0 a las 21:30. Bachata 0 tiene un segundo grupo los lunes a las 18:30, con Martina y Davide. Todas las franjas están en [el horario de la temporada](/horarios).
 
 ## Puedes hacer las dos
 

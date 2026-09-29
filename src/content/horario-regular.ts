@@ -55,7 +55,7 @@ export const horarioRegular: FranjaHoraria[] = [
   {
     hora: "18:30",
     clases: [
-      { estilo: "Bachata 1", profes: "Martina y Davide", familia: "bachata" },
+      { estilo: "Bachata 0", profes: "Martina y Davide", familia: "bachata" },
       null,
       { estilo: "Reggaetón", profes: "Ana Aylén", familia: "urbano" },
       null,

@@ -34,7 +34,7 @@ export const profesores: Profesor[] = [
   {
     slug: "davide",
     nombre: "Davide",
-    claim: "Bachata en pareja, de iniciación a intermedio.",
+    claim: "Bachata en pareja, desde cero hasta intermedio.",
     foto: "/images/profes/davide.jpg",
     fotoAlt: "Davide, profesor de bachata de NEXUS VNG",
     ancho: 933,

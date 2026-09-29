@@ -29,8 +29,8 @@ export const TARIFA_HORA: Record<string, number> = {
  * Tarifas de pareja: hay quien cobra menos por hora en las clases que da
  * acompañado que en las que da solo.
  *
- * Van por **id de curso, no por nombre de clase**: hay dos "Bachata 1" en el
- * horario (lunes 18:30 y miércoles 21:30) y casar por nombre elegiría una al
+ * Van por **id de curso, no por nombre de clase**: hay dos "Bachata 0" en el
+ * horario (lunes 18:30 y jueves 21:30) y casar por nombre elegiría una al
  * azar.
  */
 export const TARIFA_HORA_PAREJA: Record<string, { importe: number; cursos: string[] }> = {
