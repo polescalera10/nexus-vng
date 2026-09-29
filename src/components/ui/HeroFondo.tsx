@@ -26,6 +26,10 @@ export function HeroFondo({ className = "" }: { className?: string }) {
         ancho={heroBanda.desktop.ancho}
         alto={heroBanda.desktop.alto}
         sizes="100vw"
+        /* Siempre es la cabecera de la página, y en móvil el póster es el
+           elemento del LCP. Sin prioridad iba en `loading="lazy"`: LCP de
+           3,6 s en /clases/bachata (Lighthouse, 29-09-2026). */
+        prioridad
         className="absolute inset-0"
       />
       {/* Velo denso: debajo hay suelo blanco y focos, y encima va un titular

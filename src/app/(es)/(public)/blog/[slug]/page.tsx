@@ -7,7 +7,7 @@ import { MarkdownRenderer } from "@/components/ui/MarkdownRenderer";
 import { WaLink } from "@/components/ui/WaLink";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd, blogPostingLd } from "@/components/seo/JsonLd";
-import { getArticulo, listArticuloSlugs } from "@/content/blog";
+import { articulosRelacionados, getArticulo, listArticuloSlugs } from "@/content/blog";
 import { modalidadesContenido } from "@/content/modalidades";
 import { EnlacesDeEntrada } from "@/components/seo/EnlacesDeEntrada";
 import { paginasQueEnlazanA } from "@/content/paginas-seo";
@@ -19,6 +19,10 @@ import { formatDate } from "@/lib/format";
   con canónica propia — el mismo criterio que las fichas de profesor.
 */
 export const dynamicParams = false;
+
+// Misma tarjeta que el bloque "Del blog" de las fichas de disciplina.
+const TARJETA =
+  "group flex h-full flex-col rounded-lg border border-white/8 bg-bg-panel p-5 text-inherit no-underline shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-neon/30 hover:shadow-card";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -56,6 +60,7 @@ export default async function ArticuloPage({ params }: Params) {
   const disciplinas = a.disciplinas
     .map((s) => ({ slug: s, nombre: modalidadesContenido[s] ? s.replace(/-/g, " ") : null }))
     .filter((d): d is { slug: string; nombre: string } => d.nombre !== null);
+  const relacionados = articulosRelacionados(a.slug);
 
   return (
     <SupportPage eyebrow="Blog" title={a.titulo} intro={a.resumen}>
@@ -142,6 +147,29 @@ export default async function ArticuloPage({ params }: Params) {
           )}
         </aside>
       </div>
+
+      {/* Sigue leyendo: enlaces entre guías, para que ninguna dependa solo del
+          listado de /blog y de su ficha de disciplina (`articulosRelacionados`). */}
+      {relacionados.length > 0 && (
+        <section className="mt-12 space-y-5">
+          <h2 className="font-display text-3xl text-text-strong">Sigue leyendo</h2>
+          <ul className="grid list-none grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-4 p-0">
+            {relacionados.map((r) => (
+              <li key={r.slug}>
+                <Link href={`/blog/${r.slug}`} className={TARJETA}>
+                  <h3 className="font-display text-xl text-text-strong transition-colors group-hover:text-neon">
+                    {r.titulo}
+                  </h3>
+                  <p className="mt-2 font-body text-[14px] leading-relaxed text-text-muted">{r.resumen}</p>
+                  <span className="mt-4 inline-block font-body text-[13px] font-bold text-neon group-hover:underline">
+                    Leer la guía &rarr;
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <JsonLd
         data={blogPostingLd({

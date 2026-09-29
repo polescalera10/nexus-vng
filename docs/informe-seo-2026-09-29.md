@@ -80,6 +80,8 @@ En un dominio nuevo y con poca autoridad, Google rastrea poco. Lo que más ayuda
 
 ## Puntos de mejora, por impacto
 
+> **Actualización del 29-09 (noche).** Ya hechos en código: el 5 (prioridad del póster de cabecera), el 6 en lo que tenía sentido (bloque «Sigue leyendo» entre guías: cada guía recibe ahora 2–4 enlaces más), el 9 (`/llms.txt`, generado desde el contenido) y el 10 (el póster ya no se descarga dos veces). Descartados: empujar `/intensivos`, que es un histórico por decisión (`nav-items.ts`), y la masterclass, que se celebra el 3-10. El 7 no se toca: el primer párrafo de «¿Qué es Heels?» ya es una definición directa de 45 palabras. Lo que queda depende de Pol: puntos 1 a 4 y 11.
+
 ### Prioridad alta
 
 **1. Reenviar el sitemap y pedir indexación** *(Pol, 15 minutos)*

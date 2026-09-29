@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { articulos, articulosDeDisciplina, articulosOrdenados, type Articulo } from "@/content/blog";
+import {
+  articulos,
+  articulosDeDisciplina,
+  articulosOrdenados,
+  articulosRelacionados,
+  type Articulo,
+} from "@/content/blog";
 import { modalidadesContenido } from "@/content/modalidades";
 import { __parseInlineStyles } from "@/components/ui/MarkdownRenderer";
 
@@ -53,6 +59,49 @@ describe("catálogo del blog", () => {
       expect(a.description.length, a.slug).toBeLessThanOrEqual(160);
       expect(a.actualizado >= a.publicado, a.slug).toBe(true);
     }
+  });
+});
+
+describe("sigue leyendo (articulosRelacionados)", () => {
+  const lista: Articulo[] = [
+    { ...base, slug: "a", disciplinas: ["bachata", "salsa-cubana"] },
+    { ...base, slug: "b", disciplinas: ["heels"] },
+    { ...base, slug: "c", disciplinas: ["bachata"] },
+    { ...base, slug: "d", disciplinas: ["bachata", "salsa-cubana"] },
+    { ...base, slug: "e", disciplinas: ["salsa-cubana"] },
+  ];
+
+  it("nunca se recomienda a sí mismo y respeta el límite", () => {
+    const r = articulosRelacionados("a", 3, lista).map((x) => x.slug);
+    expect(r).not.toContain("a");
+    expect(r).toHaveLength(3);
+  });
+
+  it("pone primero las guías que comparten disciplina", () => {
+    // b (heels) no comparte nada con a: va detrás de c, d y e.
+    expect(articulosRelacionados("a", 3, lista).map((x) => x.slug)).toEqual(["c", "d", "e"]);
+    // Sin ninguna afín, se rellena igual.
+    expect(articulosRelacionados("b", 3, lista).map((x) => x.slug)).toHaveLength(3);
+  });
+
+  it("aparca las que el cuerpo ya enlaza", () => {
+    const conEnlace = lista.map((x) => (x.slug === "a" ? { ...x, cuerpo: "ver [c](/blog/c)" } : x));
+    expect(articulosRelacionados("a", 3, conEnlace).map((x) => x.slug)).toEqual(["d", "e", "b"]);
+  });
+
+  it("desempata dando la vuelta al registro, no siempre a las mismas", () => {
+    // Con todo empatado, cada una recomienda a las siguientes.
+    const iguales = lista.map((x) => ({ ...x, disciplinas: ["bachata"] }));
+    expect(articulosRelacionados("d", 2, iguales).map((x) => x.slug)).toEqual(["e", "a"]);
+  });
+
+  it("slug inexistente: lista vacía", () => {
+    expect(articulosRelacionados("no-existe", 3, lista)).toEqual([]);
+  });
+
+  it("con las guías publicadas, todas reciben al menos un enlace", () => {
+    const destinos = new Set(articulos.flatMap((a) => articulosRelacionados(a.slug).map((r) => r.slug)));
+    for (const a of articulos) expect(destinos, a.slug).toContain(a.slug);
   });
 });
 

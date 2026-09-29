@@ -125,11 +125,14 @@ export function VideoLoop({
         priority={prioridad}
         className={`${capa} ${listo ? "opacity-0" : "opacity-100"}`}
       />
+      {/* Sin `poster` en el <video>: el póster ya lo pinta el <Image> de
+          debajo, y el vídeo está a opacidad 0 hasta `onPlaying`. Con el
+          atributo puesto, el navegador bajaba además el JPG original sin
+          optimizar (64 KB en el hero móvil) que nadie llega a ver. */}
       {activo && (
         <video
           ref={video}
           src={activo.src}
-          poster={activo.poster}
           autoPlay
           muted
           loop

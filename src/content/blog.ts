@@ -74,6 +74,43 @@ export function listArticuloSlugs(): string[] {
   return articulos.map((a) => a.slug);
 }
 
+/**
+ * "Sigue leyendo" al pie de un artículo: las `n` guías más cercanas.
+ *
+ * Existe por el enlazado interno (29-09-2026): cinco guías recibían solo 3 o 4
+ * enlaces y Google había indexado 2 de las 10. Orden:
+ *  1. Antes las que el cuerpo NO enlaza ya: repetir un enlace no suma nada.
+ *  2. Antes las que comparten alguna disciplina. Cuenta compartir, no cuántas:
+ *     casi todas son de salsa y bachata, y puntuar por número dejaba sin un
+ *     solo enlace a las de una disciplina (la rueda de casino).
+ *  3. Empate: las siguientes en el orden del registro, dando la vuelta. Si se
+ *     desempatara por fecha, las mismas tres se llevarían todos los enlaces;
+ *     así cada guía recibe más o menos los mismos. El test comprueba que
+ *     ninguna publicada se queda sin enlace.
+ */
+export function articulosRelacionados(
+  slug: string,
+  n = 3,
+  lista: readonly Articulo[] = articulos,
+): Articulo[] {
+  const i = lista.findIndex((a) => a.slug === slug);
+  const actual = lista[i];
+  if (!actual) return [];
+  const afin = (a: Articulo) => (a.disciplinas.some((d) => actual.disciplinas.includes(d)) ? 1 : 0);
+  const yaEnlazado = (a: Articulo) => (actual.cuerpo.includes(`/blog/${a.slug}`) ? 1 : 0);
+  const distancia = (j: number) => (j - i + lista.length) % lista.length;
+
+  return lista
+    .map((a, j) => ({ a, j }))
+    .filter(({ j }) => j !== i)
+    .sort(
+      (x, y) =>
+        yaEnlazado(x.a) - yaEnlazado(y.a) || afin(y.a) - afin(x.a) || distancia(x.j) - distancia(y.j),
+    )
+    .slice(0, n)
+    .map(({ a }) => a);
+}
+
 /** Artículos que tratan una disciplina: el enlace de vuelta desde su ficha. */
 export function articulosDeDisciplina(slug: string, lista: readonly Articulo[] = articulos): Articulo[] {
   return articulosOrdenados(lista.filter((a) => a.disciplinas.includes(slug)));
