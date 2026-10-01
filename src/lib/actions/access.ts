@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { isAdminSession } from "@/lib/auth";
+import { planificarAcceso, type UsuarioExistente } from "@/lib/access-bulk";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/types/database";
 
@@ -189,5 +190,136 @@ export async function grantTeacherAccess(teacherId: string): Promise<AccessResul
   return {
     ok: true,
     message: `Listo. Ya puede entrar en /area-privada con ${teacher.email}.`,
+  };
+}
+
+export type BulkAccessResult = {
+  ok: boolean;
+  message: string;
+  creados: number;
+  enlazados: number;
+  fallos: { nombre: string; motivo: string }[];
+};
+
+/**
+ * Da acceso a todos los alumnos activos que tienen email y aún no tienen
+ * cuenta. Lo mismo que `grantStudentAccess`, en bloque y sin enviar correo.
+ *
+ * Reglas que NO son las del alta individual, a propósito:
+ *   · una cuenta que ya existe NO se toca: ni se le cambia el rol (el alta
+ *     individual sí lo hace y degradaría a un admin que fuera también alumno)
+ *     ni se enlaza si no es de alumno;
+ *   · los usuarios de Auth se leen UNA vez, no una por alumno;
+ *   · un fallo en un alumno no corta el resto: se cuenta y se devuelve.
+ */
+export async function grantAllStudentsAccess(): Promise<BulkAccessResult> {
+  const vacio = { creados: 0, enlazados: 0, fallos: [] };
+  if (!(await isAdminSession())) {
+    return { ok: false, message: "No tienes permiso.", ...vacio };
+  }
+  if (!serviceRoleDisponible()) {
+    return { ok: false, message: "Falta SUPABASE_SERVICE_ROLE_KEY en el entorno.", ...vacio };
+  }
+
+  const supabase = await createClient();
+  const { data: alumnos, error } = await supabase
+    .from("students")
+    .select("id, full_name, email")
+    .eq("active", true)
+    .is("profile_id", null)
+    .not("email", "is", null)
+    .order("full_name");
+
+  if (error) {
+    console.error("[grantAllStudentsAccess] alumnos:", error.message);
+    return { ok: false, message: "No se han podido leer los alumnos.", ...vacio };
+  }
+
+  const candidatos = (alumnos ?? [])
+    .filter((a): a is typeof a & { email: string } => Boolean(a.email?.trim()))
+    .map((a) => ({ id: a.id, full_name: a.full_name, email: a.email }));
+  if (candidatos.length === 0) {
+    return { ok: true, message: "No hay alumnos pendientes de acceso.", ...vacio };
+  }
+
+  const admin = createServiceClient();
+
+  // Usuarios de Auth que ya existen, por email, con su rol.
+  const PER_PAGE = 1000;
+  const porEmail = new Map<string, { id: string }>();
+  for (let page = 1; page <= 20; page++) {
+    const { data, error: listError } = await admin.auth.admin.listUsers({ page, perPage: PER_PAGE });
+    if (listError) {
+      console.error("[grantAllStudentsAccess] listUsers:", listError.message);
+      return { ok: false, message: "No se han podido leer las cuentas existentes.", ...vacio };
+    }
+    for (const u of data.users) if (u.email) porEmail.set(u.email.toLowerCase(), { id: u.id });
+    if (data.users.length < PER_PAGE) break;
+  }
+
+  // Todos los perfiles, sin `.in(ids)`: con cientos de ids la URL de PostgREST
+  // se pasa del límite, y `profiles` tiene una fila por usuario (decenas).
+  const { data: perfiles } = await admin.from("profiles").select("id, role");
+  const rolPorId = new Map((perfiles ?? []).map((p) => [p.id, p.role]));
+
+  const existentes = new Map<string, UsuarioExistente>();
+  for (const [email, u] of porEmail) {
+    existentes.set(email, { userId: u.id, role: rolPorId.get(u.id) ?? null });
+  }
+
+  const plan = planificarAcceso(candidatos, existentes);
+  const fallos = [...plan.omitidos];
+  let creados = 0;
+  let enlazados = 0;
+
+  for (const paso of plan.pasos) {
+    let userId = paso.userId;
+
+    if (!userId) {
+      const { data, error: createError } = await admin.auth.admin.createUser({
+        email: paso.email,
+        email_confirm: true,
+      });
+      if (createError || !data.user) {
+        console.error("[grantAllStudentsAccess] createUser:", createError?.message);
+        fallos.push({ nombre: paso.nombre, motivo: "no se pudo crear la cuenta" });
+        continue;
+      }
+      userId = data.user.id;
+      creados++;
+    } else {
+      enlazados++;
+    }
+
+    // Con la sesión del admin, igual que el alta individual: pasa por la RLS y
+    // por el guard de `students`.
+    const { error: linkError } = await supabase
+      .from("students")
+      .update({ profile_id: userId })
+      .eq("id", paso.studentId);
+
+    if (linkError) {
+      console.error("[grantAllStudentsAccess] enlazar:", linkError.message);
+      fallos.push({
+        nombre: paso.nombre,
+        motivo:
+          linkError.code === "23505"
+            ? "esa cuenta ya está enlazada a otro alumno"
+            : "cuenta creada, pero no se pudo enlazar a la ficha",
+      });
+    }
+  }
+
+  revalidatePath("/area-privada/admin/alumnos");
+  const hechos = creados + enlazados;
+  return {
+    ok: fallos.length === 0,
+    message:
+      fallos.length === 0
+        ? `Listo: ${hechos} ${hechos === 1 ? "alumno con acceso" : "alumnos con acceso"}. No se ha enviado ningún correo.`
+        : `${hechos} con acceso, ${fallos.length} sin resolver. No se ha enviado ningún correo.`,
+    creados,
+    enlazados,
+    fallos,
   };
 }

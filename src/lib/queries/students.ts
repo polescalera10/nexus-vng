@@ -197,3 +197,19 @@ export async function getStudentDetail(id: string): Promise<StudentDetail | null
     attendance: { total: totalRes.count ?? 0, present: presentRes.count ?? 0 },
   };
 }
+
+/** Alumnos activos con email y sin cuenta de acceso (los que cubre "Dar acceso a todos"). */
+export async function countStudentsSinAcceso(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("students")
+    .select("id", { count: "exact", head: true })
+    .eq("active", true)
+    .is("profile_id", null)
+    .not("email", "is", null);
+  if (error) {
+    console.error("[countStudentsSinAcceso]", error.message);
+    return 0;
+  }
+  return count ?? 0;
+}

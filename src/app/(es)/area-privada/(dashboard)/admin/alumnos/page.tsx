@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { DANCE_ROLE_LABELS, formatPoints } from "@/lib/format";
 import {
+  countStudentsSinAcceso,
   getActiveCourses,
   getNiveles,
   listStudents,
@@ -14,8 +15,13 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Table, TBody, Td, Th, THead, Tr } from "@/components/ui/Table";
 import type { DanceRole, PaymentStatus } from "@/types/database";
+import { BulkAccessButton } from "./BulkAccessButton";
 import { PaymentToggle } from "./PaymentToggle";
 import { StudentFilters } from "./StudentFilters";
+
+// "Dar acceso a todos" crea una cuenta por alumno desde esta página: con medio
+// centenar de altas el límite por defecto se queda corto.
+export const maxDuration = 60;
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -44,7 +50,7 @@ export default async function AlumnosPage({
   const estado: StudentsEstadoFilter =
     estadoRaw === "inactivos" || estadoRaw === "todos" ? estadoRaw : "activos";
 
-  const [students, niveles, cursos] = await Promise.all([
+  const [students, niveles, cursos, sinAcceso] = await Promise.all([
     listStudents({
       q: q || undefined,
       nivelId: nivel || undefined,
@@ -55,6 +61,7 @@ export default async function AlumnosPage({
     }),
     getNiveles(),
     getActiveCourses(),
+    countStudentsSinAcceso(),
   ]);
 
   // Los saldos van en una segunda consulta y no en `listStudents`: la
@@ -75,7 +82,10 @@ export default async function AlumnosPage({
             Fichas, cuotas y estado del alumnado.
           </p>
         </div>
-        <Button href="/area-privada/admin/alumnos/nuevo">Nuevo alumno</Button>
+        <div className="flex flex-wrap items-start justify-end gap-3">
+          <BulkAccessButton pendientes={sinAcceso} />
+          <Button href="/area-privada/admin/alumnos/nuevo">Nuevo alumno</Button>
+        </div>
       </div>
 
       <div className="mt-8">

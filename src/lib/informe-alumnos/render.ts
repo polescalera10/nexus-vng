@@ -133,13 +133,20 @@ function etiqueta(texto: string): string {
   );
 }
 
+/** Hasta 12 nombres y "y N más": el día que se da acceso a todos, el grupo "nunca" tiene casi 70. */
+export function nombresAcotados(nombres: readonly string[], max = 12): string {
+  if (nombres.length === 0) return "—";
+  if (nombres.length <= max) return nombres.join(", ");
+  return `${nombres.slice(0, max).join(", ")} y ${nombres.length - max} más`;
+}
+
 const SEGMENTOS: Segmento[] = ["habitual", "ocasional", "dormido", "nunca"];
 
 function bloqueSegmentos(i: InformeAlumnos): string {
   const filas = SEGMENTOS.map((s) => [
     { texto: SEGMENTO_LABELS[s], negrita: true },
     { texto: i.segmentos[s].length, negrita: true },
-    { texto: i.segmentos[s].length ? i.segmentos[s].join(", ") : "—", color: "#374151" },
+    { texto: nombresAcotados(i.segmentos[s]), color: "#374151" },
   ]);
   const nota =
     `<p style="font:400 12px ${FUENTE};color:${GRIS};line-height:1.6;margin:10px 0 0">` +

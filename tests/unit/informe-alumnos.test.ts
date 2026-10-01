@@ -16,7 +16,7 @@ import {
   ventanaDia,
 } from "@/lib/informe-alumnos/calc";
 import type { InformeAlumnos } from "@/lib/informe-alumnos/datos";
-import { asunto, esc, renderHtml, renderTexto } from "@/lib/informe-alumnos/render";
+import { asunto, esc, nombresAcotados, renderHtml, renderTexto } from "@/lib/informe-alumnos/render";
 
 /**
  * Informe diario del área de alumnos (`/api/cron/informe-alumnos`).
@@ -209,6 +209,15 @@ describe("correo", () => {
     expect(html).not.toContain("<img src=x");
     expect(html).toContain("&lt;img src=x onerror=alert(1)&gt;");
     expect(esc(`"a" & 'b'`)).toBe("&quot;a&quot; &amp; &#39;b&#39;");
+  });
+
+  it("acota las listas de nombres largas", () => {
+    expect(nombresAcotados([])).toBe("—");
+    expect(nombresAcotados(["A", "B"])).toBe("A, B");
+    const muchos = Array.from({ length: 69 }, (_, n) => `Alumno ${n}`);
+    const txt = nombresAcotados(muchos);
+    expect(txt.endsWith("y 57 más")).toBe(true);
+    expect(txt.split(",").length).toBe(12);
   });
 
   it("estilos en línea: ni <style> ni clases", () => {
