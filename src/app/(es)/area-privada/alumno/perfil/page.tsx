@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/Card";
+import { registrarVisita } from "@/lib/actividad";
 import { requireRole } from "@/lib/auth";
 import { signAvatarUrl } from "@/lib/avatars";
 import { getStudentForUser } from "@/lib/queries/alumno";
@@ -21,7 +22,11 @@ export const dynamic = "force-dynamic";
  */
 export default async function PerfilPage() {
   const { user } = await requireRole("alumno");
-  const student = await getStudentForUser(user.id);
+  // La visita se apunta en paralelo: no retrasa la página.
+  const [student] = await Promise.all([
+    getStudentForUser(user.id),
+    registrarVisita("perfil"),
+  ]);
 
   if (!student) {
     return (

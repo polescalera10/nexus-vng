@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { registrarVisita } from "@/lib/actividad";
 import { requireRole } from "@/lib/auth";
 import { getMyCourses, getStudentForUser } from "@/lib/queries/alumno";
 import { getProximaClase } from "@/lib/queries/diario";
@@ -45,7 +46,11 @@ export const dynamic = "force-dynamic";
  */
 export default async function AlumnoPage() {
   const { user } = await requireRole("alumno");
-  const student = await getStudentForUser(user.id);
+  // La visita se apunta en paralelo: no retrasa la página.
+  const [student] = await Promise.all([
+    getStudentForUser(user.id),
+    registrarVisita("inicio"),
+  ]);
 
   if (!student) {
     return (

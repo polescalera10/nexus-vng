@@ -41,6 +41,8 @@ export const REWARD_NAME = "Premio E2E";
 /** Diario de la sesión de AYER, sembrado en global-setup (el de hoy lo escribe el profe en su test). */
 export const DIARIO_RESUMEN = "Resumen E2E: enchufla doble y vuelta de la vecina.";
 export const DIARIO_VIDEO_TITULO = "Secuencia E2E";
+/** Secreto del informe diario en el servidor de los e2e (lo inyecta playwright.private.config.ts). */
+export const INFORME_SECRET_E2E = "e2e-solo-local-informe";
 
 export const IDS = {
   teacher: "e2e00000-0000-4000-8000-000000000011",

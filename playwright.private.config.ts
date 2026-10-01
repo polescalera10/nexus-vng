@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { INFORME_SECRET_E2E } from "./tests/e2e-private/fixtures";
 
 /**
  * E2E del ÁREA PRIVADA (login, roles, leads, asistencia, alumna).
@@ -68,5 +69,7 @@ export default defineConfig({
     timeout: 300_000,
     stdout: "ignore",
     stderr: "pipe",
+    // Se suman a process.env: el resto de variables siguen llegando igual.
+    env: { INFORME_ALUMNOS_SECRET: INFORME_SECRET_E2E },
   },
 });

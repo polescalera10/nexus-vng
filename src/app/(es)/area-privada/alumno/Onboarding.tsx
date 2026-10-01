@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
@@ -212,6 +213,17 @@ export function Onboarding({
                 : "No te falta nada. Nos vemos en clase."}
             </p>
           </div>
+
+          {/* Transparencia (RGPD, art. 13): el registro de uso se cuenta
+              aquí, la primera vez que entra, y no solo en /privacidad. */}
+          <p className="mb-4 font-body text-xs text-text-muted">
+            Para mejorar el área guardamos qué días entras, qué secciones abres y qué vídeos
+            reproduces. Se borra a los 12 meses.{" "}
+            <Link href="/privacidad" className="underline hover:text-accent">
+              Más información
+            </Link>
+            .
+          </p>
         </div>
 
         <div className="shrink-0 border-t border-text-strong/10 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-4">

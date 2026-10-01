@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { registrarReproduccion } from "@/lib/actions/actividad";
 import { parseVideoUrl, VIDEO_PROVIDER_LABELS } from "@/lib/video";
 
 /**
@@ -14,8 +15,20 @@ import { parseVideoUrl, VIDEO_PROVIDER_LABELS } from "@/lib/video";
  *
  * Si la URL no pasa la lista blanca de `lib/video.ts`, no se pinta nada: mejor
  * el hueco que un iframe a un dominio que nadie ha revisado.
+ *
+ * Con `videoId`, el play se apunta para el informe diario (qué vídeos se
+ * ven). Es lo único que se registra: lo que pase dentro del reproductor de
+ * YouTube o Vimeo no lo vemos ni lo queremos ver.
  */
-export function VideoEmbed({ url, titulo }: { url: string; titulo?: string | null }) {
+export function VideoEmbed({
+  url,
+  titulo,
+  videoId,
+}: {
+  url: string;
+  titulo?: string | null;
+  videoId?: string;
+}) {
   const [activo, setActivo] = useState(false);
   const video = parseVideoUrl(url);
 
@@ -38,7 +51,10 @@ export function VideoEmbed({ url, titulo }: { url: string; titulo?: string | nul
         ) : (
           <button
             type="button"
-            onClick={() => setActivo(true)}
+            onClick={() => {
+              setActivo(true);
+              if (videoId) void registrarReproduccion(videoId);
+            }}
             className="group absolute inset-0 flex size-full flex-col items-center justify-center gap-3 bg-bg-elevated transition-colors hover:bg-accent/6"
           >
             <span className="flex size-14 items-center justify-center rounded-full bg-accent text-ink shadow-neon transition-transform group-hover:scale-105">

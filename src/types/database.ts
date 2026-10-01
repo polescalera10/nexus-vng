@@ -97,6 +97,38 @@ export type PointMilestone = Tables<"point_milestones">;
 export type StudentPointBalance = { student_id: string; balance: number };
 
 /**
+ * Campos de `student_profile_changes.field` (0049a). La columna es `text` con
+ * CHECK, que el generador no ve. Si la migración amplía la lista, ampliarla aquí.
+ */
+export type ProfileChangeField =
+  | "full_name"
+  | "phone"
+  | "birthday"
+  | "dance_role"
+  | "avatar_path"
+  | "show_in_leaderboard";
+
+export type StudentProfileChange = Narrow<
+  Tables<"student_profile_changes">,
+  { field: ProfileChangeField }
+>;
+
+/** Visita del alumno a su área: una fila por alumno y día (0049a). */
+export type StudentActivityDay = Tables<"student_activity_days">;
+
+/**
+ * Vista `student_activity_summary` (0049a). Como la de saldos, agrupa por una
+ * columna NOT NULL con `min`/`max`/`count` sobre columnas NOT NULL: ninguna
+ * fila trae nulls aunque el generador los marque.
+ */
+export type StudentActivitySummary = {
+  student_id: string;
+  first_day: string;
+  last_day: string;
+  days: number;
+};
+
+/**
  * Fila de `leaderboard_alumno()` (0044d). El generador no deduce nulabilidad en
  * el RETURNS TABLE de una función SQL y da `avatar_path: string`, pero sale de
  * `students.avatar_path`, que es nullable.
@@ -120,14 +152,26 @@ export type Database = Omit<GeneratedDatabase, "public"> & {
   public: Omit<Generated, "Tables" | "Views" | "Functions"> & {
     Tables: Omit<
       Generated["Tables"],
-      "modalidades" | "teachers" | "whatsapp_events" | "intensivo_registros"
+      | "modalidades"
+      | "teachers"
+      | "whatsapp_events"
+      | "intensivo_registros"
+      | "student_profile_changes"
     > & {
       modalidades: WithRow<Generated["Tables"]["modalidades"], Modalidad>;
       teachers: WithRow<Generated["Tables"]["teachers"], Teacher>;
       whatsapp_events: WithRow<Generated["Tables"]["whatsapp_events"], WhatsappEvent>;
       intensivo_registros: WithRow<Generated["Tables"]["intensivo_registros"], IntensivoRegistro>;
+      student_profile_changes: WithRow<
+        Generated["Tables"]["student_profile_changes"],
+        StudentProfileChange
+      >;
     };
-    Views: Omit<Generated["Views"], "student_point_balances"> & {
+    Views: Omit<Generated["Views"], "student_point_balances" | "student_activity_summary"> & {
+      student_activity_summary: WithRow<
+        Generated["Views"]["student_activity_summary"],
+        StudentActivitySummary
+      >;
       student_point_balances: WithRow<
         Generated["Views"]["student_point_balances"],
         StudentPointBalance

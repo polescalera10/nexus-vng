@@ -140,6 +140,11 @@ select throws_ok($$ insert into public.niveles (nombre) values ('RLS anon') $$,
   '42501', null, 'anon: no puede crear niveles');
 select is((select count(*) from storage.objects where bucket_id = 'avatars'), 0::bigint,
   'anon: no ve fotos de perfil');
+select throws_ok($$ select public.registrar_visita_alumno('inicio') $$, '42501', null,
+  'anon: no puede apuntar visitas (0049b)');
+select throws_ok($$ select public.registrar_reproduccion_video('7e570000-0000-4000-8000-000000000093') $$, '42501', null,
+  'anon: no puede apuntar reproducciones (0049b)');
+select is((select count(*) from public.student_activity_days), 0::bigint, 'anon: no ve la actividad de alumnos');
 
 reset role;
 
@@ -223,6 +228,23 @@ select isnt_empty($$ select 1 from storage.objects
                     where bucket_id = 'avatars' and name = '7e570000-0000-4000-8000-000000000022/previa.jpg' $$,
   'alumno: puede leer fotos de compañeros (ranking)');
 
+-- Actividad (0049): escribe por RPC, nunca lee, ni lo suyo.
+select lives_ok($$ select public.registrar_visita_alumno('inicio') $$, 'alumno: apunta su visita');
+select lives_ok($$ select public.registrar_visita_alumno('ranking') $$, 'alumno: apunta otra sección el mismo día');
+select lives_ok($$ select public.registrar_visita_alumno('<script>') $$, 'alumno: una sección fuera de lista no falla');
+select lives_ok($$ select public.registrar_reproduccion_video('7e570000-0000-4000-8000-000000000093') $$,
+  'alumno: apunta un vídeo de su clase');
+select lives_ok($$ select public.registrar_reproduccion_video('7e570000-0000-4000-8000-000000000094') $$,
+  'alumno: un vídeo ajeno no falla (ni confirma que existe)');
+select is((select count(*) from public.student_activity_days), 0::bigint, 'alumno: no lee la actividad, ni la suya');
+select is((select count(*) from public.student_video_plays), 0::bigint, 'alumno: no lee reproducciones');
+select is((select count(*) from public.student_profile_changes), 0::bigint, 'alumno: no lee cambios de perfil');
+select is((select count(*) from public.student_activity_summary), 0::bigint, 'alumno: no lee el resumen de actividad');
+select throws_ok($$ insert into public.student_activity_days (student_id, day) values ('7e570000-0000-4000-8000-000000000022', current_date) $$,
+  '42501', null, 'alumno: no inserta visitas a nombre de otro por REST');
+select throws_ok($$ insert into public.informes_enviados (tipo, fecha) values ('alumnos_diario', current_date) $$,
+  '42501', null, 'alumno: no escribe en el registro de informes');
+
 reset role;
 
 
@@ -300,6 +322,8 @@ select isnt_empty($$ delete from public.attendance
                     where class_session_id = '7e570000-0000-4000-8000-000000000041'
                       and student_id = '7e570000-0000-4000-8000-000000000024' returning id $$,
   'profesor: borra el apunte de un suelto de su sesión');
+select is((select count(*) from public.student_activity_days), 0::bigint, 'profesor: no ve la actividad de alumnos');
+select is((select count(*) from public.student_profile_changes), 0::bigint, 'profesor: no ve cambios de perfil');
 
 reset role;
 
@@ -340,6 +364,20 @@ select isnt_empty($$ delete from public.rewards where id = '7e570000-0000-4000-8
 select lives_ok($$ insert into storage.objects (bucket_id, name)
                    values ('avatars', '7e570000-0000-4000-8000-000000000022/por-admin.jpg') $$,
   'admin: sube fotos en cualquier carpeta');
+
+-- Actividad apuntada por S1 en su bloque (0049).
+select is((select views from public.student_activity_days where student_id = '7e570000-0000-4000-8000-000000000021'),
+  2, 'admin: ve las visitas de S1 (la sección fuera de lista no cuenta)');
+select is((select sections from public.student_activity_days where student_id = '7e570000-0000-4000-8000-000000000021'),
+  array['inicio', 'ranking'], 'admin: secciones de S1 sin repetir');
+select is(array(select session_video_id from public.student_video_plays where student_id = '7e570000-0000-4000-8000-000000000021'),
+  array['7e570000-0000-4000-8000-000000000093']::uuid[], 'admin: solo consta el vídeo de la clase de S1');
+select is(array(select field from public.student_profile_changes where student_id = '7e570000-0000-4000-8000-000000000021'),
+  array['full_name'], 'admin: consta que S1 cambió su nombre (no lo que tocó el profe)');
+select is((select days from public.student_activity_summary where student_id = '7e570000-0000-4000-8000-000000000021'),
+  1, 'admin: lee el resumen de actividad');
+select is((select count(*) from public.student_profile_changes where student_id = '7e570000-0000-4000-8000-000000000022'),
+  0::bigint, 'admin: lo que cambia el admin no cuenta como cambio del alumno');
 
 reset role;
 

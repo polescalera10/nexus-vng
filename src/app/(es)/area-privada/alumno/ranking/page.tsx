@@ -3,6 +3,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { registrarVisita } from "@/lib/actividad";
 import { requireRole } from "@/lib/auth";
 import { formatPoints } from "@/lib/format";
 import { getStudentForUser } from "@/lib/queries/alumno";
@@ -107,7 +108,11 @@ function FilaRanking({ row }: { row: RankingRow }) {
 
 export default async function RankingPage() {
   const { user } = await requireRole("alumno");
-  const student = await getStudentForUser(user.id);
+  // La visita se apunta en paralelo: no retrasa la página.
+  const [student] = await Promise.all([
+    getStudentForUser(user.id),
+    registrarVisita("ranking"),
+  ]);
 
   if (!student) {
     return (

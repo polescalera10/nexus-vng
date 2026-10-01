@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { VideoEmbed } from "@/components/alumno/VideoEmbed";
+import { registrarVisita } from "@/lib/actividad";
 import { requireRole } from "@/lib/auth";
 import { getStudentForUser } from "@/lib/queries/alumno";
 import { getCursoDelAlumno, getDiarioDelCurso } from "@/lib/queries/diario";
@@ -25,7 +26,11 @@ export default async function ClaseDelAlumnoPage({
   params: Promise<{ courseId: string }>;
 }) {
   const { user } = await requireRole("alumno");
-  const student = await getStudentForUser(user.id);
+  // La visita se apunta en paralelo: no retrasa la página.
+  const [student] = await Promise.all([
+    getStudentForUser(user.id),
+    registrarVisita("clase"),
+  ]);
   if (!student) notFound();
 
   const { courseId } = await params;
@@ -121,7 +126,7 @@ export default async function ClaseDelAlumnoPage({
                     }`}
                   >
                     {sesion.videos.map((v) => (
-                      <VideoEmbed key={v.id} url={v.url} titulo={v.titulo} />
+                      <VideoEmbed key={v.id} url={v.url} titulo={v.titulo} videoId={v.id} />
                     ))}
                   </div>
                 )}

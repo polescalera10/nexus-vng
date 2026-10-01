@@ -34,6 +34,7 @@ export default function PrivacidadPage() {
             "Formularios de contacto y clase de prueba: nombre, teléfono, email (opcional), modalidad de interés y mensaje.",
             "Contacto por WhatsApp: número de teléfono y contenido de la conversación, tratados también por WhatsApp (Meta) según sus propias condiciones.",
             "Área privada de alumnos: email de acceso, datos de perfil y datos de gestión académica (inscripciones, asistencia).",
+            "Uso del área privada: qué días entras, la hora de la primera y la última página de cada día, cuántas páginas abres y qué secciones visitas (inicio, ranking, perfil, diario de clase), qué vídeos del diario reproduces y qué campos de tu perfil cambias (sin copiar su contenido). No guardamos tu dirección IP ni datos de tu navegador.",
             "No se solicitan categorías especiales de datos. Los servicios se dirigen a personas mayores de 18 años.",
           ]}
         />
@@ -46,6 +47,7 @@ export default function PrivacidadPage() {
             "Gestionar tu relación como alumno (inscripciones, asistencia, comunicaciones operativas) — ejecución de contrato (art. 6.1.b RGPD).",
             "Enviarte comunicaciones comerciales, solo si las has consentido expresamente — consentimiento (art. 6.1.a RGPD), revocable en cualquier momento.",
             "Seguridad del sitio y prevención de abuso en los formularios — interés legítimo (art. 6.1.f RGPD).",
+            "Saber cómo se usa el área privada para mejorarla, detectar a tiempo problemas de acceso y si alguien está dejando de venir a clase — interés legítimo (art. 6.1.f RGPD). Solo lo ve la dirección de la escuela, en un resumen diario interno. Puedes oponerte escribiéndonos y dejaremos de registrarlo.",
           ]}
         />
       </LegalSection>
@@ -55,7 +57,8 @@ export default function PrivacidadPage() {
           Los datos de solicitudes de información se conservan el tiempo necesario para atenderlas
           y, como máximo, <LegalTodo>plazo de conservación de leads, p. ej. 12 meses</LegalTodo>{" "}
           desde el último contacto. Los datos de alumnos se conservan mientras dure la relación y,
-          después, durante los plazos de prescripción legal aplicables.
+          después, durante los plazos de prescripción legal aplicables. Los registros de uso del área
+          privada se borran automáticamente a los 12 meses.
         </LegalP>
       </LegalSection>
 
@@ -64,6 +67,7 @@ export default function PrivacidadPage() {
         <LegalList
           items={[
             <>Supabase (base de datos y autenticación del área privada) — <LegalTodo>confirmar región de alojamiento (UE) y acuerdo de encargo (DPA)</LegalTodo>.</>,
+            <>Resend (Resend, Inc.), para enviar los correos del área privada: el enlace de acceso a tu email y el resumen interno de uso a la dirección de la escuela — <LegalTodo>confirmar el acuerdo de encargo (DPA) de Resend y la garantía de las transferencias fuera del EEE</LegalTodo>.</>,
             <>n8n (automatización de avisos internos de nuevas solicitudes) — <LegalTodo>confirmar dónde está alojada la instancia y su DPA</LegalTodo>.</>,
             <>Cloudflare Turnstile (Cloudflare, Inc.), al enviar un formulario: comprueba que quien lo envía es una persona y no un programa automático, para evitar el spam. Para ello analiza datos técnicos de la conexión y del navegador; no le enviamos tu nombre, teléfono ni email. Base jurídica: interés legítimo en proteger el formulario — <LegalTodo>confirmar el acuerdo de encargo (DPA) de Cloudflare y la garantía de las transferencias fuera del EEE</LegalTodo>.</>,
             "WhatsApp (Meta Platforms Ireland Ltd.), si nos escribes por ese canal: se aplica su propia política de privacidad.",

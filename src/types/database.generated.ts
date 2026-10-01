@@ -376,6 +376,27 @@ export type Database = {
           },
         ]
       }
+      informes_enviados: {
+        Row: {
+          enviado_at: string
+          fecha: string
+          proveedor_id: string | null
+          tipo: string
+        }
+        Insert: {
+          enviado_at?: string
+          fecha: string
+          proveedor_id?: string | null
+          tipo: string
+        }
+        Update: {
+          enviado_at?: string
+          fecha?: string
+          proveedor_id?: string | null
+          tipo?: string
+        }
+        Relationships: []
+      }
       intensivo_registros: {
         Row: {
           asistio: boolean
@@ -877,6 +898,112 @@ export type Database = {
           },
         ]
       }
+      student_activity_days: {
+        Row: {
+          day: string
+          first_seen_at: string
+          last_seen_at: string
+          sections: string[]
+          student_id: string
+          views: number
+        }
+        Insert: {
+          day: string
+          first_seen_at?: string
+          last_seen_at?: string
+          sections?: string[]
+          student_id: string
+          views?: number
+        }
+        Update: {
+          day?: string
+          first_seen_at?: string
+          last_seen_at?: string
+          sections?: string[]
+          student_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_activity_days_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_profile_changes: {
+        Row: {
+          changed_at: string
+          field: string
+          filled: boolean
+          id: number
+          student_id: string
+        }
+        Insert: {
+          changed_at?: string
+          field: string
+          filled: boolean
+          id?: never
+          student_id: string
+        }
+        Update: {
+          changed_at?: string
+          field?: string
+          filled?: boolean
+          id?: never
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_profile_changes_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_video_plays: {
+        Row: {
+          first_played_at: string
+          played_on: string
+          plays: number
+          session_video_id: string
+          student_id: string
+        }
+        Insert: {
+          first_played_at?: string
+          played_on: string
+          plays?: number
+          session_video_id: string
+          student_id: string
+        }
+        Update: {
+          first_played_at?: string
+          played_on?: string
+          plays?: number
+          session_video_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_video_plays_session_video_id_fkey"
+            columns: ["session_video_id"]
+            isOneToOne: false
+            referencedRelation: "session_videos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_video_plays_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       students: {
         Row: {
           active: boolean
@@ -1049,6 +1176,23 @@ export type Database = {
       }
     }
     Views: {
+      student_activity_summary: {
+        Row: {
+          days: number | null
+          first_day: string | null
+          last_day: string | null
+          student_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_activity_days_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_point_balances: {
         Row: {
           balance: number | null
@@ -1108,6 +1252,14 @@ export type Database = {
       perfil_alumno_completo: {
         Args: { p_avatar_path: string; p_birthday: string; p_full_name: string }
         Returns: boolean
+      }
+      registrar_reproduccion_video: {
+        Args: { p_video_id: string }
+        Returns: undefined
+      }
+      registrar_visita_alumno: {
+        Args: { p_seccion: string }
+        Returns: undefined
       }
       student_can_see_session: {
         Args: { p_session_id: string }
