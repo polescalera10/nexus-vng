@@ -245,40 +245,15 @@ export function courseLd(
 }
 
 /**
- * Schema.org Event — /eventos/[slug].
- *
- * `url` apunta a la ficha del evento, no al listado: Google pide una URL
- * propia por evento para plantearse el resultado enriquecido. `image` sale de
- * la primera imagen del propio Markdown de la ficha (si la hay), así que no
- * hay que mantener una lista aparte.
+ * Lugar del evento. `ubicacion` viene como "Sala · Localidad" (p. ej.
+ * "En Tu Salsa · Cubelles"): si hay localidad se declara esa, no la de la
+ * escuela. Sin ubicación publicada, el evento es en la sala de NEXUS. La calle
+ * y el código postal de una sala ajena no se conocen y no se inventan.
  */
-export function eventLd(e: {
-  titulo: string;
-  descripcion?: string | null;
-  fecha: string;
-  slug?: string | null;
-  /** Imagen destacada del evento (ruta absoluta o relativa al dominio). */
-  imagen?: string | null;
-}) {
-  const url = e.slug ? `${site.url}/eventos/${e.slug}` : `${site.url}/eventos`;
-  const imagen = e.imagen
-    ? e.imagen.startsWith("http")
-      ? e.imagen
-      : `${site.url}${e.imagen}`
-    : `${site.url}/opengraph-image`;
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: e.titulo,
-    description: e.descripcion ?? undefined,
-    startDate: e.fecha,
-    eventStatus: "https://schema.org/EventScheduled",
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    inLanguage: "es-ES",
-    url,
-    image: imagen,
-    location: {
+function lugarEvento(ubicacion?: string | null) {
+  const texto = ubicacion?.trim();
+  if (!texto) {
+    return {
       "@type": "Place",
       name: `${site.name} · ${site.nap.venue}`,
       address: {
@@ -289,8 +264,81 @@ export function eventLd(e: {
         postalCode: site.nap.postalCode,
         addressCountry: site.nap.addressCountry,
       },
+    };
+  }
+  const [nombre, localidad] = texto.split("·").map((t) => t.trim());
+  return {
+    "@type": "Place",
+    name: nombre || texto,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: localidad || site.nap.addressLocality,
+      addressRegion: site.nap.addressRegion,
+      addressCountry: site.nap.addressCountry,
     },
+  };
+}
+
+/**
+ * Schema.org Event — /eventos y /eventos/[slug].
+ *
+ * `url` apunta a la ficha del evento, no al listado: Google pide una URL
+ * propia por evento para plantearse el resultado enriquecido. `image` sale de
+ * la primera imagen del propio Markdown de la ficha (si la hay), así que no
+ * hay que mantener una lista aparte.
+ *
+ * `offers` solo se emite si el evento tiene precio publicado (0 = gratuito):
+ * sin precio no se inventa. `performer` es la escuela, que es quien imparte la
+ * clase o pincha la fiesta; la tabla `eventos` no enlaza a profesores.
+ */
+export function eventLd(e: {
+  titulo: string;
+  descripcion?: string | null;
+  fecha: string;
+  fechaFin?: string | null;
+  slug?: string | null;
+  /** Imagen destacada del evento (ruta absoluta o relativa al dominio). */
+  imagen?: string | null;
+  /** Euros; 0 = gratuito; null/undefined = sin precio publicado. */
+  precio?: number | string | null;
+  ubicacion?: string | null;
+  /** Si todavía se puede reservar plaza (declara disponibilidad). */
+  abierto?: boolean;
+}) {
+  const url = e.slug ? `${site.url}/eventos/${e.slug}` : `${site.url}/eventos`;
+  const imagen = e.imagen
+    ? e.imagen.startsWith("http")
+      ? e.imagen
+      : `${site.url}${e.imagen}`
+    : `${site.url}/opengraph-image`;
+  const precio = e.precio === null || e.precio === undefined ? null : Number(e.precio);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: e.titulo,
+    description: e.descripcion ?? undefined,
+    startDate: e.fecha,
+    endDate: e.fechaFin ?? undefined,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    inLanguage: "es-ES",
+    url,
+    image: imagen,
+    location: lugarEvento(e.ubicacion),
     organizer: orgRef(),
+    performer: orgRef(),
+    ...(precio !== null && Number.isFinite(precio)
+      ? {
+          offers: {
+            "@type": "Offer",
+            url,
+            price: String(precio),
+            priceCurrency: "EUR",
+            ...(e.abierto ? { availability: "https://schema.org/InStock" } : {}),
+          },
+        }
+      : {}),
   };
 }
 

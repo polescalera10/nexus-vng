@@ -7,7 +7,7 @@ import { MasterclassLeadForm } from "@/components/forms/MasterclassLeadForm";
 import { SetWaPageContext } from "@/components/ui/WaPageContext";
 import { waContextEvento } from "@/lib/wa-page-context";
 import { getEventoBySlug, getEventoSlugs } from "@/lib/queries/eventos";
-import { admiteInscripcion } from "@/lib/eventos";
+import { admiteInscripcion, eventoTerminado } from "@/lib/eventos";
 import { JsonLd, eventLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ogImages, metaDescripcion, primeraImagenMarkdown } from "@/lib/seo";
@@ -206,7 +206,11 @@ export default async function EventoDetailPage({ params }: Params) {
           titulo: e.titulo,
           descripcion: metaDescripcion(e.descripcion, 300),
           fecha: e.fecha,
+          fechaFin: e.fecha_fin,
           slug: e.slug,
+          precio: e.precio,
+          ubicacion: e.ubicacion,
+          abierto: !eventoTerminado(e),
           imagen: safeImageSrc(e.cover_image_url) ?? primeraImagenMarkdown(e.descripcion),
         })}
       />

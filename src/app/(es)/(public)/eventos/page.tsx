@@ -4,7 +4,7 @@ import { SupportPage } from "@/components/layout/SupportPage";
 import { PhotoPlaceholder } from "@/components/ui/PhotoPlaceholder";
 import { JsonLd, eventLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
-import { site } from "@/lib/site";
+import { eventoTerminado } from "@/lib/eventos";
 import { getEventos } from "@/lib/queries/eventos";
 import { EVENTO_TIPO_LABELS } from "@/lib/format";
 import { safeImageSrc } from "@/lib/images";
@@ -27,34 +27,19 @@ export async function generateMetadata(): Promise<Metadata> {
 // Revalidar cada hora
 export const revalidate = 3600;
 
-/**
- * `Event` completo de una ficha: parte del helper común y le añade lo que este
- * listado sí conoce — imagen real, hora de fin derivada y dirección completa.
- */
+/** `Event` de una ficha del listado: mismo helper que la ficha, para que no diverjan. */
 function eventoLdCompleto(e: Evento, cover: string | null) {
-  return {
-    ...eventLd({ titulo: e.titulo, descripcion: e.descripcion, fecha: e.fecha }),
-    ...(e.fecha_fin ? { endDate: e.fecha_fin } : {}),
-    ...(cover
-      ? { image: [cover.startsWith("http") ? cover : `${site.url}${cover}`] }
-      : {}),
-    url: `${site.url}/eventos/${e.slug}`,
-    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    inLanguage: "es-ES",
-    location: {
-      "@type": "Place",
-      name: `${site.name} · ${site.nap.venue}`,
-      address: {
-        "@type": "PostalAddress",
-        // La calle sigue pendiente de confirmar en lib/site.ts; vacía no se emite.
-        streetAddress: site.nap.streetAddress || undefined,
-        addressLocality: site.nap.addressLocality,
-        addressRegion: site.nap.addressRegion,
-        postalCode: site.nap.postalCode,
-        addressCountry: site.nap.addressCountry,
-      },
-    },
-  };
+  return eventLd({
+    titulo: e.titulo,
+    descripcion: e.descripcion,
+    fecha: e.fecha,
+    fechaFin: e.fecha_fin,
+    slug: e.slug,
+    imagen: cover,
+    precio: e.precio,
+    ubicacion: e.ubicacion,
+    abierto: !eventoTerminado(e),
+  });
 }
 
 export default async function EventosPage() {
