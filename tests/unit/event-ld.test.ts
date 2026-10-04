@@ -16,6 +16,11 @@ describe("eventLd", () => {
     });
   });
 
+  it("declara validFrom con la fecha de alta del evento", () => {
+    const ld = eventLd({ ...base, precio: 20, reservableDesde: "2026-09-01T10:00:00+00:00" });
+    expect(ld.offers).toMatchObject({ validFrom: "2026-09-01T10:00:00+00:00" });
+  });
+
   it("precio 0 es gratuito y se declara", () => {
     expect(eventLd({ ...base, precio: 0 }).offers).toMatchObject({ price: "0" });
   });

@@ -39,6 +39,7 @@ function eventoLdCompleto(e: Evento, cover: string | null) {
     precio: e.precio,
     ubicacion: e.ubicacion,
     abierto: !eventoTerminado(e),
+    reservableDesde: e.created_at,
   });
 }
 

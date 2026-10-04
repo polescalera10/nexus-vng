@@ -211,6 +211,7 @@ export default async function EventoDetailPage({ params }: Params) {
           precio: e.precio,
           ubicacion: e.ubicacion,
           abierto: !eventoTerminado(e),
+          reservableDesde: e.created_at,
           imagen: safeImageSrc(e.cover_image_url) ?? primeraImagenMarkdown(e.descripcion),
         })}
       />

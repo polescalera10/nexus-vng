@@ -290,6 +290,10 @@ function lugarEvento(ubicacion?: string | null) {
  * `offers` solo se emite si el evento tiene precio publicado (0 = gratuito):
  * sin precio no se inventa. `performer` es la escuela, que es quien imparte la
  * clase o pincha la fiesta; la tabla `eventos` no enlaza a profesores.
+ *
+ * `validFrom` (desde cuándo se puede reservar) es la fecha de alta del evento:
+ * la plaza se reserva desde que existe la ficha. No hay columna de "inicio de
+ * venta" aparte, así que no se declara otra fecha.
  */
 export function eventLd(e: {
   titulo: string;
@@ -304,6 +308,8 @@ export function eventLd(e: {
   ubicacion?: string | null;
   /** Si todavía se puede reservar plaza (declara disponibilidad). */
   abierto?: boolean;
+  /** Alta del evento (`created_at`): desde cuándo se puede reservar. */
+  reservableDesde?: string | null;
 }) {
   const url = e.slug ? `${site.url}/eventos/${e.slug}` : `${site.url}/eventos`;
   const imagen = e.imagen
@@ -335,6 +341,7 @@ export function eventLd(e: {
             url,
             price: String(precio),
             priceCurrency: "EUR",
+            ...(e.reservableDesde ? { validFrom: e.reservableDesde } : {}),
             ...(e.abierto ? { availability: "https://schema.org/InStock" } : {}),
           },
         }
