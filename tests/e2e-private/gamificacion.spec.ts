@@ -30,10 +30,7 @@ test("la alumna canjea un premio y el admin lo entrega", async ({ page, browser 
   });
   const admin = await adminContext.newPage();
   await admin.goto("/area-privada/admin/gamificacion");
-  // Al hidratar, Next precarga a la vez todos los enlaces del menú. Si la
-  // acción "Entregado" responde mientras siguen en vuelo, el router puede no
-  // aplicar el refresco (en la CI del 05-10 el servidor devolvió la lista
-  // vacía y la pantalla siguió igual). Una persona no pulsa tan rápido.
+  // Que termine de hidratar y de precargar el menú antes de pulsar.
   await admin.waitForLoadState("networkidle");
 
   // Filas pendientes de este premio y esta alumna. Puede haber más de una si
@@ -47,6 +44,8 @@ test("la alumna canjea un premio y el admin lo entrega", async ({ page, browser 
   const antes = await pendientes.count();
 
   await pendientes.first().getByRole("button", { name: "Entregado" }).click();
+  // Los botones se cambian al momento por el resultado (RedemptionActions).
+  await expect(admin.getByRole("status").filter({ hasText: "✓ Entregado" })).toBeVisible();
   await expect(pendientes).toHaveCount(antes - 1);
 
   await admin.reload();

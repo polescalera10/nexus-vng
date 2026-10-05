@@ -10,6 +10,10 @@ import type { RedemptionListItem } from "@/lib/queries/gamificacion";
 vi.mock("@/lib/actions/gamificacion", () => ({
   resolveRedemption: vi.fn(),
 }));
+// `RedemptionActions` pide un `router.refresh()` al resolver un canje.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
 
 const { Notificaciones } = await import(
   "@/app/(es)/area-privada/(dashboard)/admin/_components/Notificaciones"
