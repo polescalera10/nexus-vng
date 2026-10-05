@@ -49,6 +49,10 @@ test("la alumna canjea un premio y el admin lo entrega", async ({ page, browser 
 
   // El canje queda en el historial global de puntos.
   await admin.goto("/area-privada/admin/gamificacion/historial?regla=canje");
-  await expect(admin.getByText(`Canje: ${REWARD_NAME}`).first()).toBeVisible();
+  // Tabla en escritorio y tarjetas en móvil: las dos están en el DOM y una
+  // oculta, así que se busca la que se ve.
+  await expect(
+    admin.getByText(`Canje: ${REWARD_NAME}`).filter({ visible: true }).first(),
+  ).toBeVisible();
   await adminContext.close();
 });

@@ -11,7 +11,7 @@ import {
 /**
  * Informe diario del área de alumnos (0049 + /api/cron/informe-alumnos).
  *
- * Primero la alumna navega y abre un vídeo; luego se pide el informe del día
+ * Primero la alumna navega por su área; luego se pide el informe del día
  * de HOY en modo vista (`?vista=html`, no envía nada) y se comprueba que la
  * recoge. Así se prueba la cadena entera contra el esquema real: la RPC, la
  * RLS, el trigger y las lecturas paginadas de la ruta.
@@ -34,11 +34,10 @@ function hoyMadrid(): string {
   }).format(new Date());
 }
 
-test("sus visitas y el play del vídeo quedan apuntados", async ({ page }) => {
+test("sus visitas quedan apuntadas, también las secciones nuevas (0050)", async ({ page }) => {
   await page.goto("/area-privada/alumno/ranking");
-  await page.goto(`/area-privada/alumno/clase/${IDS.course}`);
-  await page.getByRole("button", { name: new RegExp(DIARIO_VIDEO_TITULO) }).click();
-  await expect(page.locator("iframe")).toHaveCount(1);
+  await page.goto("/area-privada/alumno/premios");
+  await page.goto("/area-privada/alumno/historial");
 
   const db = admin();
   await expect
@@ -50,7 +49,18 @@ test("sus visitas y el play del vídeo quedan apuntados", async ({ page }) => {
         .eq("day", hoyMadrid());
       return data?.[0]?.sections ?? [];
     })
-    .toEqual(expect.arrayContaining(["ranking", "clase"]));
+    .toEqual(expect.arrayContaining(["ranking", "premios", "historial"]));
+});
+
+// ⏸ El play solo existe en el diario de clase, apagado desde el 05-10-2026
+// (lib/alumno-secciones.ts). Al encenderlo, quitar el `.skip` y volver a pedir
+// DIARIO_VIDEO_TITULO en el informe de abajo.
+test.skip("el play del vídeo del diario queda apuntado", async ({ page }) => {
+  await page.goto(`/area-privada/alumno/clase/${IDS.course}`);
+  await page.getByRole("button", { name: new RegExp(DIARIO_VIDEO_TITULO) }).click();
+  await expect(page.locator("iframe")).toHaveCount(1);
+
+  const db = admin();
   await expect
     .poll(async () => {
       const { count } = await db
@@ -70,7 +80,7 @@ test("el informe del día la recoge y no se envía en modo vista", async ({ requ
   const html = await res.text();
   expect(html).toContain("Área de alumnos");
   expect(html).toContain(STUDENT_NAME);
-  expect(html).toContain(DIARIO_VIDEO_TITULO);
+  expect(html).toContain("Premios");
 });
 
 test("sin el secreto, el informe responde 401", async ({ request }) => {
