@@ -5,10 +5,11 @@ import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import { Toggle } from "@/components/ui/Toggle";
 import { savePointRule, type GamificacionFormState } from "@/lib/actions/gamificacion";
-import { POINT_SOURCE_LABELS } from "@/lib/format";
-import { manualPointSources } from "@/lib/validation/gamificacion";
+import { ICONO_PUNTOS_LABELS, POINT_SOURCE_LABELS } from "@/lib/format";
+import { iconosPuntos, manualPointSources } from "@/lib/validation/gamificacion";
 import type { PointRule } from "@/types/database";
 
 const initial: GamificacionFormState = { status: "idle" };
@@ -86,6 +87,41 @@ export function PointRuleForm({ rule }: { rule?: PointRule }) {
           </option>
         ))}
       </Select>
+
+      <Select
+        label="Icono"
+        name="icon"
+        defaultValue={rule?.icon ?? "estrella"}
+        error={err("icon")}
+      >
+        {iconosPuntos.map((i) => (
+          <option key={i} value={i}>
+            {ICONO_PUNTOS_LABELS[i]}
+          </option>
+        ))}
+      </Select>
+
+      <Input
+        label="Tope al mes por alumno (opcional)"
+        name="monthly_limit"
+        type="number"
+        inputMode="numeric"
+        min={1}
+        defaultValue={rule?.monthly_limit ?? ""}
+        hint="Vacío = sin tope. La base de datos rechaza el apunte que lo pase."
+        error={err("monthly_limit")}
+      />
+
+      <div className="sm:col-span-2">
+        <Textarea
+          label="Explicación para el alumno (opcional)"
+          name="description"
+          rows={2}
+          defaultValue={rule?.description ?? ""}
+          hint="Sale en Premios › Cómo ganar. Cuándo cuenta y qué hace falta."
+          error={err("description")}
+        />
+      </div>
 
       <div className="flex items-center gap-3 sm:col-span-2">
         <Toggle checked={active} onChange={setActive} label="Regla activa" />

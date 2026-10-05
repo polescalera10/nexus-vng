@@ -16,6 +16,7 @@ export type NavIconName =
   | "today"
   | "eventos"
   | "puntos"
+  | "premios"
   | "perfil";
 
 export type NavItem = {
@@ -26,6 +27,13 @@ export type NavItem = {
   short?: string;
   /** true en las rutas raíz del panel para no quedar siempre activas. */
   exact?: boolean;
+  /**
+   * Rutas hijas que cuentan como esta sección aunque el ítem sea `exact`
+   * (el historial de puntos cuelga del Inicio del alumno sin tener pestaña).
+   */
+  also?: string[];
+  /** Contador de cosas pendientes (canjes por entregar). 0 o ausente = nada. */
+  badge?: number;
 };
 
 /* Iconos inline (24px, stroke) — sin dependencias externas. */
@@ -84,6 +92,12 @@ function NavIcon({ name }: { name: NavIconName }) {
         <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9L12 3.5Z" />
       </>
     ),
+    premios: (
+      <>
+        <rect x="4" y="9" width="16" height="11" rx="1.5" />
+        <path d="M3 9h18M12 9v11M12 9c-1.5-3.5-5.5-4-5.5-1.5C6.5 9 9.5 9 12 9Zm0 0c1.5-3.5 5.5-4 5.5-1.5 0 1.5-3 1.5-5.5 1.5Z" />
+      </>
+    ),
     perfil: (
       <>
         <circle cx="12" cy="8" r="3.4" />
@@ -109,8 +123,33 @@ function NavIcon({ name }: { name: NavIconName }) {
 }
 
 function isActive(pathname: string, item: NavItem) {
+  if (item.also?.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return true;
   if (item.exact) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+/** Texto para lectores de pantalla: "Gamificación, 2 pendientes". */
+function etiquetaBadge(n: number) {
+  return `${n} ${n === 1 ? "pendiente" : "pendientes"}`;
+}
+
+/** Contador en píldora junto al nombre (barra lateral de escritorio). */
+function Contador({ n }: { n: number }) {
+  return (
+    <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-warning px-1.5 py-0.5 font-body text-[11px] font-bold leading-none text-ink">
+      <span aria-hidden="true">{n}</span>
+      <span className="sr-only">{etiquetaBadge(n)}</span>
+    </span>
+  );
+}
+
+/** Punto sobre el icono de la barra de pestañas: ahí no cabe un número legible. */
+function Punto({ n }: { n: number }) {
+  return (
+    <span className="absolute -top-0.5 -right-1 size-2.5 rounded-full bg-warning ring-2 ring-bg-panel">
+      <span className="sr-only">{etiquetaBadge(n)}</span>
+    </span>
+  );
 }
 
 /** Navegación lateral (escritorio, md+). La comparten los tres roles. */
@@ -134,6 +173,7 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
           >
             <NavIcon name={item.icon} />
             {item.label}
+            {item.badge ? <Contador n={item.badge} /> : null}
           </Link>
         );
       })}
@@ -166,6 +206,7 @@ export function TabBar({ items }: { items: NavItem[] }) {
   }, [pathname]);
 
   const hayOcultoActivo = ocultos.some((item) => isActive(pathname, item));
+  const pendientesOcultos = ocultos.reduce((n, item) => n + (item.badge ?? 0), 0);
 
   const tabClass = (active: boolean) =>
     `flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-0.5 font-body text-[11px] font-semibold ${
@@ -196,7 +237,10 @@ export function TabBar({ items }: { items: NavItem[] }) {
                         active ? "bg-accent/10 text-accent" : "text-text-body"
                       }`}
                     >
-                      <NavIcon name={item.icon} />
+                      <span className="relative">
+                        <NavIcon name={item.icon} />
+                        {item.badge ? <Punto n={item.badge} /> : null}
+                      </span>
                       <span className="max-w-full truncate">
                         {item.short ?? item.label}
                       </span>
@@ -223,7 +267,10 @@ export function TabBar({ items }: { items: NavItem[] }) {
                 aria-current={active ? "page" : undefined}
                 className={tabClass(active)}
               >
-                <NavIcon name={item.icon} />
+                <span className="relative">
+                  <NavIcon name={item.icon} />
+                  {item.badge ? <Punto n={item.badge} /> : null}
+                </span>
                 <span className="max-w-full truncate">{item.short ?? item.label}</span>
               </Link>
             );
@@ -236,19 +283,22 @@ export function TabBar({ items }: { items: NavItem[] }) {
               onClick={() => setMasAbierto((v) => !v)}
               className={tabClass(masAbierto || hayOcultoActivo)}
             >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                className="size-5 flex-none"
-              >
-                <circle cx="5" cy="12" r="1.4" />
-                <circle cx="12" cy="12" r="1.4" />
-                <circle cx="19" cy="12" r="1.4" />
-              </svg>
+              <span className="relative">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  className="size-5 flex-none"
+                >
+                  <circle cx="5" cy="12" r="1.4" />
+                  <circle cx="12" cy="12" r="1.4" />
+                  <circle cx="19" cy="12" r="1.4" />
+                </svg>
+                {pendientesOcultos > 0 && <Punto n={pendientesOcultos} />}
+              </span>
               <span>Más</span>
             </button>
           )}

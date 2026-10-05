@@ -59,7 +59,8 @@ export default async function AlumnoPage({
   const notice = readConversionNotice(query);
 
   const [puntos, reglas] = await Promise.all([
-    getStudentPoints(id, 20),
+    // 50 para que el contador de stories y reels del mes (PuntosPanel) los vea todos.
+    getStudentPoints(id, 50),
     getPointRules(true),
   ]);
 

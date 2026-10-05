@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getRewards } from "@/lib/queries/gamificacion";
 import { formatPoints } from "@/lib/format";
+import { REDEEM_LIMIT_LABELS } from "@/lib/puntos";
 import { RewardForm } from "./RewardForm";
 
 export const metadata = { title: "Premios · NEXUS VNG" };
@@ -53,7 +54,7 @@ export default async function PremiosPage({
         {rewards.length === 0 ? (
           <EmptyState
             title="Sin premios todavía"
-            description="Crea el primero arriba: una camiseta, una clase gratis, una entrada a la fiesta…"
+            description="Crea el primero arriba: un mes gratis, una entrada a masterclass, una sudadera…"
           />
         ) : (
           <ul className="divide-y divide-text-strong/8 rounded-lg border border-text-strong/8 bg-bg-panel shadow-soft">
@@ -63,6 +64,9 @@ export default async function PremiosPage({
                   {r.name}
                 </span>
                 <Badge variant="success">{formatPoints(r.cost_points)} puntos</Badge>
+                {r.redeem_limit && (
+                  <Badge variant="warning">{REDEEM_LIMIT_LABELS[r.redeem_limit]}</Badge>
+                )}
                 {!r.active && <Badge variant="neutral">Retirado</Badge>}
                 <span className="font-body text-[13px] text-text-muted">
                   {r.stock === null ? "Sin límite de unidades" : `${r.stock} disponibles`}

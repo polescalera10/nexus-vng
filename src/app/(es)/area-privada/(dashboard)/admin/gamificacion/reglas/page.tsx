@@ -71,6 +71,9 @@ export default async function ReglasPuntosPage({
                   {formatPoints(r.points)}
                 </Badge>
                 <Badge>{POINT_SOURCE_LABELS[r.source]}</Badge>
+                {r.monthly_limit !== null && (
+                  <Badge variant="warning">Máx. {r.monthly_limit} al mes</Badge>
+                )}
                 {!r.active && <Badge variant="neutral">Desactivada</Badge>}
                 <code className="font-body text-xs text-text-muted">{r.code}</code>
                 <Link
@@ -79,6 +82,11 @@ export default async function ReglasPuntosPage({
                 >
                   Editar
                 </Link>
+                {r.description && (
+                  <p className="w-full font-body text-[13px] text-text-muted">
+                    {r.description}
+                  </p>
+                )}
               </li>
             ))}
           </ul>

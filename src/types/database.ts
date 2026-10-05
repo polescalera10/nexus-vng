@@ -82,10 +82,38 @@ export type IntensivoRegistro = Narrow<
   Tables<"intensivo_registros">,
   { metodo_pago: MetodoPago | null }
 >;
-export type PointRule = Tables<"point_rules">;
+/**
+ * `point_rules.icon` y `rewards.icon`: `text` con la misma lista cerrada en un
+ * CHECK (0050). Si la migración amplía la lista, ampliarla aquí y en
+ * `components/alumno/IconoPuntos.tsx`.
+ */
+export type IconoPuntos =
+  | "masterclass"
+  | "congreso"
+  | "amigo"
+  | "perfil"
+  | "story"
+  | "reel"
+  | "estrella"
+  | "invitado"
+  | "descuento"
+  | "entrada"
+  | "mes"
+  | "hoodie"
+  | "pase"
+  | "corona"
+  | "regalo";
+
+/** `rewards.redeem_limit`: `text` con CHECK (0050). Ventana móvil de 3 o 12 meses. */
+export type RedeemLimit = "trimestre" | "anual";
+
+export type PointRule = Narrow<Tables<"point_rules">, { icon: IconoPuntos | null }>;
 /** Apunte del libro mayor de puntos. El saldo NUNCA se materializa. */
 export type PointEvent = Tables<"point_events">;
-export type Reward = Tables<"rewards">;
+export type Reward = Narrow<
+  Tables<"rewards">,
+  { icon: IconoPuntos | null; redeem_limit: RedeemLimit | null }
+>;
 export type RewardRedemption = Tables<"reward_redemptions">;
 export type PointMilestone = Tables<"point_milestones">;
 

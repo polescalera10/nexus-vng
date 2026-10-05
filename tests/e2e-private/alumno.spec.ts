@@ -21,12 +21,44 @@ const PNG_1PX = Buffer.from(
   "base64",
 );
 
-test("en Inicio ve su saludo y su clase", async ({ page }) => {
+test("en Inicio ve su saludo y sus puntos, y ya no sus clases", async ({ page }) => {
   await page.goto("/area-privada/alumno");
   const firstName = STUDENT_NAME.split(" ")[0];
   await expect(page.getByRole("heading", { name: `Hola, ${firstName}`, level: 1 })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Tus clases" })).toBeVisible();
-  await expect(page.getByText(COURSE_NAME).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tus puntos" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Últimos movimientos" })).toBeVisible();
+  // Clases y diario apagados desde el 05-10-2026 (lib/alumno-secciones.ts).
+  await expect(page.getByRole("heading", { name: "Tus clases" })).toHaveCount(0);
+  await expect(page.getByText(COURSE_NAME)).toHaveCount(0);
+});
+
+test("Premios enseña el catálogo, cómo ganar y las normas", async ({ page }) => {
+  await page.goto("/area-privada/alumno/premios");
+  await expect(page.getByRole("heading", { name: "Premios", level: 1 })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Canjear" }).first()).toBeVisible();
+
+  await page.getByRole("link", { name: "Cómo ganar" }).click();
+  await expect(page).toHaveURL(/\?ver=ganar$/);
+  await expect(page.getByRole("heading", { name: "Story en Instagram" })).toBeVisible();
+  await expect(page.getByText(/Máximo 4 al mes · este mes llevas \d+/)).toBeVisible();
+
+  await page.getByText("Normas del programa").click();
+  await expect(page.getByText("Los puntos no son dinero")).toBeVisible();
+});
+
+test("el historial agrupa por meses y filtra", async ({ page }) => {
+  await page.goto("/area-privada/alumno/historial");
+  await expect(page.getByRole("heading", { name: "Tu historial", level: 1 })).toBeVisible();
+  await expect(page.getByText("Saldo inicial E2E").first()).toBeVisible();
+
+  await page.getByRole("link", { name: "Ganados" }).click();
+  await expect(page).toHaveURL(/filtro=ganados$/);
+  await expect(page.getByText("Saldo inicial E2E").first()).toBeVisible();
+});
+
+test("el diario de clase apagado devuelve al Inicio", async ({ page }) => {
+  await page.goto(`/area-privada/alumno/clase/${IDS.course}`);
+  await expect(page).toHaveURL(/\/area-privada\/alumno$/);
 });
 
 test("Perfil y Ranking abren sin salir de su área", async ({ page }) => {
@@ -38,7 +70,9 @@ test("Perfil y Ranking abren sin salir de su área", async ({ page }) => {
   }
 });
 
-test("lee el diario de su clase y el vídeo no se carga hasta darle al play", async ({ page }) => {
+// ⏸ Diario apagado desde el 05-10-2026 (lib/alumno-secciones.ts). Al volver a
+// encenderlo, quitar los dos `.skip`.
+test.skip("lee el diario de su clase y el vídeo no se carga hasta darle al play", async ({ page }) => {
   await page.goto(`/area-privada/alumno/clase/${IDS.course}`);
   await expect(page.getByText(DIARIO_RESUMEN)).toBeVisible();
 
@@ -51,7 +85,7 @@ test("lee el diario de su clase y el vídeo no se carga hasta darle al play", as
   );
 });
 
-test("no abre el diario de un curso en el que no está", async ({ page }) => {
+test.skip("no abre el diario de un curso en el que no está", async ({ page }) => {
   await page.goto(`/area-privada/alumno/clase/${IDS.otherCourse}`);
   // El área de alumno no tiene not-found propio: sale el 404 general de la web.
   await expect(

@@ -4,9 +4,13 @@ import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Toggle } from "@/components/ui/Toggle";
 import { saveReward, type GamificacionFormState } from "@/lib/actions/gamificacion";
+import { ICONO_PUNTOS_LABELS } from "@/lib/format";
+import { REDEEM_LIMIT_LABELS } from "@/lib/puntos";
+import { iconosPuntos, redeemLimits } from "@/lib/validation/gamificacion";
 import type { Reward } from "@/types/database";
 
 const initial: GamificacionFormState = { status: "idle" };
@@ -72,11 +76,40 @@ export function RewardForm({ reward }: { reward?: Reward }) {
         error={err("stock")}
       />
 
+      <Select
+        label="Icono"
+        name="icon"
+        defaultValue={reward?.icon ?? "regalo"}
+        error={err("icon")}
+      >
+        {iconosPuntos.map((i) => (
+          <option key={i} value={i}>
+            {ICONO_PUNTOS_LABELS[i]}
+          </option>
+        ))}
+      </Select>
+
+      <Select
+        label="Cada alumno puede pedirlo"
+        name="redeem_limit"
+        defaultValue={reward?.redeem_limit ?? ""}
+        hint="El tope lo hace cumplir la base de datos."
+        error={err("redeem_limit")}
+      >
+        <option value="">Sin límite</option>
+        {redeemLimits.map((l) => (
+          <option key={l} value={l}>
+            {REDEEM_LIMIT_LABELS[l]}
+          </option>
+        ))}
+      </Select>
+
       <div className="sm:col-span-2">
         <Textarea
           label="Descripción (opcional)"
           name="description"
           rows={3}
+          hint="Qué es y cómo se entrega. La ve el alumno antes de canjear."
           defaultValue={reward?.description ?? ""}
           error={err("description")}
         />

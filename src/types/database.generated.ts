@@ -653,8 +653,11 @@ export type Database = {
           active: boolean
           code: string
           created_at: string
+          description: string | null
+          icon: string | null
           id: string
           label: string
+          monthly_limit: number | null
           orden: number
           points: number
           source: Database["public"]["Enums"]["point_source"]
@@ -664,8 +667,11 @@ export type Database = {
           active?: boolean
           code: string
           created_at?: string
+          description?: string | null
+          icon?: string | null
           id?: string
           label: string
+          monthly_limit?: number | null
           orden?: number
           points: number
           source?: Database["public"]["Enums"]["point_source"]
@@ -675,8 +681,11 @@ export type Database = {
           active?: boolean
           code?: string
           created_at?: string
+          description?: string | null
+          icon?: string | null
           id?: string
           label?: string
+          monthly_limit?: number | null
           orden?: number
           points?: number
           source?: Database["public"]["Enums"]["point_source"]
@@ -778,9 +787,11 @@ export type Database = {
           cost_points: number
           created_at: string
           description: string | null
+          icon: string | null
           id: string
           name: string
           orden: number
+          redeem_limit: string | null
           stock: number | null
           updated_at: string
         }
@@ -789,9 +800,11 @@ export type Database = {
           cost_points: number
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name: string
           orden?: number
+          redeem_limit?: string | null
           stock?: number | null
           updated_at?: string
         }
@@ -800,9 +813,11 @@ export type Database = {
           cost_points?: number
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name?: string
           orden?: number
+          redeem_limit?: string | null
           stock?: number | null
           updated_at?: string
         }

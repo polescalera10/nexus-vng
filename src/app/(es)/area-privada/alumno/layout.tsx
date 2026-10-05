@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
  * Shell del área del alumno.
  *
  * Antes era una cabecera con el logo y poco más: el alumno tenía una sola
- * página. Con Ranking y Perfil ya son tres destinos, así que pasa al mismo
+ * página. Con Premios, Ranking y Perfil ya son cuatro destinos, así que usa el mismo
  * patrón que admin y profesor — barra lateral en escritorio, pestañas abajo en
  * móvil — y reutiliza sus componentes en vez de tener una navegación propia
  * que habría que arreglar dos veces.
@@ -23,8 +23,21 @@ import { createClient } from "@/lib/supabase/server";
  * queremos que siga haciendo.
  */
 
+/*
+ * Desde el 05-10-2026 el área se centra en puntos y perfil: Premios entra en el
+ * menú y el historial cuelga del Inicio (no tiene pestaña propia para que la
+ * barra móvil siga en cuatro). El diario de clase está apagado, ver
+ * `lib/alumno-secciones.ts`.
+ */
 const NAV: NavItem[] = [
-  { href: "/area-privada/alumno", label: "Inicio", icon: "home", exact: true },
+  {
+    href: "/area-privada/alumno",
+    label: "Inicio",
+    icon: "home",
+    exact: true,
+    also: ["/area-privada/alumno/historial"],
+  },
+  { href: "/area-privada/alumno/premios", label: "Premios", icon: "premios" },
   { href: "/area-privada/alumno/ranking", label: "Ranking", icon: "puntos" },
   { href: "/area-privada/alumno/perfil", label: "Perfil", icon: "perfil" },
 ];

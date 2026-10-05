@@ -29,7 +29,7 @@ describe("pointEventSchema", () => {
     expect(pointEventSchema.safeParse({ ...base, points: "0" }).success).toBe(false);
   });
 
-  it("replica el rango del CHECK point_events_points_range", () => {
+  it("un apunte a mano no pasa de 10.000 (la BD admite más solo por los canjes, 0050)", () => {
     expect(pointEventSchema.safeParse({ ...base, points: "10000" }).success).toBe(true);
     expect(pointEventSchema.safeParse({ ...base, points: "10001" }).success).toBe(false);
   });
@@ -70,6 +70,19 @@ describe("pointRuleSchema", () => {
   it("normaliza el código a minúsculas", () => {
     expect(pointRuleSchema.parse({ ...base, code: "TRAE_AMIGO" }).code).toBe("trae_amigo");
   });
+
+  it("tope mensual: vacío es sin tope, y si hay, entre 1 y 100 (CHECK de 0050)", () => {
+    expect(pointRuleSchema.parse({ ...base, monthly_limit: "" }).monthly_limit).toBeUndefined();
+    expect(pointRuleSchema.parse({ ...base, monthly_limit: "4" }).monthly_limit).toBe(4);
+    expect(pointRuleSchema.safeParse({ ...base, monthly_limit: "0" }).success).toBe(false);
+    expect(pointRuleSchema.safeParse({ ...base, monthly_limit: "101" }).success).toBe(false);
+  });
+
+  it("solo iconos de la lista cerrada del CHECK", () => {
+    expect(pointRuleSchema.safeParse({ ...base, icon: "story" }).success).toBe(true);
+    expect(pointRuleSchema.safeParse({ ...base, icon: "" }).success).toBe(true);
+    expect(pointRuleSchema.safeParse({ ...base, icon: "<svg>" }).success).toBe(false);
+  });
 });
 
 describe("rewardSchema", () => {
@@ -93,6 +106,17 @@ describe("rewardSchema", () => {
   it("exige un coste de al menos un punto", () => {
     expect(rewardSchema.safeParse({ ...base, cost_points: "0" }).success).toBe(false);
     expect(rewardSchema.safeParse({ ...base, cost_points: "1" }).success).toBe(true);
+  });
+
+  it("admite el año gratis (12.000 puntos)", () => {
+    expect(rewardSchema.safeParse({ ...base, cost_points: "12000" }).success).toBe(true);
+  });
+
+  it("tope de canje: vacío, trimestre o anual (CHECK de 0050)", () => {
+    expect(rewardSchema.safeParse({ ...base, redeem_limit: "" }).success).toBe(true);
+    expect(rewardSchema.safeParse({ ...base, redeem_limit: "trimestre" }).success).toBe(true);
+    expect(rewardSchema.safeParse({ ...base, redeem_limit: "anual" }).success).toBe(true);
+    expect(rewardSchema.safeParse({ ...base, redeem_limit: "semanal" }).success).toBe(false);
   });
 });
 

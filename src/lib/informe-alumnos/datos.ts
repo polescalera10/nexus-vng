@@ -80,6 +80,8 @@ export type InformeAlumnos = {
 
 export const SECCION_LABELS: Record<string, string> = {
   inicio: "Inicio",
+  premios: "Premios",
+  historial: "Historial",
   ranking: "Ranking",
   perfil: "Perfil",
   clase: "Diario",

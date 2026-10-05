@@ -11,6 +11,7 @@ import {
   type GamificacionFormState,
 } from "@/lib/actions/gamificacion";
 import { POINT_SOURCE_LABELS, formatDate, formatPoints, todayInMadrid } from "@/lib/format";
+import { usosDelMes } from "@/lib/puntos";
 import type { PointEvent, PointRule } from "@/types/database";
 
 const initial: GamificacionFormState = { status: "idle" };
@@ -53,6 +54,11 @@ export function PuntosPanel({
 
   const err = (field: string) => state.errors?.[field]?.[0];
 
+  // Tope de stories y reels (0050): se avisa en el selector para no tener que
+  // esperar al error del trigger. Cuenta sobre los movimientos que se pintan,
+  // que son los más recientes: los de este mes siempre están.
+  const mes = todayInMadrid().slice(0, 7);
+
   function aplicarRegla(code: string) {
     setRuleCode(code);
     const rule = rules.find((r) => r.code === code);
@@ -85,12 +91,20 @@ export function PuntosPanel({
             <option value="">Escribirlo a mano</option>
             {rules
               .filter((r) => r.active)
-              .map((r) => (
-                <option key={r.id} value={r.code}>
-                  {r.label} ({r.points >= 0 ? "+" : ""}
-                  {r.points})
-                </option>
-              ))}
+              .map((r) => {
+                const usados =
+                  r.monthly_limit !== null ? usosDelMes(events, r.code, mes) : 0;
+                const tope =
+                  r.monthly_limit !== null
+                    ? ` · ${usados}/${r.monthly_limit} este mes`
+                    : "";
+                return (
+                  <option key={r.id} value={r.code}>
+                    {r.label} ({r.points >= 0 ? "+" : ""}
+                    {r.points}){tope}
+                  </option>
+                );
+              })}
           </Select>
         </div>
 

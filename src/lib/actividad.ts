@@ -12,7 +12,13 @@ import { createClient } from "@/lib/supabase/server";
  * Nunca rompe la página. Si el apunte falla, se pierde una visita del
  * informe; si fallara la página, el alumno se quedaría sin su área.
  */
-export type SeccionAlumno = "inicio" | "ranking" | "perfil" | "clase";
+export type SeccionAlumno =
+  | "inicio"
+  | "premios"
+  | "historial"
+  | "ranking"
+  | "perfil"
+  | "clase";
 
 export async function registrarVisita(seccion: SeccionAlumno): Promise<void> {
   try {

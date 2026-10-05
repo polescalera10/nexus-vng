@@ -1,44 +1,43 @@
 import Link from "next/link";
+import { BarraProgreso } from "@/components/alumno/BarraProgreso";
+import { IconoPuntos } from "@/components/alumno/IconoPuntos";
+import { Movimiento } from "@/components/alumno/Movimiento";
 import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { registrarVisita } from "@/lib/actividad";
 import { requireRole } from "@/lib/auth";
-import { getMyCourses, getStudentForUser } from "@/lib/queries/alumno";
-import { getProximaClase } from "@/lib/queries/diario";
-import { getEventos } from "@/lib/queries/eventos";
+import { getStudentForUser } from "@/lib/queries/alumno";
 import {
   getPointRule,
+  getPointRules,
   getRewards,
   getStudentPoints,
   getStudentRedemptions,
 } from "@/lib/queries/gamificacion";
 import { camposPendientes, listaPendientes } from "@/lib/perfil-completo";
-import { Onboarding } from "./Onboarding";
+import { formatPoints, formatRelative } from "@/lib/format";
 import {
-  DANCE_ROLE_LABELS,
-  ENROLLMENT_STATUS_LABELS,
-  EVENTO_TIPO_LABELS,
-  formatDate,
-  formatDateTime,
-  formatPoints,
-  formatSessionDay,
-  formatTime,
-  POINT_SOURCE_LABELS,
-  REDEMPTION_STATUS_LABELS,
-  WEEKDAYS,
-} from "@/lib/format";
-import { RewardCatalog } from "./RewardCatalog";
+  iconoDeMovimiento,
+  progreso,
+  proximoCanjeDisponible,
+  siguienteMeta,
+} from "@/lib/puntos";
+import { Onboarding } from "./Onboarding";
+// ⏸ Clases, diario y eventos: apagado desde el 05-10-2026 (ver el componente).
+// import { ClasesYEventos } from "./_ocultas/ClasesYEventos";
 
 export const metadata = { title: "Mi área · NEXUS VNG" };
 export const dynamic = "force-dynamic";
 
 /**
- * Área del alumno.
+ * Inicio del alumno, centrado en los puntos (05-10-2026).
  *
- * Orden deliberado: lo primero es cuándo vuelve a clase y qué se dio en las
- * suyas; los puntos y los premios van al final. Antes era al revés y el 70%
- * de la pantalla lo ocupaba la gamificación, que es la parte que menos usa
- * quien entra a repasar la secuencia del martes.
+ * Responde a tres preguntas, en este orden: cuántos puntos tengo, cuánto me
+ * falta para el siguiente premio y qué ha pasado últimamente. Todo lo demás
+ * —catálogo, cómo ganar, normas— vive en Premios, a un toque.
+ *
+ * Las clases, el diario y los eventos que había antes no se han borrado: están
+ * en `_ocultas/ClasesYEventos.tsx`, comentados abajo.
  *
  * Un usuario con rol `alumno` puede existir sin ficha en `students` (por
  * ejemplo si se registró por su cuenta): en ese caso se le explica qué falta
@@ -67,16 +66,14 @@ export default async function AlumnoPage() {
     );
   }
 
-  const [puntos, cursos, premios, canjes, proxima, eventos, reglaPerfil] =
-    await Promise.all([
-      getStudentPoints(student.id, 20),
-      getMyCourses(student.id),
-      getRewards(true),
-      getStudentRedemptions(student.id),
-      getProximaClase(student.id),
-      getEventos(),
-      getPointRule("perfil_completo"),
-    ]);
+  const [puntos, premios, canjes, reglas, reglaPerfil] = await Promise.all([
+    getStudentPoints(student.id, 5),
+    // Todos, también los retirados: un canje antiguo necesita su icono.
+    getRewards(),
+    getStudentRedemptions(student.id),
+    getPointRules(),
+    getPointRule("perfil_completo"),
+  ]);
 
   // Los puntos los concede el trigger de 0045d leyendo esta misma regla. Si
   // Pol la apaga desde el panel, aquí deja de prometerse nada.
@@ -84,13 +81,26 @@ export default async function AlumnoPage() {
   const premioPerfil = reglaPerfil?.points ?? 0;
   const pidePerfil = pendientes.length > 0 && premioPerfil > 0;
 
-  // `getEventos()` los devuelve por fecha ascendente, pasados incluidos.
-  const ahora = Date.now();
-  const proximosEventos = eventos
-    .filter((e) => new Date(e.fecha_fin ?? e.fecha).getTime() >= ahora)
-    .slice(0, 4);
+  const balance = puntos.balance;
+  const catalogo = premios.filter((r) => r.active);
+  const meta = siguienteMeta(catalogo, balance);
+  const ahora = new Date();
+  const pedibles = catalogo.filter(
+    (r) =>
+      r.cost_points <= balance &&
+      (r.stock === null || r.stock > 0) &&
+      proximoCanjeDisponible(r, canjes, ahora) === null,
+  ).length;
 
-  const canjesPendientes = canjes.filter((c) => c.status === "solicitado").length;
+  const enCurso = canjes.filter((c) => c.status === "solicitado");
+
+  const premioPorId = new Map(premios.map((r) => [r.id, r]));
+  const iconosRegla = new Map(reglas.map((r) => [r.code, r.icon]));
+  const iconosCanje = new Map(
+    canjes.map((c) => [c.id, premioPorId.get(c.reward_id)?.icon ?? null]),
+  );
+
+  const nombre = student.full_name.split(" ")[0] ?? "";
 
   return (
     <>
@@ -100,7 +110,7 @@ export default async function AlumnoPage() {
 
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
         <h1 className="font-display text-[clamp(30px,5vw,48px)] text-text-strong">
-          Hola, {student.full_name.split(" ")[0]}
+          Hola, {nombre}
         </h1>
         {student.payment_status === "pendiente" && (
           <Badge variant="warning">Cuota pendiente</Badge>
@@ -111,251 +121,171 @@ export default async function AlumnoPage() {
       {/* La bienvenida sale una sola vez; el recordatorio de abajo es el que
           insiste mientras falten datos. */}
       {student.onboarding_seen_at === null && (
-        <Onboarding
-          nombre={student.full_name.split(" ")[0] ?? ""}
-          pendientes={pendientes}
-          puntosPremio={premioPerfil}
-        />
+        <Onboarding nombre={nombre} pendientes={pendientes} puntosPremio={premioPerfil} />
       )}
 
-      {pidePerfil && (
-        <div className="mt-6 rounded-lg border border-accent/30 bg-accent/8 p-5">
-          <p className="font-body text-base font-bold text-text-strong">
-            Completa tu perfil y suma {premioPerfil} puntos
-          </p>
-          <p className="mt-1 font-body text-sm text-text-muted">
-            Nos faltan {listaPendientes(pendientes)}.
-          </p>
-          <Link
-            href="/area-privada/alumno/perfil"
-            className="mt-3 inline-block font-body text-sm font-semibold text-accent hover:underline"
-          >
-            Completar mi perfil →
-          </Link>
-        </div>
-      )}
-
-      {/* ── Próxima clase ──────────────────────────────────────────────────── */}
-      {proxima && (
-        <div className="mt-8">
-          <Card
-            title="Tu próxima clase"
-            action={
-              proxima.status === "cancelada" ? (
-                <Badge variant="danger">Cancelada</Badge>
-              ) : null
-            }
-          >
-            <p className="font-display text-3xl text-accent">
-              {formatSessionDay(proxima.session_date)} · {formatTime(proxima.start_time)}
-            </p>
-            <p className="mt-2 font-body text-base text-text-strong">
-              {proxima.courseName}
-              {proxima.teacherNames.length > 0 && (
-                <span className="font-normal text-text-muted">
-                  {" "}
-                  · con {proxima.teacherNames.join(" y ")}
-                </span>
-              )}
-            </p>
-            {proxima.status === "cancelada" ? (
-              <p className="mt-3 font-body text-sm text-danger">
-                Esta clase está cancelada. No hace falta que vengas.
-              </p>
-            ) : (
-              <p className="mt-1 font-body text-sm text-text-muted">
-                {formatDate(proxima.session_date)}
-              </p>
-            )}
-            <div className="mt-4">
-              <Link
-                href={`/area-privada/alumno/clase/${proxima.courseId}`}
-                className="font-body text-sm font-semibold text-accent hover:underline"
-              >
-                Ver lo que dimos la última vez →
-              </Link>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* ── Tus clases ─────────────────────────────────────────────────────── */}
-      <h2 className="mt-10 font-display text-2xl text-text-strong">Tus clases</h2>
-
-      {cursos.length === 0 ? (
-        <p className="mt-3 font-body text-sm text-text-muted">
-          Todavía no estás matriculado en ninguna clase. Habla con tu profe o
-          escríbenos por WhatsApp.
+      {/* ── Saldo y siguiente premio ───────────────────────────────────────── */}
+      <section
+        aria-labelledby="tus-puntos"
+        className="mt-6 rounded-lg border border-accent/25 bg-bg-panel p-5 shadow-soft sm:p-7"
+      >
+        <h2
+          id="tus-puntos"
+          className="font-body text-xs font-bold uppercase tracking-[0.14em] text-text-muted"
+        >
+          Tus puntos
+        </h2>
+        <p className="mt-1 font-display text-[clamp(48px,12vw,72px)] leading-none text-gradient-nexus tabular-nums">
+          {formatPoints(balance)}
         </p>
-      ) : (
-        <ul className="mt-4 grid gap-3 sm:grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))]">
-          {cursos.map((c) => {
-            const contenido = (
-              <>
-                <div className="flex items-start justify-between gap-3">
-                  <p className="font-body text-base font-bold text-text-strong">
-                    {c.course?.name ?? "Clase eliminada"}
-                  </p>
-                  <Badge variant={c.status === "activa" ? "success" : "neutral"}>
-                    {ENROLLMENT_STATUS_LABELS[c.status]}
-                  </Badge>
-                </div>
-                <p className="mt-1.5 font-body text-sm text-text-muted">
-                  {c.course
-                    ? `${WEEKDAYS[c.course.weekday]} · ${formatTime(c.course.start_time)} · ${c.course.duration_min} min`
-                    : ""}
-                  {c.teacherNames.length > 0 && <> · con {c.teacherNames.join(" y ")}</>}
-                </p>
-                <p className="mt-0.5 font-body text-xs text-text-faint">
-                  Bailas de {DANCE_ROLE_LABELS[c.role_in_course] ?? c.role_in_course}
-                </p>
-              </>
-            );
 
-            // Sin curso (borrado) no hay a dónde ir: se pinta sin enlace.
-            return (
-              <li key={c.id}>
-                {c.course ? (
-                  <Link
-                    href={`/area-privada/alumno/clase/${c.course.id}`}
-                    className="block h-full rounded-lg border border-text-strong/8 bg-bg-panel p-5 shadow-soft transition-colors hover:border-accent/40 hover:bg-bg-elevated"
-                  >
-                    {contenido}
-                    <p className="mt-3 font-body text-sm font-semibold text-accent">
-                      Ver el diario de la clase →
-                    </p>
-                  </Link>
-                ) : (
-                  <div className="h-full rounded-lg border border-text-strong/8 bg-bg-panel p-5 shadow-soft">
-                    {contenido}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        {meta ? (
+          <div className="mt-5">
+            <p className="font-body text-[15px] text-text-body">
+              Te faltan{" "}
+              <strong className="font-bold text-text-strong">
+                {formatPoints(meta.cost_points - balance)}
+              </strong>{" "}
+              para <strong className="font-bold text-text-strong">{meta.name}</strong>
+            </p>
+            <div className="mt-2.5">
+              <BarraProgreso
+                valor={progreso(balance, meta.cost_points)}
+                etiqueta={`Progreso hacia ${meta.name}`}
+              />
+            </div>
+          </div>
+        ) : catalogo.length > 0 ? (
+          <p className="mt-5 font-body text-[15px] text-text-body">
+            Llegas a todos los premios del catálogo.
+          </p>
+        ) : null}
+
+        {pedibles > 0 && (
+          <p className="mt-4 flex items-center gap-2 font-body text-sm font-semibold text-neon-lime">
+            <IconoPuntos name="regalo" size="sm" tono="lime" />
+            {pedibles === 1
+              ? "Ya puedes pedir 1 premio."
+              : `Ya puedes pedir ${pedibles} premios.`}
+          </p>
+        )}
+
+        <div className="mt-6 flex flex-wrap gap-2.5">
+          <Button href="/area-privada/alumno/premios">Ver premios</Button>
+          <Button href="/area-privada/alumno/premios?ver=ganar" variant="secondary">
+            Cómo ganar puntos
+          </Button>
+        </div>
+      </section>
+
+      {/* ── Perfil incompleto: los puntos más fáciles ──────────────────────── */}
+      {pidePerfil && (
+        <Link
+          href="/area-privada/alumno/perfil"
+          className="mt-4 flex items-center gap-4 rounded-lg border border-text-strong/10 bg-bg-panel p-4 transition-colors hover:border-accent/40 hover:bg-bg-elevated"
+        >
+          <IconoPuntos name="perfil" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-body text-[15px] font-bold text-text-strong">
+              Completa tu perfil: +{formatPoints(premioPerfil)} puntos
+            </span>
+            <span className="block font-body text-sm text-text-muted">
+              Te {pendientes.length === 1 ? "falta" : "faltan"} {listaPendientes(pendientes)}.
+            </span>
+          </span>
+          <span aria-hidden="true" className="font-body text-lg text-accent">
+            →
+          </span>
+        </Link>
       )}
 
-      {/* ── Próximos eventos ───────────────────────────────────────────────── */}
-      {proximosEventos.length > 0 && (
-        <>
-          <h2 className="mt-12 font-display text-2xl text-text-strong">
-            Próximos eventos
+      {/* ── Premios pedidos que aún no tiene ───────────────────────────────── */}
+      {enCurso.length > 0 && (
+        <section aria-labelledby="pedidos" className="mt-10">
+          <h2 id="pedidos" className="font-display text-2xl text-text-strong">
+            Tus premios pedidos
           </h2>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))]">
-            {proximosEventos.map((e) => (
-              <li key={e.id}>
-                <Link
-                  href={`/eventos/${e.slug}`}
-                  className="block h-full rounded-lg border border-text-strong/8 bg-bg-panel p-5 shadow-soft transition-colors hover:border-accent/40 hover:bg-bg-elevated"
-                >
-                  <Badge>{EVENTO_TIPO_LABELS[e.tipo]}</Badge>
-                  <p className="mt-2.5 font-body text-base font-bold text-text-strong">
-                    {e.titulo}
-                  </p>
-                  <p className="mt-1 font-body text-sm text-text-muted">
-                    {formatDateTime(e.fecha)}
-                    {e.ubicacion && <> · {e.ubicacion}</>}
-                  </p>
-                </Link>
+          <ul className="mt-3 flex flex-col gap-2.5">
+            {enCurso.map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center gap-3 rounded-lg border border-warning/25 bg-warning/6 p-4"
+              >
+                <IconoPuntos name={premioPorId.get(c.reward_id)?.icon ?? "regalo"} />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-body text-[15px] font-bold text-text-strong">
+                    {c.rewardName ?? "Premio retirado"}
+                  </span>
+                  <span className="block font-body text-sm text-text-muted">
+                    Pedido {formatRelative(c.requested_at)}. Te escribimos para
+                    dártelo.
+                  </span>
+                </span>
+                <Badge variant="warning">En camino</Badge>
               </li>
             ))}
           </ul>
-        </>
+        </section>
       )}
 
-      {/* ── Puntos y premios ───────────────────────────────────────────────── */}
-      <h2 className="mt-12 font-display text-2xl text-text-strong">
-        Puntos y premios
-      </h2>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Card title="Tus puntos">
-          <p className="font-display text-5xl text-accent">
-            {formatPoints(puntos.balance)}
-          </p>
-          <p className="mt-1 font-body text-sm text-text-muted">
-            Se ganan viniendo a clase, a las fiestas y a los congresos.
-          </p>
-          {canjesPendientes > 0 && (
-            <p className="mt-3 font-body text-sm text-warning">
-              Tienes {canjesPendientes}{" "}
-              {canjesPendientes === 1 ? "premio pendiente" : "premios pendientes"} de
-              recoger.
-            </p>
+      {/* ── Últimos movimientos ────────────────────────────────────────────── */}
+      <section aria-labelledby="movimientos" className="mt-10">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 id="movimientos" className="font-display text-2xl text-text-strong">
+            Últimos movimientos
+          </h2>
+          {puntos.events.length > 0 && (
+            <Link
+              href="/area-privada/alumno/historial"
+              className="inline-flex min-h-11 items-center font-body text-sm font-semibold text-accent hover:underline"
+            >
+              Ver todo →
+            </Link>
           )}
-          <Link
-            href="/area-privada/alumno/ranking"
-            className="mt-4 inline-block font-body text-sm font-semibold text-accent hover:underline"
-          >
-            Ver el ranking →
-          </Link>
-        </Card>
+        </div>
 
-        <Card title="Premios" className="lg:col-span-2">
-          <RewardCatalog rewards={premios} balance={puntos.balance} />
-        </Card>
-
-        <Card title="Tus canjes">
-          {canjes.length === 0 ? (
-            <p className="font-body text-sm text-text-muted">
-              Todavía no has pedido ningún premio.
+        {puntos.events.length === 0 ? (
+          <div className="mt-3 rounded-lg border border-dashed border-text-strong/15 p-5">
+            <p className="font-body text-[15px] font-bold text-text-strong">
+              Todavía no tienes puntos
             </p>
-          ) : (
-            <ul className="divide-y divide-text-strong/6">
-              {canjes.map((c) => (
-                <li key={c.id} className="flex items-baseline gap-2 py-2.5">
-                  <span className="min-w-0 flex-1 font-body text-sm text-text-body">
-                    {c.rewardName ?? "Premio retirado"}
-                  </span>
-                  <Badge
-                    variant={
-                      c.status === "entregado"
-                        ? "success"
-                        : c.status === "cancelado"
-                          ? "danger"
-                          : "warning"
-                    }
-                  >
-                    {REDEMPTION_STATUS_LABELS[c.status]}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-
-        <Card title="Movimientos" className="lg:col-span-2">
-          {puntos.events.length === 0 ? (
-            <p className="font-body text-sm text-text-muted">
-              Aún no tienes movimientos.
+            <p className="mt-1 font-body text-sm text-text-muted">
+              Los primeros llegan rápido: ven a una masterclass, trae a un amigo o
+              sube una story etiquetando a @nexusvng.
             </p>
-          ) : (
-            <ul className="divide-y divide-text-strong/6">
+            <Link
+              href="/area-privada/alumno/premios?ver=ganar"
+              className="mt-3 inline-flex min-h-11 items-center font-body text-sm font-semibold text-accent hover:underline"
+            >
+              Ver cómo ganar puntos →
+            </Link>
+          </div>
+        ) : (
+          <>
+            <ul className="mt-2 divide-y divide-text-strong/6">
               {puntos.events.map((e) => (
-                <li key={e.id} className="flex items-baseline gap-3 py-2.5">
-                  <span
-                    className={`w-14 shrink-0 font-body text-sm font-bold ${
-                      e.points >= 0 ? "text-accent" : "text-danger"
-                    }`}
-                  >
-                    {e.points >= 0 ? "+" : ""}
-                    {formatPoints(e.points)}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-body text-sm text-text-body">
-                      {e.concept}
-                    </span>
-                    <span className="block font-body text-xs text-text-muted">
-                      {formatDate(e.occurred_on)} · {POINT_SOURCE_LABELS[e.source]}
-                    </span>
-                  </span>
-                </li>
+                <Movimiento
+                  key={e.id}
+                  event={e}
+                  icon={iconoDeMovimiento(e, iconosRegla, iconosCanje)}
+                />
               ))}
             </ul>
-          )}
-        </Card>
-      </div>
+            <Link
+              href="/area-privada/alumno/historial"
+              className="mt-2 flex min-h-11 items-center justify-center rounded-sm border border-text-strong/10 font-body text-sm font-semibold text-text-body hover:bg-bg-elevated"
+            >
+              Ver todo mi historial
+            </Link>
+          </>
+        )}
+      </section>
+
+      {/* ⏸ Apagado desde el 05-10-2026 (decisión de Pol): próxima clase, tus
+          clases con su diario y próximos eventos. Para volver a enseñarlo,
+          descomentar esto y el import de arriba.
+      <ClasesYEventos studentId={student.id} />
+      */}
     </>
   );
 }

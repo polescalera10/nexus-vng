@@ -47,7 +47,8 @@ export async function getPointRules(onlyActive = false): Promise<PointRule[]> {
     console.error("[getPointRules]", error.message);
     return [];
   }
-  return data ?? [];
+  // `icon` es text con CHECK: el estrechamiento de `PointRule` lo refleja.
+  return (data ?? []) as PointRule[];
 }
 
 /**
@@ -71,7 +72,7 @@ export async function getPointRule(code: string): Promise<PointRule | null> {
     console.error("[getPointRule]", error.message);
     return null;
   }
-  return data;
+  return data as PointRule | null;
 }
 
 /**
@@ -114,7 +115,8 @@ export async function getRewards(onlyActive = false): Promise<Reward[]> {
     console.error("[getRewards]", error.message);
     return [];
   }
-  return data ?? [];
+  // `icon` y `redeem_limit` son text con CHECK (0050).
+  return (data ?? []) as Reward[];
 }
 
 export async function getPointMilestones(): Promise<PointMilestone[]> {
@@ -276,4 +278,138 @@ export async function getStudentRedemptions(
     studentName: null,
     rewardName: rewardName.get(r.reward_id) ?? null,
   }));
+}
+
+/* ── Historial global (admin) ────────────────────────────────────────────── */
+
+export type HistorialFiltros = {
+  studentId?: string;
+  /** Código de regla, o `canje` para ver solo canjes. */
+  regla?: string;
+  /** `AAAA-MM`. */
+  mes?: string;
+  /** Desde 1. */
+  pagina: number;
+};
+
+export type HistorialFila = PointEvent & {
+  studentName: string | null;
+  ruleLabel: string | null;
+  /** Quién hizo el apunte. En un canje es el propio alumno. */
+  createdByName: string | null;
+};
+
+export const HISTORIAL_POR_PAGINA = 50;
+
+/** Primer día del mes siguiente a `AAAA-MM`, como `AAAA-MM-DD`. */
+function mesSiguiente(mes: string): string {
+  const [y = 1970, m = 1] = mes.split("-").map(Number);
+  // `m` va de 1 a 12 y Date.UTC cuenta desde 0: pasarle `m` ya es el mes siguiente.
+  const d = new Date(Date.UTC(y, m, 1));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Todos los apuntes del libro mayor, del más reciente al más antiguo, con
+ * filtros y paginación. Solo admin: la RLS de `point_events` deja al alumno
+ * ver los suyos y nada más, así que con otra sesión esto devuelve lo suyo.
+ */
+export async function getHistorialPuntos(
+  f: HistorialFiltros,
+): Promise<{ filas: HistorialFila[]; total: number }> {
+  const supabase = await createClient();
+  const desde = (f.pagina - 1) * HISTORIAL_POR_PAGINA;
+
+  let query = supabase
+    .from("point_events")
+    .select("*", { count: "exact" })
+    .order("occurred_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .range(desde, desde + HISTORIAL_POR_PAGINA - 1);
+
+  if (f.studentId) query = query.eq("student_id", f.studentId);
+  if (f.regla === "canje") query = query.eq("source", "canje");
+  else if (f.regla) query = query.eq("rule_code", f.regla);
+  if (f.mes) query = query.gte("occurred_on", `${f.mes}-01`).lt("occurred_on", mesSiguiente(f.mes));
+
+  const { data: events, count, error } = await query;
+  if (error) {
+    console.error("[getHistorialPuntos]", error.message);
+    return { filas: [], total: 0 };
+  }
+  if (!events || events.length === 0) return { filas: [], total: count ?? 0 };
+
+  const creadores = [...new Set(events.map((e) => e.created_by).filter((id): id is string => !!id))];
+  const [{ data: students }, { data: perfiles }, { data: reglas }] = await Promise.all([
+    supabase
+      .from("students")
+      .select("id, full_name")
+      .in("id", [...new Set(events.map((e) => e.student_id))]),
+    creadores.length > 0
+      ? supabase.from("profiles").select("id, nombre").in("id", creadores)
+      : Promise.resolve({ data: [] as { id: string; nombre: string | null }[] }),
+    supabase.from("point_rules").select("code, label"),
+  ]);
+
+  const studentName = new Map((students ?? []).map((s) => [s.id, s.full_name]));
+  const perfilNombre = new Map((perfiles ?? []).map((p) => [p.id, p.nombre]));
+  const ruleLabel = new Map((reglas ?? []).map((r) => [r.code, r.label]));
+
+  return {
+    total: count ?? events.length,
+    filas: events.map((e) => ({
+      ...e,
+      studentName: studentName.get(e.student_id) ?? null,
+      ruleLabel: e.rule_code ? (ruleLabel.get(e.rule_code) ?? null) : null,
+      createdByName: e.created_by ? (perfilNombre.get(e.created_by) ?? null) : null,
+    })),
+  };
+}
+
+export type ResumenPuntos = {
+  /** Puntos positivos apuntados este mes (sin contar devoluciones de canjes). */
+  dadosEsteMes: number;
+  /** Puntos que han salido en canjes este mes, en positivo. */
+  canjeadosEsteMes: number;
+  /** Suma de todos los saldos: lo que los alumnos podrían canjear hoy. */
+  enCirculacion: number;
+};
+
+/** Cifras de cabecera del historial. `mes` en `AAAA-MM` (hora de Madrid). */
+export async function getResumenPuntos(mes: string): Promise<ResumenPuntos> {
+  const supabase = await createClient();
+  const [{ data: delMes, error: e1 }, { data: saldos, error: e2 }] = await Promise.all([
+    supabase
+      .from("point_events")
+      .select("points, source")
+      .gte("occurred_on", `${mes}-01`)
+      .lt("occurred_on", mesSiguiente(mes)),
+    supabase.from("student_point_balances").select("balance"),
+  ]);
+  if (e1) console.error("[getResumenPuntos]", e1.message);
+  if (e2) console.error("[getResumenPuntos]", e2.message);
+
+  let dadosEsteMes = 0;
+  let canjeadosEsteMes = 0;
+  for (const e of delMes ?? []) {
+    if (e.source === "canje") canjeadosEsteMes += -e.points;
+    else if (e.points > 0) dadosEsteMes += e.points;
+  }
+  const enCirculacion = (saldos ?? []).reduce((n, s) => n + (s.balance ?? 0), 0);
+
+  return { dadosEsteMes, canjeadosEsteMes, enCirculacion };
+}
+
+/** Alumnos para el filtro del historial (también los de baja: tienen apuntes). */
+export async function getStudentOptions(): Promise<{ id: string; full_name: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("students")
+    .select("id, full_name")
+    .order("full_name", { ascending: true });
+  if (error) {
+    console.error("[getStudentOptions]", error.message);
+    return [];
+  }
+  return data ?? [];
 }

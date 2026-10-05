@@ -1,4 +1,5 @@
 import type {
+  IconoPuntos,
   EventoTipo,
   PointSource,
   RedemptionStatus,
@@ -219,6 +220,25 @@ export const POINT_SOURCE_LABELS: Record<PointSource, string> = {
   ajuste: "Ajuste",
 };
 
+/** Nombre de cada icono de la gamificación en los selectores del panel. */
+export const ICONO_PUNTOS_LABELS: Record<IconoPuntos, string> = {
+  masterclass: "Rayo (masterclass, taller)",
+  congreso: "Mundo (congreso)",
+  amigo: "Persona con + (amigo)",
+  perfil: "Persona (perfil)",
+  story: "Círculo (story)",
+  reel: "Vídeo (reel)",
+  estrella: "Estrella",
+  invitado: "Dos personas (invitado)",
+  descuento: "Etiqueta (descuento)",
+  entrada: "Entrada",
+  mes: "Calendario (mes gratis)",
+  hoodie: "Sudadera",
+  pase: "Acreditación (full pass)",
+  corona: "Corona",
+  regalo: "Regalo",
+};
+
 export const REDEMPTION_STATUS_LABELS: Record<RedemptionStatus, string> = {
   solicitado: "Solicitado",
   entregado: "Entregado",
@@ -245,7 +265,15 @@ export function formatDateTime(iso: string): string {
   });
 }
 
-/** 1250 → "1.250" (los saldos de puntos se leen mejor con separador). */
+/**
+ * 1250 → "1.250" (los saldos de puntos se leen mejor con separador).
+ *
+ * `useGrouping: "always"` porque la norma del español (y por tanto `es-ES`) no
+ * agrupa los números de cuatro cifras: sin él salía "1250" junto a "12.000" en
+ * el mismo catálogo.
+ */
+const PUNTOS = new Intl.NumberFormat("es-ES", { useGrouping: "always" });
+
 export function formatPoints(points: number): string {
-  return new Intl.NumberFormat("es-ES").format(points);
+  return PUNTOS.format(points);
 }

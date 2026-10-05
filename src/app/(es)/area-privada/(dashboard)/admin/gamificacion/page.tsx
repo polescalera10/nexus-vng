@@ -37,12 +37,19 @@ export default async function GamificacionPage() {
             Gamificación
           </h1>
           <p className="mt-1 font-body text-sm text-text-muted">
-            Puntos por venir a clase, fiestas y congresos; premios para canjearlos.
+            Puntos por masterclass, congresos, amigos y redes; premios para canjearlos.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button href="/area-privada/admin/gamificacion/premios" size="sm">
             Premios
+          </Button>
+          <Button
+            href="/area-privada/admin/gamificacion/historial"
+            size="sm"
+            variant="secondary"
+          >
+            Historial
           </Button>
           <Button
             href="/area-privada/admin/gamificacion/reglas"

@@ -66,7 +66,20 @@ export default async function DashboardLayout({
   const role = profile?.role ?? "alumno";
   if (role === "alumno") redirect("/area-privada/alumno");
 
-  const items = NAV[role];
+  // Canjes por entregar: el contador del menú avisa desde cualquier pantalla,
+  // no solo desde Novedades. Una cuenta `head`, sin traer filas.
+  let items = NAV[role];
+  if (role === "admin") {
+    const { count } = await supabase
+      .from("reward_redemptions")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "solicitado");
+    if (count) {
+      items = items.map((item) =>
+        item.href === "/area-privada/admin/gamificacion" ? { ...item, badge: count } : item,
+      );
+    }
+  }
 
   return (
     <div className="min-h-dvh">

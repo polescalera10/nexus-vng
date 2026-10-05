@@ -23,8 +23,18 @@ import { listaPendientes, type CampoPendiente } from "@/lib/perfil-completo";
 const SECCIONES = [
   {
     titulo: "Inicio",
-    texto: "Tu próxima clase y el diario de cada grupo, con vídeos.",
+    texto: "Tus puntos, lo que te falta para el siguiente premio y tu historial.",
     icono: <path d="M4 11.5 12 4l8 7.5M6 10.5V20h12v-9.5M10 20v-5h4v5" />,
+  },
+  {
+    titulo: "Premios",
+    texto: "Qué puedes pedir con tus puntos y cómo ganar más.",
+    icono: (
+      <>
+        <rect x="4" y="9" width="16" height="11" rx="1.5" />
+        <path d="M3 9h18M12 9v11M12 9c-1.5-3.5-5.5-4-5.5-1.5C6.5 9 9.5 9 12 9Zm0 0c1.5-3.5 5.5-4 5.5-1.5 0 1.5-3 1.5-5.5 1.5Z" />
+      </>
+    ),
   },
   {
     titulo: "Ranking",
@@ -181,7 +191,7 @@ export function Onboarding({
               Hola, {nombre}
             </h2>
             <p className="mt-1.5 font-body text-sm text-text-muted">
-              Tu área tiene tres sitios.
+              Tu área tiene cuatro sitios.
             </p>
           </div>
 

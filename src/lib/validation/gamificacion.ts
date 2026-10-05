@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { optionalNumber } from "@/lib/validation/numbers";
-import type { PointSource } from "@/types/database";
+import type { IconoPuntos, PointSource, RedeemLimit } from "@/types/database";
 
 /**
  * Validación de la gamificación (migración 0027).
@@ -20,6 +20,31 @@ export const manualPointSources = [
   "asistencia",
   "ajuste",
 ] as const satisfies readonly PointSource[];
+
+/** Lista cerrada del CHECK `*_icon_valid` (0050). Mismo orden que el tipo. */
+export const iconosPuntos = [
+  "masterclass",
+  "congreso",
+  "amigo",
+  "perfil",
+  "story",
+  "reel",
+  "estrella",
+  "invitado",
+  "descuento",
+  "entrada",
+  "mes",
+  "hoodie",
+  "pase",
+  "corona",
+  "regalo",
+] as const satisfies readonly IconoPuntos[];
+
+/** CHECK `rewards_redeem_limit_valid` (0050). */
+export const redeemLimits = ["trimestre", "anual"] as const satisfies readonly RedeemLimit[];
+
+/** Vacío en el formulario = null en la BD. */
+const iconoOpcional = z.enum(iconosPuntos).optional().or(z.literal(""));
 
 export const pointEventSchema = z.object({
   student_id: z.string().uuid("Alumno no válido"),
@@ -68,6 +93,21 @@ export const pointRuleSchema = z.object({
   source: z.enum(manualPointSources, {
     errorMap: () => ({ message: "Elige el motivo" }),
   }),
+  description: z
+    .string()
+    .trim()
+    .max(300, "Descripción demasiado larga")
+    .optional()
+    .or(z.literal("")),
+  icon: iconoOpcional,
+  /** Vacío = sin tope. */
+  monthly_limit: optionalNumber(
+    z.coerce
+      .number({ invalid_type_error: "Tope no válido" })
+      .int("El tope es un número entero")
+      .min(1, "Mínimo 1 al mes")
+      .max(100, "Máximo 100 al mes"),
+  ),
   active: z.boolean(),
 });
 
@@ -98,6 +138,9 @@ export const rewardSchema = z.object({
       .int("El stock es un número entero")
       .min(0, "El stock no puede ser negativo"),
   ),
+  icon: iconoOpcional,
+  /** Vacío = se puede pedir sin límite. */
+  redeem_limit: z.enum(redeemLimits).optional().or(z.literal("")),
   active: z.boolean(),
 });
 

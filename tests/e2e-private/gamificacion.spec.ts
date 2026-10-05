@@ -10,13 +10,19 @@ import { REWARD_NAME, STUDENT_NAME, storageStatePath } from "./fixtures";
 test.use({ storageState: storageStatePath("alumno") });
 
 test("la alumna canjea un premio y el admin lo entrega", async ({ page, browser }, testInfo) => {
-  await page.goto("/area-privada/alumno");
+  await page.goto("/area-privada/alumno/premios");
 
   const premio = page.getByRole("listitem").filter({ hasText: REWARD_NAME });
   await premio.getByRole("button", { name: "Canjear" }).click();
+
+  // Confirmación en dos pasos: el canje descuenta puntos al momento.
+  const dialogo = page.getByRole("dialog", { name: "¿Lo canjeas?" });
+  await expect(dialogo).toBeVisible();
+  await dialogo.getByRole("button", { name: "Sí, canjear" }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Canje solicitado. Te lo entregamos en clase." }),
+    page.getByRole("status").filter({ hasText: "Canje pedido. Te escribimos para dártelo." }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Entendido" }).click();
 
   const adminContext = await browser.newContext({
     baseURL: testInfo.project.use.baseURL,
@@ -40,5 +46,9 @@ test("la alumna canjea un premio y el admin lo entrega", async ({ page, browser 
 
   await admin.reload();
   await expect(pendientes).toHaveCount(antes - 1);
+
+  // El canje queda en el historial global de puntos.
+  await admin.goto("/area-privada/admin/gamificacion/historial?regla=canje");
+  await expect(admin.getByText(`Canje: ${REWARD_NAME}`).first()).toBeVisible();
   await adminContext.close();
 });

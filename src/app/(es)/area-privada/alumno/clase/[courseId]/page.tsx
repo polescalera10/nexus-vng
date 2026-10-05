@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { VideoEmbed } from "@/components/alumno/VideoEmbed";
 import { registrarVisita } from "@/lib/actividad";
+import { DIARIO_DE_CLASE_VISIBLE } from "@/lib/alumno-secciones";
 import { requireRole } from "@/lib/auth";
 import { getStudentForUser } from "@/lib/queries/alumno";
 import { getCursoDelAlumno, getDiarioDelCurso } from "@/lib/queries/diario";
@@ -26,6 +27,8 @@ export default async function ClaseDelAlumnoPage({
   params: Promise<{ courseId: string }>;
 }) {
   const { user } = await requireRole("alumno");
+  // ⏸ Sección apagada desde el 05-10-2026: ver `lib/alumno-secciones.ts`.
+  if (!DIARIO_DE_CLASE_VISIBLE) redirect("/area-privada/alumno");
   // La visita se apunta en paralelo: no retrasa la página.
   const [student] = await Promise.all([
     getStudentForUser(user.id),

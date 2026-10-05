@@ -61,21 +61,16 @@ insert into public.enrollments (id, student_id, course_id, role_in_course, statu
 on conflict (id) do nothing;
 
 -- ════════════════════════════════════════════════════════════════════════════
--- SEED · gamificación y eventos de prueba (solo desarrollo local)
---   Las reglas y los hitos ya vienen en la migración 0027; aquí solo hay
---   premios y algún apunte para que el panel no se vea vacío en local.
+-- SEED · gamificación (solo desarrollo local)
+--   Reglas, premios e hitos vienen en las migraciones (0027 y 0050, catálogo
+--   real decidido por Pol el 05-10-2026). Aquí solo hay algún apunte para que
+--   el área del alumno y el historial no se vean vacíos en local.
 -- ════════════════════════════════════════════════════════════════════════════
 
-insert into public.rewards (id, name, description, cost_points, stock, active, orden) values
-  ('e0000000-0000-4000-8000-000000000001', 'Camiseta NEXUS', 'Camiseta de la escuela, talla a elegir.', 300, 20, true, 1),
-  ('e0000000-0000-4000-8000-000000000002', 'Entrada a la fiesta', 'Una entrada para la próxima fiesta social.', 150, null, true, 2),
-  ('e0000000-0000-4000-8000-000000000003', 'Clase particular (30 min)', 'Media hora con el profe que elijas.', 800, 4, true, 3)
-on conflict (id) do nothing;
-
 insert into public.point_events (id, student_id, points, concept, source, rule_code, occurred_on) values
-  ('f0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 10, 'Asistir a una clase', 'asistencia', 'asistencia_clase', current_date - 7),
-  ('f0000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000001', 25, 'Fiesta social', 'evento', 'asistencia_fiesta', current_date - 3),
-  ('f0000000-0000-4000-8000-000000000003', 'b0000000-0000-4000-8000-000000000003', 10, 'Asistir a una clase', 'asistencia', 'asistencia_clase', current_date - 2)
+  ('f0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 200, 'Masterclass de bachata', 'evento', 'taller', current_date - 7),
+  ('f0000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000001', 5, 'Story del intensivo', 'manual', 'story_instagram', current_date - 3),
+  ('f0000000-0000-4000-8000-000000000003', 'b0000000-0000-4000-8000-000000000003', 800, 'Congreso de otoño', 'evento', 'congreso', current_date - 2)
 on conflict (id) do nothing;
 
 insert into public.eventos (id, titulo, slug, tipo, fecha, fecha_fin, ubicacion, precio, capacidad, puntos, publico, descripcion) values

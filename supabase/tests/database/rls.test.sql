@@ -99,6 +99,10 @@ insert into public.point_events (id, student_id, points, concept) values
 insert into public.rewards (id, name, cost_points, stock, active) values
   ('7e570000-0000-4000-8000-000000000085', 'RLS premio', 20, 5, true);
 
+-- Premio con tope por alumno (0050): una vez cada 3 meses.
+insert into public.rewards (id, name, cost_points, stock, active, redeem_limit) values
+  ('7e570000-0000-4000-8000-000000000087', 'RLS premio trimestral', 5, null, true, 'trimestre');
+
 insert into public.leads (id, nombre, telefono, origen) values
   ('7e570000-0000-4000-8000-000000000071', 'Lead RLS', '+34600000071', 'test-rls');
 
@@ -203,6 +207,12 @@ select throws_ok($$ insert into public.reward_redemptions (reward_id, student_id
 select lives_ok($$ insert into public.reward_redemptions (reward_id, student_id, cost_points)
                    values ('7e570000-0000-4000-8000-000000000085', '7e570000-0000-4000-8000-000000000021', 20) $$,
   'alumno: puede canjear un premio propio con saldo');
+select lives_ok($$ insert into public.reward_redemptions (reward_id, student_id, cost_points)
+                   values ('7e570000-0000-4000-8000-000000000087', '7e570000-0000-4000-8000-000000000021', 5) $$,
+  'alumno: canjea un premio con tope trimestral');
+select throws_ok($$ insert into public.reward_redemptions (reward_id, student_id, cost_points)
+                    values ('7e570000-0000-4000-8000-000000000087', '7e570000-0000-4000-8000-000000000021', 5) $$,
+  'P0001', null, 'alumno: no repite un premio con tope trimestral antes de 3 meses (0050)');
 select is_empty($$ update public.reward_redemptions set status = 'entregado'
                   where student_id = '7e570000-0000-4000-8000-000000000021' returning id $$,
   'alumno: no puede marcar su canje como entregado');
@@ -232,6 +242,7 @@ select isnt_empty($$ select 1 from storage.objects
 select lives_ok($$ select public.registrar_visita_alumno('inicio') $$, 'alumno: apunta su visita');
 select lives_ok($$ select public.registrar_visita_alumno('ranking') $$, 'alumno: apunta otra sección el mismo día');
 select lives_ok($$ select public.registrar_visita_alumno('<script>') $$, 'alumno: una sección fuera de lista no falla');
+select lives_ok($$ select public.registrar_visita_alumno('premios') $$, 'alumno: apunta la sección de premios (0050)');
 select lives_ok($$ select public.registrar_reproduccion_video('7e570000-0000-4000-8000-000000000093') $$,
   'alumno: apunta un vídeo de su clase');
 select lives_ok($$ select public.registrar_reproduccion_video('7e570000-0000-4000-8000-000000000094') $$,
@@ -361,15 +372,28 @@ select isnt_empty($$ update public.students set payment_status = 'pendiente' whe
   'admin: cambia la cuota de un alumno');
 select isnt_empty($$ delete from public.rewards where id = '7e570000-0000-4000-8000-000000000086' returning id $$,
   'admin: borra premios');
+
+-- Tope mensual de reels (0050): dos al mes, el tercero no entra aunque lo dé el admin.
+select lives_ok($$ insert into public.point_events (student_id, points, concept, rule_code)
+                   values ('7e570000-0000-4000-8000-000000000022', 15, 'Reel 1', 'reel_instagram'),
+                          ('7e570000-0000-4000-8000-000000000022', 15, 'Reel 2', 'reel_instagram') $$,
+  'admin: da dos reels en el mismo mes');
+select throws_ok($$ insert into public.point_events (student_id, points, concept, rule_code)
+                    values ('7e570000-0000-4000-8000-000000000022', 15, 'Reel 3', 'reel_instagram') $$,
+  'P0001', null, 'admin: no pasa del tope mensual de reels (0050)');
+select lives_ok($$ insert into public.point_events (student_id, points, concept, rule_code, occurred_on)
+                   values ('7e570000-0000-4000-8000-000000000022', 15, 'Reel del mes pasado', 'reel_instagram',
+                           (date_trunc('month', current_date) - interval '1 day')::date) $$,
+  'admin: el tope es por mes natural');
 select lives_ok($$ insert into storage.objects (bucket_id, name)
                    values ('avatars', '7e570000-0000-4000-8000-000000000022/por-admin.jpg') $$,
   'admin: sube fotos en cualquier carpeta');
 
 -- Actividad apuntada por S1 en su bloque (0049).
 select is((select views from public.student_activity_days where student_id = '7e570000-0000-4000-8000-000000000021'),
-  2, 'admin: ve las visitas de S1 (la sección fuera de lista no cuenta)');
+  3, 'admin: ve las visitas de S1 (la sección fuera de lista no cuenta)');
 select is((select sections from public.student_activity_days where student_id = '7e570000-0000-4000-8000-000000000021'),
-  array['inicio', 'ranking'], 'admin: secciones de S1 sin repetir');
+  array['inicio', 'ranking', 'premios'], 'admin: secciones de S1 sin repetir');
 select is(array(select session_video_id from public.student_video_plays where student_id = '7e570000-0000-4000-8000-000000000021'),
   array['7e570000-0000-4000-8000-000000000093']::uuid[], 'admin: solo consta el vídeo de la clase de S1');
 select is(array(select field from public.student_profile_changes where student_id = '7e570000-0000-4000-8000-000000000021'),

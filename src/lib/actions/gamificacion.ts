@@ -37,11 +37,18 @@ const ADMIN_PATHS = [
   "/area-privada/admin/gamificacion",
   "/area-privada/admin/gamificacion/premios",
   "/area-privada/admin/gamificacion/reglas",
+  "/area-privada/admin/gamificacion/historial",
+];
+
+const ALUMNO_PATHS = [
+  "/area-privada/alumno",
+  "/area-privada/alumno/premios",
+  "/area-privada/alumno/historial",
 ];
 
 function revalidateGamificacion(studentId?: string) {
   for (const path of ADMIN_PATHS) revalidatePath(path);
-  revalidatePath("/area-privada/alumno");
+  for (const path of ALUMNO_PATHS) revalidatePath(path);
   if (studentId) revalidatePath(`/area-privada/admin/alumnos/${studentId}`);
 }
 
@@ -94,6 +101,13 @@ export async function addPointEvent(
 
   if (error) {
     console.error("[addPointEvent]", error.message);
+    // Tope de stories y reels: lo hace cumplir el trigger de 0050.
+    if (error.message?.includes("límite mensual")) {
+      return {
+        status: "error",
+        message: "Ya tiene el máximo de este mes para esa regla. Si es de otro mes, cambia la fecha.",
+      };
+    }
     return { status: "error", message: "No se han podido registrar los puntos." };
   }
 
@@ -136,6 +150,9 @@ export async function savePointRule(
     label: formData.get("label"),
     points: formData.get("points"),
     source: formData.get("source") ?? "manual",
+    description: formData.get("description") ?? "",
+    icon: formData.get("icon") ?? "",
+    monthly_limit: formData.get("monthly_limit") ?? "",
     active: formData.get("active") === "on",
   });
 
@@ -147,7 +164,13 @@ export async function savePointRule(
     };
   }
 
-  const { id, ...row } = parsed.data;
+  const { id, ...d } = parsed.data;
+  const row = {
+    ...d,
+    description: d.description || null,
+    icon: d.icon || null,
+    monthly_limit: d.monthly_limit ?? null,
+  };
   const supabase = await createClient();
 
   const { error } = id
@@ -185,6 +208,8 @@ export async function saveReward(
     description: formData.get("description") ?? "",
     cost_points: formData.get("cost_points"),
     stock: formData.get("stock") ?? "",
+    icon: formData.get("icon") ?? "",
+    redeem_limit: formData.get("redeem_limit") ?? "",
     active: formData.get("active") === "on",
   });
 
@@ -202,6 +227,8 @@ export async function saveReward(
     description: d.description || null,
     cost_points: d.cost_points,
     stock: d.stock ?? null,
+    icon: d.icon || null,
+    redeem_limit: d.redeem_limit || null,
     active: d.active,
   };
 
@@ -276,11 +303,17 @@ export async function requestRedemption(rewardId: string): Promise<GamificacionR
     if (detail.includes("no quedan unidades")) {
       return { ok: false, message: "Se ha agotado este premio." };
     }
+    if (detail.includes("límite de canje")) {
+      return {
+        ok: false,
+        message: "Ya pediste este premio hace poco. Podrás volver a pedirlo cuando pase el plazo.",
+      };
+    }
     return { ok: false, message: "No se ha podido solicitar el canje." };
   }
 
   revalidateGamificacion(student.id);
-  return { ok: true, message: "Canje solicitado. Te lo entregamos en clase." };
+  return { ok: true, message: "Canje pedido. Te escribimos para dártelo." };
 }
 
 /** El admin marca un canje como entregado o lo cancela (devuelve los puntos). */
