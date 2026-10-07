@@ -79,7 +79,13 @@ export function ComoGanar({
           <ul className="mt-2.5 flex flex-col gap-2 font-body text-sm text-text-body">
             <li className="flex gap-2">
               <span aria-hidden="true" className="text-accent">✓</span>
-              Desde una cuenta pública, etiquetando a @nexusvng.
+              Tiene que ser contenido tuyo: lo grabas y lo publicas tú, en tu cuenta.
+              Compartir o republicar lo que sube la cuenta de NEXUS no cuenta.
+            </li>
+            <li className="flex gap-2">
+              <span aria-hidden="true" className="text-accent">✓</span>
+              Desde una cuenta pública, etiquetando a @nexusvng. En los reels también
+              puedes invitarnos como colaborador.
             </li>
             <li className="flex gap-2">
               <span aria-hidden="true" className="text-accent">✓</span>

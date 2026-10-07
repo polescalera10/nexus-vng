@@ -251,7 +251,7 @@ export default async function AlumnoPage() {
             </p>
             <p className="mt-1 font-body text-sm text-text-muted">
               Los primeros llegan rápido: ven a una masterclass, trae a un amigo o
-              sube una story etiquetando a @nexusvng.
+              crea tu propia story y etiqueta a @nexusvng.
             </p>
             <Link
               href="/area-privada/alumno/premios?ver=ganar"

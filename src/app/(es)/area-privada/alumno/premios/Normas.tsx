@@ -39,7 +39,7 @@ const NORMAS: { titulo: string; texto: string }[] = [
   {
     titulo: "Stories y reels",
     texto:
-      "Como máximo 4 stories y 2 reels al mes. Cuenta pública, etiqueta a @nexusvng y márcalo como colaboración. Los puntos los suma tu profe o el equipo al verlo.",
+      "Como máximo 4 stories y 2 reels al mes. Tienen que ser tuyos: los creas y los publicas tú, no vale compartir lo que sube la cuenta de NEXUS. Cuenta pública, etiqueta a @nexusvng (en los reels también puedes invitarnos como colaborador) y márcalo como colaboración. Los puntos los suma tu profe o el equipo al verlo.",
   },
   {
     titulo: "Reseña en Google",

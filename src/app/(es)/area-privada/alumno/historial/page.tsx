@@ -137,7 +137,7 @@ export default async function HistorialPage({
           <p className="mt-1 font-body text-sm text-text-muted">
             {filtro === "canjes"
               ? "Cuando pidas un premio, aparecerá aquí."
-              : "Ven a una masterclass, trae a un amigo o sube una story etiquetando a @nexusvng."}
+              : "Ven a una masterclass, trae a un amigo o crea tu propia story y etiqueta a @nexusvng."}
           </p>
           <Link
             href={
