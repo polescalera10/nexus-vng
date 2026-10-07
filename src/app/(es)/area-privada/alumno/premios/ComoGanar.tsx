@@ -3,7 +3,8 @@ import { formatPoints } from "@/lib/format";
 import type { PointRule } from "@/types/database";
 
 /**
- * Cómo se ganan puntos: una tarjeta por regla activa, en el orden del panel.
+ * Cómo se ganan puntos: una tarjeta por regla activa, de menos a más puntos
+ * (a igualdad, el orden del panel).
  *
  * Lee `point_rules` (puntos, texto y tope), que es la misma fila que usa el
  * admin al dar puntos y el trigger del tope mensual: lo que se promete aquí y
@@ -25,12 +26,14 @@ export function ComoGanar({
     );
   }
 
+  // `sort` es estable: las reglas que empatan a puntos conservan su `orden`.
+  const ordenadas = [...reglas].sort((a, b) => a.points - b.points);
   const hayRedes = reglas.some((r) => r.code === "story_instagram" || r.code === "reel_instagram");
 
   return (
     <>
       <ul className="grid gap-3 sm:grid-cols-2">
-        {reglas.map((r) => {
+        {ordenadas.map((r) => {
           const usados = usosEsteMes[r.code] ?? 0;
           const lleno = r.monthly_limit !== null && usados >= r.monthly_limit;
           return (

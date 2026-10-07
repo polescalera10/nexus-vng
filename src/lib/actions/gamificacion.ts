@@ -108,6 +108,10 @@ export async function addPointEvent(
         message: "Ya tiene el máximo de este mes para esa regla. Si es de otro mes, cambia la fecha.",
       };
     }
+    // Reseña de Google: una sola vez por alumno (índice único de 0051).
+    if (error.code === "23505" && error.message?.includes("point_events_resena_google_una_vez")) {
+      return { status: "error", message: "Ya cobró los puntos por su reseña en Google." };
+    }
     return { status: "error", message: "No se han podido registrar los puntos." };
   }
 

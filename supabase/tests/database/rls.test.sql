@@ -385,6 +385,14 @@ select lives_ok($$ insert into public.point_events (student_id, points, concept,
                    values ('7e570000-0000-4000-8000-000000000022', 15, 'Reel del mes pasado', 'reel_instagram',
                            (date_trunc('month', current_date) - interval '1 day')::date) $$,
   'admin: el tope es por mes natural');
+
+-- Reseña de Google (0051): una sola vez por alumno.
+select lives_ok($$ insert into public.point_events (student_id, points, concept, rule_code)
+                   values ('7e570000-0000-4000-8000-000000000022', 50, 'Reseña en Google', 'resena_google') $$,
+  'admin: da los puntos de la reseña de Google');
+select throws_ok($$ insert into public.point_events (student_id, points, concept, rule_code)
+                    values ('7e570000-0000-4000-8000-000000000022', 50, 'Reseña en Google otra vez', 'resena_google') $$,
+  '23505', null, 'admin: la reseña de Google solo se paga una vez por alumno (0051)');
 select lives_ok($$ insert into storage.objects (bucket_id, name)
                    values ('avatars', '7e570000-0000-4000-8000-000000000022/por-admin.jpg') $$,
   'admin: sube fotos en cualquier carpeta');

@@ -42,6 +42,11 @@ const NORMAS: { titulo: string; texto: string }[] = [
       "Como máximo 4 stories y 2 reels al mes. Cuenta pública, etiqueta a @nexusvng y márcalo como colaboración. Los puntos los suma tu profe o el equipo al verlo.",
   },
   {
+    titulo: "Reseña en Google",
+    texto:
+      "50 puntos, una sola vez, por dejar tu opinión sobre NEXUS en Google. Puntúa y cuenta lo que de verdad pienses: no premiamos la nota, premiamos que la dejes. Menciona en la reseña que NEXUS te da puntos por escribirla. Los puntos los suma el equipo al verla.",
+  },
+  {
     titulo: "Cambios",
     texto:
       "Podemos cambiar premios y puntos. Si lo hacemos, lo verás aquí antes, y lo que ya hayas pedido se respeta.",
