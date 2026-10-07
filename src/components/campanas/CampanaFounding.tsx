@@ -16,7 +16,7 @@ export function CampanaFounding({ mensajeWhatsapp }: { mensajeWhatsapp: string }
             <span className="font-display text-[clamp(46px,10vw,64px)] leading-none text-neon-mint">
               {founding.price}
             </span>
-            <span className="font-body text-base text-white/65">/mes</span>
+            <span className="font-body text-base text-white/65">al mes</span>
           </div>
 
           <p className="mt-4 font-body text-sm leading-relaxed text-white/70">{founding.urgencyNote}</p>

@@ -100,14 +100,14 @@ export const tProfesores = pares(
 
 export const tFounding = pares(
   {
-    mes: "/mes",
+    mes: "al mes",
     plazas: "Plazas fundadoras",
     quedan: (l: number, t: number) => `Quedan ${l} / ${t}`,
     quedanAria: (l: number, t: number) => `Quedan ${l} de ${t} plazas fundadoras`,
     preguntar: "O pregúntanos por WhatsApp",
   },
   {
-    mes: "/mes",
+    mes: "al mes",
     plazas: "Places fundadores",
     quedan: (l: number, t: number) => `Queden ${l} / ${t}`,
     quedanAria: (l: number, t: number) => `Queden ${l} de ${t} places fundadores`,

@@ -156,7 +156,7 @@ export default async function SocioFundadorPage() {
                 <span className="font-display text-neon-mint text-[clamp(54px,9vw,76px)] leading-none">
                   {founding.price}
                 </span>
-                <span className="font-body text-[17px] text-white/65">/mes</span>
+                <span className="font-body text-[17px] text-white/65">al mes</span>
                 {founding.priceOld && (
                   <span className="font-body text-[19px] text-white/40 line-through">
                     {founding.priceOld}
