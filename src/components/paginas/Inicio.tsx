@@ -33,12 +33,11 @@ export async function Inicio({ locale }: { locale: Locale }) {
       <IntroLocal locale={locale} />
       {/* Orden revisado el 09-10-2026 (auditoría integral, punto 12): la home
           medía ~15.600 px en móvil y convertía la mitad que /clases. Lo que
-          busca quien llega (qué se baila, para quién es, cómo se empieza y
-          cuánto cuesta) va ahora en las primeras pantallas; la prueba social
-          y los profes, después. */}
+          busca quien llega (qué se baila, para quién es y cuánto cuesta) va
+          ahora en las primeras pantallas, seguido de cómo empezar y el mapa; la
+          prueba social y los profes, después. */}
       <Modalidades locale={locale} modalidades={modalidades} />
       <ParaTi locale={locale} />
-      <ComoEmpezar locale={locale} />
       <Founding locale={locale} spots={spots} />
       {/* Precios "estándar": debajo del founding a propósito — cuando la promo
           fundadora se retire y se borre <Founding />, esta sección queda como
@@ -48,12 +47,13 @@ export async function Inicio({ locale }: { locale: Locale }) {
           <Precios locale={locale} />
         </div>
       </section>
+      <ComoEmpezar locale={locale} />
+      {/* El mapa, justo cuando se le dice al visitante que venga a la sala. */}
+      <DondeEstamos locale={locale} />
       {/* Fotos reales de clase y, debajo, el carrusel de reseñas de la ficha de
           Google (Featurable). Sin reseñas, solo las fotos. */}
       <Comunidad locale={locale} resenas={resenas} />
       <Profesores locale={locale} />
-      {/* El mapa, justo cuando se le dice al visitante que venga a la sala. */}
-      <DondeEstamos locale={locale} />
       {/* Enlaza a las landings de campaña, que solo existen en castellano. */}
       {locale === "es" && <PuntoDePartida />}
       <Faq locale={locale} />
