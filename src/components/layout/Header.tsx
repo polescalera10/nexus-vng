@@ -1,4 +1,5 @@
 import { Logo } from "@/components/layout/Logo";
+import { SelectorIdioma } from "@/components/layout/SelectorIdioma";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { navEn } from "@/components/layout/nav-items";
 import type { Locale } from "@/i18n/locales";
@@ -30,6 +31,11 @@ export function Header({ locale = "es" }: { locale?: Locale }) {
             </Link>
           ))}
         </nav>
+        <SelectorIdioma
+          locale={locale}
+          variante="cabecera"
+          className="font-body hover:text-neon hidden min-h-11 items-center text-[13px] font-semibold text-white/75 no-underline transition-colors md:inline-flex"
+        />
         {/* El envoltorio es el que oculta el CTA por debajo de md: `WaLink`
             lleva `inline-flex` en sus clases base y Tailwind v4 emite
             `.inline-flex` después de `.hidden`, así que un `hidden` puesto en

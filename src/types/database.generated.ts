@@ -461,6 +461,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["lead_estado"]
           evento_slug: string | null
           id: string
+          idioma: string
           intereses: string[] | null
           mensaje: string | null
           modalidad_interes: string | null
@@ -476,6 +477,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["lead_estado"]
           evento_slug?: string | null
           id?: string
+          idioma?: string
           intereses?: string[] | null
           mensaje?: string | null
           modalidad_interes?: string | null
@@ -491,6 +493,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["lead_estado"]
           evento_slug?: string | null
           id?: string
+          idioma?: string
           intereses?: string[] | null
           mensaje?: string | null
           modalidad_interes?: string | null

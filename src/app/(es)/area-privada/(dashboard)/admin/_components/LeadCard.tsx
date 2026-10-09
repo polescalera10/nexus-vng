@@ -102,6 +102,8 @@ export function LeadCard({
   const waHref = buildLeadWaLink(lead.telefono, lead.nombre);
   const meta = [
     LEAD_ORIGEN_LABELS[lead.origen] ?? lead.origen,
+    // Llegó desde la web en catalán (0053): contestarle en catalán.
+    lead.idioma === "ca" ? "En català" : null,
     lead.modalidad_interes,
     lead.intereses?.length ? lead.intereses.join(", ") : null,
   ]

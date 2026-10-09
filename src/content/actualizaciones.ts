@@ -14,19 +14,26 @@
  * eventos) no van aquí: su fecha sale del `updated_at` de Supabase.
  */
 export const actualizaciones: Record<string, string> = {
-  "": "2026-09-16",
+  "": "2026-10-09",
   "/clases": "2026-09-15",
   "/socio-fundador": "2026-08-01",
   "/intensivos": "2026-09-15",
   "/profesores": "2026-08-14",
-  "/horarios": "2026-09-15",
+  "/horarios": "2026-10-09",
   "/eventos": "2026-09-15",
   "/sobre-nosotros": "2026-09-15",
   "/contacto": "2026-09-15",
-  "/faq": "2026-09-15",
+  "/faq": "2026-10-09",
   "/aviso-legal": "2026-08-01",
   "/privacidad": "2026-09-16",
   "/cookies": "2026-09-16",
+  // Piloto en catalán, publicado el 09-10-2026.
+  "/ca": "2026-10-09",
+  "/ca/classes": "2026-10-09",
+  "/ca/classes/salsa-cubana": "2026-10-09",
+  "/ca/classes/bachata": "2026-10-09",
+  "/ca/horaris": "2026-10-09",
+  "/ca/contacte": "2026-10-09",
 };
 
 /** Fecha de la sección para el sitemap; cae a hoy si la ruta no está declarada. */

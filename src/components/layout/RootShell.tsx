@@ -56,7 +56,7 @@ export function RootShell({
     <html lang={lang} className={`${anton.variable} ${inter.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         {children}
-        {conSchema && <JsonLd data={localBusinessLd()} />}
+        {conSchema && <JsonLd data={localBusinessLd(lang)} />}
       </body>
     </html>
   );

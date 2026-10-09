@@ -25,6 +25,13 @@ const PAGES = [
   "/clases-de-baile-sant-pere-de-ribes",
   "/clases-de-baile-sitges",
   "/clases-de-baile-en-tacones",
+  // Piloto en catalán (09-10-2026).
+  "/ca",
+  "/ca/classes",
+  "/ca/classes/salsa-cubana",
+  "/ca/classes/bachata",
+  "/ca/horaris",
+  "/ca/contacte",
 ];
 
 /** Diferencia entre el ancho del documento y el del viewport. */

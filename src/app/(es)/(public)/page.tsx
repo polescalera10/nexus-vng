@@ -1,6 +1,7 @@
 import { Inicio } from "@/components/paginas/Inicio";
 import { tInicioMeta } from "@/i18n/textos/inicio";
 import type { Metadata } from "next";
+import { alternatesDe } from "@/i18n/rutas";
 
 /*
   Meta propia de la home, con acción al final. No se toca `site.description`:
@@ -11,6 +12,7 @@ import type { Metadata } from "next";
 */
 export const metadata: Metadata = {
   description: tInicioMeta.es.description,
+  alternates: alternatesDe("/"),
 };
 
 // ISR: la landing es estática y se revalida cada hora (modalidades editables).

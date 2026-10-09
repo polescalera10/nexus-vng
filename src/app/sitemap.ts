@@ -7,6 +7,7 @@ import { getEventosSitemap } from "@/lib/queries/eventos";
 import { listadoIndexable } from "@/lib/indexable";
 import { articulos } from "@/content/blog";
 import { paginasSeo } from "@/content/paginas-seo";
+import { alternatesDe, PAREJAS } from "@/i18n/rutas";
 
 /**
  * Sitemap: SOLO URLs canónicas e indexables.
@@ -56,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Misma regla para el blog mientras no haya artículos.
   if (listadoIndexable(articulos.length)) staticPaths.push("/blog");
 
-  return [
+  const entradas: MetadataRoute.Sitemap = [
     ...staticPaths.map((path) => ({
       url: `${base}${path}`,
       lastModified: ultimaActualizacion(path),
@@ -84,5 +85,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/${p.slug}`,
       lastModified: new Date(`${p.actualizado}T00:00:00Z`),
     })),
+    // Piloto en catalán: las 6 páginas con pareja (`i18n/rutas.ts`).
+    ...PAREJAS.map(([, ca]) => ({
+      url: `${base}${ca}`,
+      lastModified: ultimaActualizacion(ca),
+    })),
   ];
+
+  // hreflang en el sitemap para las parejas, en las dos direcciones: Google
+  // pide que cada versión declare a la otra (y a sí misma).
+  return entradas.map((e) => {
+    const path = e.url.slice(base.length) || "/";
+    const { languages } = alternatesDe(path);
+    if (!languages) return e;
+    return {
+      ...e,
+      alternates: {
+        languages: Object.fromEntries(
+          Object.entries(languages).map(([lang, ruta]) => [lang, `${base}${ruta === "/" ? "" : ruta}`]),
+        ),
+      },
+    };
+  });
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { alternatesDe } from "@/i18n/rutas";
 import { Clases } from "@/components/paginas/Clases";
 import { tClases } from "@/i18n/textos/paginas";
 
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
   title: tClases.es.title,
   // 150–160 caracteres: por encima, Google corta la descripción en el SERP.
   description: tClases.es.description,
-  alternates: { canonical: "/clases" },
+  alternates: alternatesDe("/clases"),
 };
 
 // Revalidar cada hora por si cambian las modalidades en Supabase.

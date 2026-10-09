@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { alternatesDe } from "@/i18n/rutas";
 import { Modalidad } from "@/components/paginas/Modalidad";
 import { getModalidadBySlug, getModalidadSlugs } from "@/lib/queries/modalidades";
 import { contenidoModalidad, metaModalidad } from "@/content/por-idioma";
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `/clases/${m.slug}` },
+    alternates: alternatesDe(`/clases/${m.slug}`),
     openGraph: { title: t.ogTitle(m.nombre), description: ogDescription, images: ogImages },
   };
 }

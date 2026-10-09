@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { WaLink } from "@/components/ui/WaLink";
 import type { NavLink } from "@/components/layout/nav-items";
 import type { Locale } from "@/i18n/locales";
+import { SelectorIdioma } from "@/components/layout/SelectorIdioma";
 import { tMenu } from "@/i18n/textos/comun";
 
 const PANEL_ID = "mobile-nav-panel";
@@ -168,6 +169,11 @@ export function MobileNav({ items, locale = "es" }: { items: readonly NavLink[];
                   </Link>
                 );
               })}
+              <SelectorIdioma
+                locale={locale}
+                variante="menu"
+                className="font-body flex min-h-14 items-center border-b border-white/8 text-base font-semibold text-white/75 no-underline transition-colors hover:text-neon"
+              />
             </nav>
 
             <div className="container-nexus mt-auto pt-10">

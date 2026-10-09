@@ -107,6 +107,7 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
   // 1) Persistir el lead (escritura de servidor, ver leadsWriteClient).
   const supabase = await leadsWriteClient();
   const { error } = await supabase.from("leads").insert({
+    idioma: locale,
     nombre: lead.nombre,
     telefono: lead.telefono,
     email: lead.email || null,
@@ -126,6 +127,7 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
   // 2) Notificar a n8n (email + WhatsApp). No bloquea el éxito del lead.
   await postToN8n({
     ...lead,
+    idioma: locale,
     consentimiento: true,
     recibido_en: new Date().toISOString(),
   }).catch((e) => console.error("[submitLead] webhook n8n falló:", e));
@@ -198,6 +200,7 @@ export async function submitInterestLead(
 
   const supabase = await leadsWriteClient();
   const { error } = await supabase.from("leads").insert({
+    idioma: locale,
     nombre: lead.nombre,
     telefono: lead.telefono,
     email: lead.email,
@@ -220,6 +223,7 @@ export async function submitInterestLead(
 
   await postToN8n({
     ...lead,
+    idioma: locale,
     intereses_texto: lead.intereses.join(", "),
     consentimiento: true,
     recibido_en: new Date().toISOString(),
@@ -294,6 +298,7 @@ export async function submitMasterclassLead(
 
   const supabase = await leadsWriteClient();
   const { error } = await supabase.from("leads").insert({
+    idioma: locale,
     nombre: lead.nombre,
     telefono: lead.telefono,
     email: lead.email,
@@ -310,6 +315,7 @@ export async function submitMasterclassLead(
 
   await postToN8n({
     ...lead,
+    idioma: locale,
     origen: "masterclass",
     evento_titulo: evento.titulo,
     evento_fecha: evento.fecha,

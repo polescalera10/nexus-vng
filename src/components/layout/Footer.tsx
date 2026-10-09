@@ -4,6 +4,7 @@ import { WaTrackedLink } from "@/components/ui/WaTrackedLink";
 import { site } from "@/lib/site";
 import { articulos } from "@/content/blog";
 import type { Locale } from "@/i18n/locales";
+import { SelectorIdioma } from "@/components/layout/SelectorIdioma";
 import { tIdioma, tPie } from "@/i18n/textos/comun";
 
 // min-h-11 (44px): con py-[9px] la píldora se quedaba en 40px de alto, por
@@ -154,6 +155,11 @@ export function Footer({ locale = "es" }: { locale?: Locale }) {
             © {new Date().getFullYear()} {site.name} · {t.hecho}
           </p>
           <div className="flex flex-wrap items-center gap-4">
+            <SelectorIdioma
+              locale={locale}
+              variante="pie"
+              className="font-body text-xs font-semibold text-white/70 no-underline transition-colors hover:text-neon"
+            />
             {legal(locale).map(({ href, label, soloEs }) => (
               <Link
                 key={href}

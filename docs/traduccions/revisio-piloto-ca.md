@@ -1,6 +1,6 @@
 # Revisión del piloto en catalán
 
-**Generado:** 2026-09-17 con `scripts/revision-ca.mts`. No se edita a mano: se corrige el texto en el código y se vuelve a generar.
+**Generado:** 2026-10-09 con `scripts/revision-ca.mts`. No se edita a mano: se corrige el texto en el código y se vuelve a generar.
 
 ## Cómo revisarlo
 
@@ -75,10 +75,13 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `levels[3].label` | Avanzado | Avançat |
 | `experience[0].title` | Progresas sin agobio | Avances sense pressió |
 | `experience[0].text` | Grupos por nivel real. Avanzas cuando estás listo, no cuando toca. | Grups per nivell real. Avances quan estàs a punt, no quan toca. |
+| `experience[0].icon` | progreso | progreso |
 | `experience[1].title` | Una comunidad de verdad | Una comunitat de veritat |
 | `experience[1].text` | Llegas solo y sales con planes. El finde empieza aquí, en la pista. | Arribes sol i surts amb plans. El cap de setmana comença aquí, a la pista. |
+| `experience[1].icon` | comunidad | comunidad |
 | `experience[2].title` | Sales sintiéndote capaz | Surts sentint-te capaç |
 | `experience[2].text` | Cada clase te devuelve un poco de confianza. Y eso se nota también fuera de la pista. | Cada classe et torna una mica de confiança. I això també es nota fora de la pista. |
+| `experience[2].icon` | confianza | confianza |
 | `steps[0].title` | Escríbenos | Escriu-nos |
 | `steps[0].text` | Un WhatsApp y listo. Sin formularios eternos, sin compromiso. | Un WhatsApp i llestos. Sense formularis eterns, sense compromís. |
 | `steps[1].title` | Te ubicamos | T'ubiquem |
@@ -86,15 +89,15 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `steps[2].title` | Vienes a probar | Véns a provar |
 | `steps[2].text` | Bailas, conoces al grupo y decides. Sin presión y sin letra pequeña. | Balles, coneixes el grup i decideixes. Sense pressió i sense lletra petita. |
 | `faqs[0].q` | ¿Dónde estáis? | On sou? |
-| `faqs[0].a` | Dentro del gimnasio Aranha, en Vilanova i la Geltrú. Escríbenos por WhatsApp y te mandamos la ubicación exacta. | Al Gimnàs Aranha, a la Rambla del Garraf, 32, primera planta, a Sant Pere de Ribes, tocant a Vilanova i la Geltrú. Si et costa trobar-nos, escriu-nos per WhatsApp i t'hi guiem. |
+| `faqs[0].a` | En el Gimnasio Aranha, en la Rambla del Garraf, 32, primera planta, en Sant Pere de Ribes, pegado a Vilanova i la Geltrú. Si te cuesta encontrarnos, escríbenos por WhatsApp y te guiamos. | Al Gimnàs Aranha, a la Rambla del Garraf, 32, primera planta, a Sant Pere de Ribes, tocant a Vilanova i la Geltrú. Si et costa trobar-nos, escriu-nos per WhatsApp i t'hi guiem. |
 | `faqs[1].q` | ¿Cuánto cuesta? | Quant costa? |
-| `faqs[1].a` | La tarifa fundadora de lanzamiento es de 85 €/mes (solo 10 plazas) e incluye acceso a todas las disciplinas, con la cuota bloqueada mientras sigas de alta. Después, la tarifa plana con todos los estilos es de 100 €/mes; también puedes venir por estilos sueltos desde 35 €/mes. Y antes de decidir, tienes una clase de prueba para conocer el ambiente. | La tarifa fundadora de llançament és de 85 €/mes (només 10 places) i inclou accés a totes les disciplines, amb la quota bloquejada mentre continuïs d'alta. Després, la tarifa plana amb tots els estils és de 100 €/mes; també pots venir per estils solts des de 35 €/mes. I abans de decidir pots fer una classe de prova: té un cost, que et descomptem si t'inscrius. |
+| `faqs[1].a` | La tarifa fundadora de lanzamiento es de 85 €/mes (solo 10 plazas) e incluye acceso a todas las disciplinas, con la cuota bloqueada mientras sigas de alta. Después, la tarifa plana con todos los estilos es de 100 €/mes; también puedes venir por estilos sueltos desde 35 €/mes. Y antes de decidir puedes hacer una clase de prueba: tiene un coste, que te descontamos si te inscribes. | La tarifa fundadora de llançament és de 85 €/mes (només 10 places) i inclou accés a totes les disciplines, amb la quota bloquejada mentre continuïs d'alta. Després, la tarifa plana amb tots els estils és de 100 €/mes; també pots venir per estils solts des de 35 €/mes. I abans de decidir pots fer una classe de prova: té un cost, que et descomptem si t'inscrius. |
 | `faqs[2].q` | ¿Qué horarios hay? | Quins horaris hi ha? |
-| `faqs[2].a` | Estamos cerrando el cuadro definitivo de la temporada. Escríbenos con tu disponibilidad y te decimos qué grupos encajan con tu agenda. | Fem classe de dilluns a divendres, de 18:30 a 22:30, en sessions d'una hora. La graella completa és a la pàgina d'horaris; escriu-nos amb la teva disponibilitat i et diem quins grups t'encaixen. |
+| `faqs[2].a` | Damos clase de lunes a viernes, de 18:30 a 22:30, en sesiones de una hora. La parrilla completa está en la página de horarios; escríbenos con tu disponibilidad y te decimos qué grupos encajan contigo. | Fem classe de dilluns a divendres, de 18:30 a 22:30, en sessions d'una hora. La graella completa és a la pàgina d'horaris; escriu-nos amb la teva disponibilitat i et diem quins grups t'encaixen. |
 | `faqs[3].q` | ¿Necesito venir con pareja? | He de venir amb parella? |
-| `faqs[3].a` | No hace falta. Rotamos en clase y conocerás a todo el grupo. La mayoría viene sola. | No cal. A classe la rotació de parella és voluntària, però la recomanem: ballar amb persones diferents ajuda molt a aprendre. La majoria de gent ve sola. |
+| `faqs[3].a` | No hace falta. En clase la rotación de pareja es voluntaria, pero la recomendamos: bailar con personas distintas ayuda mucho a aprender. La mayoría de la gente viene sola. | No cal. A classe la rotació de parella és voluntària, però la recomanem: ballar amb persones diferents ajuda molt a aprendre. La majoria de gent ve sola. |
 | `faqs[4].q` | ¿Qué nivel necesito? | Quin nivell necessito? |
-| `faqs[4].a` | El que tengas. Hay grupos desde cero absoluto hasta avanzado, y te ubicamos en el que mejor encaja contigo. | El que tinguis. Hi ha grups des de zero absolut fins a avançat, i el professor t'assigna el que millor t'encaixa. |
+| `faqs[4].a` | El que tengas. Hay grupos desde cero absoluto hasta avanzado, y el profesor te asigna el que mejor encaja contigo. | El que tinguis. Hi ha grups des de zero absolut fins a avançat, i el professor t'assigna el que millor t'encaixa. |
 | `faqs[5].q` | ¿Hay edad mínima o máxima? | Hi ha edat mínima o màxima? |
 | `faqs[5].a` | Somos una escuela para adultos: hay gente de los 18 a los 60 y pico. El único requisito es tener ganas. | Som una escola per a adults: hi ha gent dels 18 als 60 i escaig. L'únic requisit és tenir ganes. |
 | `faqs[6].q` | ¿Qué llevo a la clase de prueba? | Què porto a la classe de prova? |
@@ -136,8 +139,6 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `tParaTi.kicker` | Esto es para ti | Això és per a tu |
 | `tParaTi.titulo` | Para quien nunca ha bailado. Y para quien ya no puede parar. | Per a qui no ha ballat mai. I per a qui ja no pot parar. |
 | `tParaTi.texto` | Tenemos grupos por nivel real, desde cero absoluto hasta avanzado. Llegues con la edad, la timidez o las dos manos izquierdas que sea: hay un sitio hecho para ti. | Tenim grups per nivell real, des de zero absolut fins a avançat. Vinguis amb l'edat, la timidesa o els dos peus esquerres que sigui: hi ha un lloc fet per a tu. |
-| `tExperiencia.kicker` | Lo que vas a vivir | El que viuràs |
-| `tExperiencia.titulo` | Más que pasos: una forma de sentirte | Més que passos: una manera de sentir-te |
 | `tModalidades.kicker` | Qué se baila | Què s'hi balla |
 | `tModalidades.etiqueta` | Modalidad | Modalitat |
 | `tModalidades.verN` | Ver las ‹A› disciplinas | Mira les ‹A› disciplines |
@@ -152,7 +153,7 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `tProfesores.tags[0]` | Te corrigen el detalle | Et corregeixen el detall |
 | `tProfesores.tags[1]` | Te conocen por tu nombre | Et coneixen pel nom |
 | `tProfesores.tags[2]` | Formación constante | Formació constant |
-| `tFounding.mes` | /mes | /mes |
+| `tFounding.mes` | al mes | al mes |
 | `tFounding.plazas` | Plazas fundadoras | Places fundadores |
 | `tFounding.quedan` | Quedan ‹A› / ‹B› | Queden ‹A› / ‹B› |
 | `tFounding.quedanAria` | Quedan ‹A› de ‹B› plazas fundadoras | Queden ‹A› de ‹B› places fundadores |
@@ -272,10 +273,10 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `salsa-cubana.aprenderas[4]` | Musicalidad: entender la clave, el son y la timba para bailar con la música y no encima de ella. | Musicalitat: entendre la clau, el son i la timba per ballar amb la música i no per sobre. |
 | `salsa-cubana.aprenderas[5]` | Recursos de improvisación para defenderte en cualquier fiesta, con cualquier pareja y a cualquier velocidad. | Recursos d'improvisació per defensar-te a qualsevol festa, amb qualsevol parella i a qualsevol velocitat. |
 | `salsa-cubana.comoEsLaClase[0]` | Cada sesión dura una hora y sigue la misma estructura: calentamiento y paso básico, un bloque de técnica individual (peso, giro, brazos) y después la figura del día, desmontada por partes y montada de nuevo con música. | Cada sessió dura una hora i segueix la mateixa estructura: escalfament i pas bàsic, un bloc de tècnica individual (pes, gir, braços) i després la figura del dia, desmuntada per parts i muntada de nou amb música. |
-| `salsa-cubana.comoEsLaClase[1]` | Se rota de pareja toda la clase. Es la norma que hace posible venir solo: nadie se queda fuera y aprendes a guiar o a seguir a personas distintas, que es lo que pasa en una fiesta. | La rotació de parella és voluntària, però la recomanem: ballar amb persones diferents t'ensenya a guiar o a seguir energies diferents, que és el que passa a una festa. Per això pots venir sol sense problema. |
+| `salsa-cubana.comoEsLaClase[1]` | La rotación de pareja es voluntaria, pero la recomendamos: bailar con personas distintas te enseña a guiar o a seguir energías diferentes, que es lo que pasa en una fiesta. Por eso puedes venir solo sin problema. | La rotació de parella és voluntària, però la recomanem: ballar amb persones diferents t'ensenya a guiar o a seguir energies diferents, que és el que passa a una festa. Per això pots venir sol sense problema. |
 | `salsa-cubana.comoEsLaClase[2]` | Los grupos van por nivel: 0 para quien no ha bailado nunca, 1 iniciación y 2 intermedio. Si no sabes dónde encajas, te ubicamos nosotros. Solo necesitas ropa cómoda y un calzado que gire bien sobre el suelo de la sala. | Els grups van per nivell: 0 per a qui no ha ballat mai, 1 iniciació i 2 intermedi. El nivell te l'assigna el professor, així que no cal que sàpigues on encaixes. Només necessites roba còmoda i un calçat que giri bé sobre el terra de la sala. |
 | `salsa-cubana.beneficios[0].title` | Vida social real | Vida social real |
-| `salsa-cubana.beneficios[0].text` | Es el baile más social que existe: rotas de pareja en cada clase, conoces a todo el grupo y las fiestas se convierten en tu plan de finde. | És el ball més social que hi ha: coneixes tot el grup i les festes es converteixen en el teu pla del cap de setmana. |
+| `salsa-cubana.beneficios[0].text` | Es el baile más social que existe: conoces a todo el grupo y las fiestas se convierten en tu plan de finde. | És el ball més social que hi ha: coneixes tot el grup i les festes es converteixen en el teu pla del cap de setmana. |
 | `salsa-cubana.beneficios[1].title` | Coordinación y memoria | Coordinació i memòria |
 | `salsa-cubana.beneficios[1].text` | Guiar o seguir figuras trabaja la coordinación, el oído musical y la memoria — un entrenamiento completo que no parece entrenamiento. | Guiar o seguir figures treballa la coordinació, l'oïda musical i la memòria: un entrenament complet que no sembla un entrenament. |
 | `salsa-cubana.beneficios[2].title` | Confianza que se nota | Confiança que es nota |
@@ -303,8 +304,8 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `bachata.aprenderas[4]` | Recursos de bachata moderna y sensual, con criterio sobre cuándo tienen sentido y cuándo sobran. | Recursos de bachata moderna i sensual, amb criteri sobre quan tenen sentit i quan sobren. |
 | `bachata.aprenderas[5]` | Adaptarte a cualquier pareja y a cualquier nivel en una fiesta: la habilidad más útil de todas. | Adaptar-te a qualsevol parella i a qualsevol nivell en una festa: l'habilitat més útil de totes. |
 | `bachata.comoEsLaClase[0]` | La clase dura una hora y arranca siempre con básico y calentamiento sobre la música del día. Después viene un bloque de técnica —peso, cadera, brazos, o el detalle que toque— y por último la combinación de la sesión, explicada por partes, primero sin música y luego con ella hasta que sale sola. | La classe dura una hora i sempre comença amb bàsic i escalfament sobre la música del dia. Després ve un bloc de tècnica —pes, maluc, braços o el detall que toqui— i finalment la combinació de la sessió, explicada per parts, primer sense música i després amb música fins que surt sola. |
-| `bachata.comoEsLaClase[1]` | Se rota de pareja constantemente, así que no hace falta venir con nadie. Rotar es incómodo el primer día y liberador a partir del segundo: es lo que te enseña a guiar y a seguir de verdad. | La rotació de parella és voluntària, però la recomanem: canviar de parella és incòmode el primer dia i alliberador a partir del segon, perquè et fa conèixer energies de ball diferents i és el que t'ensenya a guiar i a seguir de debò. No cal venir amb ningú. |
-| `bachata.comoEsLaClase[2]` | Hay grupos de nivel 0 (desde cero absoluto), 1 (iniciación) y 2 (intermedio), más una clase de estilo femenino aplicado a la bachata. Si dudas de tu nivel, escríbenos y te colocamos en el grupo donde vas a disfrutar más, no en el que suene mejor. | Hi ha grups de nivell 0 (des de zero absolut), 1 (iniciació) i 2 (intermedi), a més d'una classe d'estil femení aplicat a la bachata. El nivell te l'assigna el professor: t'ubiquem al grup on gaudiràs més, no al que soni millor. |
+| `bachata.comoEsLaClase[1]` | La rotación de pareja es voluntaria, pero la recomendamos: cambiar de pareja es incómodo el primer día y liberador a partir del segundo, porque te hace conocer energías de baile distintas y es lo que te enseña a guiar y a seguir de verdad. No hace falta venir con nadie. | La rotació de parella és voluntària, però la recomanem: canviar de parella és incòmode el primer dia i alliberador a partir del segon, perquè et fa conèixer energies de ball diferents i és el que t'ensenya a guiar i a seguir de debò. No cal venir amb ningú. |
+| `bachata.comoEsLaClase[2]` | Hay grupos de nivel 0 (desde cero absoluto), 1 (iniciación) y 2 (intermedio), más una clase de estilo femenino aplicado a la bachata. El nivel te lo asigna el profesor: te colocamos en el grupo donde vas a disfrutar más, no en el que suene mejor. | Hi ha grups de nivell 0 (des de zero absolut), 1 (iniciació) i 2 (intermedi), a més d'una classe d'estil femení aplicat a la bachata. El nivell te l'assigna el professor: t'ubiquem al grup on gaudiràs més, no al que soni millor. |
 | `bachata.beneficios[0].title` | Resultados rápidos | Resultats ràpids |
 | `bachata.beneficios[0].text` | El básico se aprende en pocas clases: en poco tiempo ya puedes salir a bailar de verdad. Pocas cosas motivan tanto como progresar rápido y notarlo el mismo mes. | El bàsic s'aprèn en poques classes: en poc temps ja pots sortir a ballar de debò. Poques coses motiven tant com progressar ràpid i notar-ho el mateix mes. |
 | `bachata.beneficios[1].title` | Conexión de verdad | Connexió de veritat |
@@ -340,7 +341,7 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `tHorarios.con` | Con ‹A›. | Amb ‹A›. |
 | `tHorarios.niveles` | Grupos por nivel real | Grups per nivell real |
 | `tHorarios.nivelesTexto` | Cada disciplina se organiza en grupos por nivel, para que avances a tu ritmo y nunca te sientas ni perdido ni frenado. En la parrilla, el número que acompaña al estilo es justo eso: **0** es desde cero absoluto, **1** iniciación y **2** intermedio. Los estilos sin número tienen un solo grupo abierto. | Cada disciplina s'organitza en grups per nivell, perquè avancis al teu ritme i no et sentis mai ni perdut ni frenat. A la graella, el número que acompanya l'estil és justament això: **0** és des de zero absolut, **1** iniciació i **2** intermedi. Els estils sense número tenen un sol grup obert. |
-| `tHorarios.noSabes` | Si no sabes dónde encajas, no pasa nada: nos cuentas qué llevas bailado y te proponemos el grupo. Si al probar vemos que te queda corto o largo, se ajusta. | Si no saps on encaixes, cap problema: ens expliques què has ballat i el professor t'assigna el grup. Si en provar veiem que se't queda curt o llarg, s'ajusta. |
+| `tHorarios.noSabes` | Si no sabes dónde encajas, no pasa nada: nos cuentas qué llevas bailado y el profesor te asigna el grupo. Si al probar vemos que te queda corto o largo, se ajusta. | Si no saps on encaixes, cap problema: ens expliques què has ballat i el professor t'assigna el grup. Si en provar veiem que se't queda curt o llarg, s'ajusta. |
 | `tHorarios.hueco` | Encuentra tu hueco | Troba el teu forat |
 | `tHorarios.huecoTexto` | Dinos qué días puedes y qué te apetece bailar, y te decimos qué grupos de la parrilla encajan con tu agenda. | Digues-nos quins dies pots i què et ve de gust ballar, i et direm quins grups de la graella encaixen amb la teva agenda. |
 | `tHorarios.consultar` | Consultar horarios | Consulta els horaris |
@@ -390,6 +391,8 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `tPie.siguenos` | Síguenos | Segueix-nos |
 | `tPie.hecho` | Hecho con ritmo | Fet amb ritme |
 | `tPie.clases` | Clases | Classes |
+| `tPie.precios` | Precios | Preus |
+| `tPie.empezar` | Empezar desde cero | Començar de zero |
 | `tPie.eventos` | Eventos | Esdeveniments |
 | `tPie.blog` | Blog | Blog |
 | `tPie.sobreNosotros` | Sobre nosotros | Qui som |
@@ -403,7 +406,7 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `tPie.cookies` | Cookies | Galetes |
 | `tPie.legalesEnEs` |  | Textos legals en castellà |
 | `tCookies.dialogo` | Consentimiento de cookies | Consentiment de galetes |
-| `tCookies.texto` | Usamos cookies de análisis (Google Analytics) para entender qué partes de la web funcionan y mejorarlas. Solo se activan si las aceptas. | Fem servir galetes d'anàlisi (Google Analytics) per entendre quines parts del web funcionen i millorar-les. Només s'activen si les acceptes. |
+| `tCookies.texto` | Usamos cookies de análisis (Google Analytics) para mejorar la web. Solo se activan si las aceptas. | Fem servir galetes d'anàlisi (Google Analytics) per millorar el web. Només s'activen si les acceptes. |
 | `tCookies.masInfo` | Más información | Més informació |
 | `tCookies.masInfoAria` | Más información sobre la política de cookies | Més informació sobre la política de galetes (en castellà) |
 | `tCookies.rechazar` | Rechazar | Rebutja |
@@ -499,10 +502,11 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `error[4]` | El teléfono solo puede tener números y símbolos | El telèfon només pot tenir números i símbols |
 | `error[5]` | Email no válido | El correu electrònic no és vàlid |
 | `error[6]` | Necesitamos tu email | Necessitem el teu correu electrònic |
-| `error[7]` | Mensaje demasiado largo | El missatge és massa llarg |
-| `error[8]` | Marca al menos una opción que te interese | Marca com a mínim una opció que t'interessi |
-| `error[9]` | Demasiadas opciones marcadas | Hi ha massa opcions marcades |
-| `error[10]` | Debes aceptar el tratamiento de datos para continuar | Has d'acceptar el tractament de dades per continuar |
+| `error[7]` | Evento no válido | L'esdeveniment no és vàlid |
+| `error[8]` | Mensaje demasiado largo | El missatge és massa llarg |
+| `error[9]` | Marca al menos una opción que te interese | Marca com a mínim una opció que t'interessi |
+| `error[10]` | Demasiadas opciones marcadas | Hi ha massa opcions marcades |
+| `error[11]` | Debes aceptar el tratamiento de datos para continuar | Has d'acceptar el tractament de dades per continuar |
 
 ## WhatsApp (primer mensaje)
 
@@ -570,7 +574,7 @@ Al traducir aparecieron datos del castellano que no coinciden con lo que confirm
 | `profesor:pol` | Pol, profesor de salsa cubana y bachata de NEXUS VNG | Pol, professor de salsa cubana i bachata de NEXUS VNG |
 | `profesor:yuri` | Yuri, profesora de heels y sexy style de NEXUS VNG | Yuri, professora de heels i sexy style de NEXUS VNG |
 | `profesor:ana-aylen` | Ana Aylén, profesora de salsa, reparto y reggaetón de NEXUS VNG | Ana Aylén, professora de salsa, reparto i reggaeton de NEXUS VNG |
-| `claim:davide` | Bachata en pareja, de iniciación a intermedio. | Bachata en parella, d'iniciació a intermedi. |
+| `claim:davide` | Bachata en pareja, desde cero hasta intermedio. | Bachata en parella, des de zero fins a intermedi. |
 | `claim:martina` | Bachata, lady style y los grupos de compañía. | Bachata, lady style i els grups de companyia. |
 | `claim:pol` | Salsa cubana y bachata, desde cero absoluto. | Salsa cubana i bachata, des de zero absolut. |
 | `claim:yuri` | Heels y sexy style: técnica, líneas y actitud. | Heels i sexy style: tècnica, línies i actitud. |
