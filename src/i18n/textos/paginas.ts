@@ -212,7 +212,7 @@ export const tHorarios = pares(
     nivelesTexto:
       "Cada disciplina se organiza en grupos por nivel, para que avances a tu ritmo y nunca te sientas ni perdido ni frenado. En la parrilla, el número que acompaña al estilo es justo eso: **0** es desde cero absoluto, **1** iniciación y **2** intermedio. Los estilos sin número tienen un solo grupo abierto.",
     noSabes:
-      "Si no sabes dónde encajas, no pasa nada: nos cuentas qué llevas bailado y te proponemos el grupo. Si al probar vemos que te queda corto o largo, se ajusta.",
+      "Si no sabes dónde encajas, no pasa nada: nos cuentas qué llevas bailado y el profesor te asigna el grupo. Si al probar vemos que te queda corto o largo, se ajusta.",
     hueco: "Encuentra tu hueco",
     huecoTexto:
       "Dinos qué días puedes y qué te apetece bailar, y te decimos qué grupos de la parrilla encajan con tu agenda.",

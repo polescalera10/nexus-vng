@@ -339,7 +339,7 @@ export const empezar: Record<string, CampanaDolorContent> = {
     faqExtra: [
       {
         q: "¿Qué nivel necesito para empezar?",
-        a: "El que tengas. Hay grupos desde cero absoluto hasta avanzado, y te ubicamos en el que mejor encaja contigo.",
+        a: "El que tengas. Hay grupos desde cero absoluto hasta avanzado, y el profesor te asigna el que mejor encaja contigo.",
       },
     ],
     cierreEmocional: "Nadie va a frenar a nadie: todo el grupo empieza igual. Escríbenos y lo compruebas tú mismo/a.",

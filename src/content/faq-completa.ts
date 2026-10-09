@@ -74,7 +74,7 @@ export const faqGrupos: FaqGrupo[] = [
     items: [
       {
         q: "¿Qué nivel necesito?",
-        a: "El que tengas. Hay grupos desde cero absoluto hasta avanzado, y te ubicamos en el que mejor encaja contigo.",
+        a: "El que tengas. Hay grupos desde cero absoluto hasta avanzado, y el profesor te asigna el que mejor encaja contigo.",
       },
       {
         q: "¿Cómo sabéis en qué grupo encajo?",
@@ -97,7 +97,7 @@ export const faqGrupos: FaqGrupo[] = [
     items: [
       {
         q: "¿Necesito venir con pareja?",
-        a: "No hace falta. Rotamos en clase y conocerás a todo el grupo. La mayoría viene sola.",
+        a: "No hace falta. En clase la rotación de pareja es voluntaria, pero la recomendamos: bailar con personas distintas ayuda mucho a aprender. La mayoría de la gente viene sola.",
       },
       {
         q: "¿Hace falta experiencia previa bailando en pareja?",
@@ -120,7 +120,7 @@ export const faqGrupos: FaqGrupo[] = [
       },
       {
         q: "¿Dónde estáis?",
-        a: "Dentro del gimnasio Aranha, en Vilanova i la Geltrú. Escríbenos por WhatsApp y te mandamos la ubicación exacta.",
+        a: "En el Gimnasio Aranha, en la Rambla del Garraf, 32, primera planta, en Sant Pere de Ribes, pegado a Vilanova i la Geltrú. Si te cuesta encontrarnos, escríbenos por WhatsApp y te guiamos.",
       },
       {
         q: "¿Puedo cambiarme de grupo a mitad de temporada?",

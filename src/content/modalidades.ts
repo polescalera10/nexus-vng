@@ -119,13 +119,13 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
     ],
     comoEsLaClase: [
       "Cada sesión dura una hora y sigue la misma estructura: calentamiento y paso básico, un bloque de técnica individual (peso, giro, brazos) y después la figura del día, desmontada por partes y montada de nuevo con música.",
-      "Se rota de pareja toda la clase. Es la norma que hace posible venir solo: nadie se queda fuera y aprendes a guiar o a seguir a personas distintas, que es lo que pasa en una fiesta.",
+      "La rotación de pareja es voluntaria, pero la recomendamos: bailar con personas distintas te enseña a guiar o a seguir energías diferentes, que es lo que pasa en una fiesta. Por eso puedes venir solo sin problema.",
       "Los grupos van por nivel: 0 para quien no ha bailado nunca, 1 iniciación y 2 intermedio. Si no sabes dónde encajas, te ubicamos nosotros. Solo necesitas ropa cómoda y un calzado que gire bien sobre el suelo de la sala.",
     ],
     beneficios: [
       {
         title: "Vida social real",
-        text: "Es el baile más social que existe: rotas de pareja en cada clase, conoces a todo el grupo y las fiestas se convierten en tu plan de finde.",
+        text: "Es el baile más social que existe: conoces a todo el grupo y las fiestas se convierten en tu plan de finde.",
       },
       {
         title: "Coordinación y memoria",
@@ -178,8 +178,8 @@ export const modalidadesContenido: Record<string, ModalidadContenido> = {
     ],
     comoEsLaClase: [
       "La clase dura una hora y arranca siempre con básico y calentamiento sobre la música del día. Después viene un bloque de técnica —peso, cadera, brazos, o el detalle que toque— y por último la combinación de la sesión, explicada por partes, primero sin música y luego con ella hasta que sale sola.",
-      "Se rota de pareja constantemente, así que no hace falta venir con nadie. Rotar es incómodo el primer día y liberador a partir del segundo: es lo que te enseña a guiar y a seguir de verdad.",
-      "Hay grupos de nivel 0 (desde cero absoluto), 1 (iniciación) y 2 (intermedio), más una clase de estilo femenino aplicado a la bachata. Si dudas de tu nivel, escríbenos y te colocamos en el grupo donde vas a disfrutar más, no en el que suene mejor.",
+      "La rotación de pareja es voluntaria, pero la recomendamos: cambiar de pareja es incómodo el primer día y liberador a partir del segundo, porque te hace conocer energías de baile distintas y es lo que te enseña a guiar y a seguir de verdad. No hace falta venir con nadie.",
+      "Hay grupos de nivel 0 (desde cero absoluto), 1 (iniciación) y 2 (intermedio), más una clase de estilo femenino aplicado a la bachata. El nivel te lo asigna el profesor: te colocamos en el grupo donde vas a disfrutar más, no en el que suene mejor.",
     ],
     beneficios: [
       {

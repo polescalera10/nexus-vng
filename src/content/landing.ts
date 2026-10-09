@@ -136,26 +136,25 @@ export const steps = [
 export const faqs = [
   {
     q: "¿Dónde estáis?",
-    // TODO: añadir calle y número exactos cuando Pol los confirme.
-    a: "Dentro del gimnasio Aranha, en Vilanova i la Geltrú. Escríbenos por WhatsApp y te mandamos la ubicación exacta.",
+    // Dirección pública confirmada por Pol el 16-09-2026.
+    a: "En el Gimnasio Aranha, en la Rambla del Garraf, 32, primera planta, en Sant Pere de Ribes, pegado a Vilanova i la Geltrú. Si te cuesta encontrarnos, escríbenos por WhatsApp y te guiamos.",
   },
   {
     q: "¿Cuánto cuesta?",
-    // TODO: condiciones de la clase de prueba (Pol retiró "gratis" el 19-06) y cuota estándar de referencia.
-    a: "La tarifa fundadora de lanzamiento es de 85 €/mes (solo 10 plazas) e incluye acceso a todas las disciplinas, con la cuota bloqueada mientras sigas de alta. Después, la tarifa plana con todos los estilos es de 100 €/mes; también puedes venir por estilos sueltos desde 35 €/mes. Y antes de decidir, tienes una clase de prueba para conocer el ambiente.",
+    // Clase de prueba: tiene coste y se descuenta al inscribirse (Pol, 16-09-2026). Precio sin publicar.
+    a: "La tarifa fundadora de lanzamiento es de 85 €/mes (solo 10 plazas) e incluye acceso a todas las disciplinas, con la cuota bloqueada mientras sigas de alta. Después, la tarifa plana con todos los estilos es de 100 €/mes; también puedes venir por estilos sueltos desde 35 €/mes. Y antes de decidir puedes hacer una clase de prueba: tiene un coste, que te descontamos si te inscribes.",
   },
   {
     q: "¿Qué horarios hay?",
-    // TODO: publicar el cuadro real de horarios por grupo/nivel cuando esté cerrado.
-    a: "Estamos cerrando el cuadro definitivo de la temporada. Escríbenos con tu disponibilidad y te decimos qué grupos encajan con tu agenda.",
+    a: "Damos clase de lunes a viernes, de 18:30 a 22:30, en sesiones de una hora. La parrilla completa está en la página de horarios; escríbenos con tu disponibilidad y te decimos qué grupos encajan contigo.",
   },
   {
     q: "¿Necesito venir con pareja?",
-    a: "No hace falta. Rotamos en clase y conocerás a todo el grupo. La mayoría viene sola.",
+    a: "No hace falta. En clase la rotación de pareja es voluntaria, pero la recomendamos: bailar con personas distintas ayuda mucho a aprender. La mayoría de la gente viene sola.",
   },
   {
     q: "¿Qué nivel necesito?",
-    a: "El que tengas. Hay grupos desde cero absoluto hasta avanzado, y te ubicamos en el que mejor encaja contigo.",
+    a: "El que tengas. Hay grupos desde cero absoluto hasta avanzado, y el profesor te asigna el que mejor encaja contigo.",
   },
   {
     q: "¿Hay edad mínima o máxima?",
