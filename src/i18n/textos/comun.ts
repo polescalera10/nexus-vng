@@ -93,7 +93,7 @@ export const tCookies = pares(
   {
     dialogo: "Consentimiento de cookies",
     texto:
-      "Usamos cookies de análisis (Google Analytics) para entender qué partes de la web funcionan y mejorarlas. Solo se activan si las aceptas.",
+      "Usamos cookies de análisis (Google Analytics) para mejorar la web. Solo se activan si las aceptas.",
     masInfo: "Más información",
     masInfoAria: "Más información sobre la política de cookies",
     rechazar: "Rechazar",
@@ -102,7 +102,7 @@ export const tCookies = pares(
   {
     dialogo: "Consentiment de galetes",
     texto:
-      "Fem servir galetes d'anàlisi (Google Analytics) per entendre quines parts del web funcionen i millorar-les. Només s'activen si les acceptes.",
+      "Fem servir galetes d'anàlisi (Google Analytics) per millorar el web. Només s'activen si les acceptes.",
     masInfo: "Més informació",
     masInfoAria: "Més informació sobre la política de galetes (en castellà)",
     rechazar: "Rebutja",
