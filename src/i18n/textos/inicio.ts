@@ -44,11 +44,6 @@ export const tParaTi = pares(
   },
 );
 
-export const tExperiencia = pares(
-  { kicker: "Lo que vas a vivir", titulo: "Más que pasos: una forma de sentirte" },
-  { kicker: "El que viuràs", titulo: "Més que passos: una manera de sentir-te" },
-);
-
 export const tModalidades = pares(
   {
     kicker: "Qué se baila",

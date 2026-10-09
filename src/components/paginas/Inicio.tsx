@@ -2,7 +2,6 @@ import { Hero } from "@/components/landing/Hero";
 import { IntroLocal } from "@/components/landing/IntroLocal";
 import { ParaTi } from "@/components/landing/ParaTi";
 import { PuntoDePartida } from "@/components/landing/PuntoDePartida";
-import { Experiencia } from "@/components/landing/Experiencia";
 import { Modalidades } from "@/components/landing/Modalidades";
 import { Comunidad } from "@/components/landing/Comunidad";
 import { Profesores } from "@/components/landing/Profesores";
@@ -32,13 +31,14 @@ export async function Inicio({ locale }: { locale: Locale }) {
     <main>
       <Hero locale={locale} valoracion={resenas ? { nota: resenas.nota, total: resenas.total } : null} />
       <IntroLocal locale={locale} />
-      <ParaTi locale={locale} />
-      <Experiencia locale={locale} />
+      {/* Orden revisado el 09-10-2026 (auditoría integral, punto 12): la home
+          medía ~15.600 px en móvil y convertía la mitad que /clases. Lo que
+          busca quien llega (qué se baila, para quién es, cómo se empieza y
+          cuánto cuesta) va ahora en las primeras pantallas; la prueba social
+          y los profes, después. */}
       <Modalidades locale={locale} modalidades={modalidades} />
-      {/* Fotos reales de clase y, debajo, el carrusel de reseñas de la ficha de
-          Google (Featurable). Sin reseñas, solo las fotos. */}
-      <Comunidad locale={locale} resenas={resenas} />
-      <Profesores locale={locale} />
+      <ParaTi locale={locale} />
+      <ComoEmpezar locale={locale} />
       <Founding locale={locale} spots={spots} />
       {/* Precios "estándar": debajo del founding a propósito — cuando la promo
           fundadora se retire y se borre <Founding />, esta sección queda como
@@ -48,7 +48,10 @@ export async function Inicio({ locale }: { locale: Locale }) {
           <Precios locale={locale} />
         </div>
       </section>
-      <ComoEmpezar locale={locale} />
+      {/* Fotos reales de clase y, debajo, el carrusel de reseñas de la ficha de
+          Google (Featurable). Sin reseñas, solo las fotos. */}
+      <Comunidad locale={locale} resenas={resenas} />
+      <Profesores locale={locale} />
       {/* El mapa, justo cuando se le dice al visitante que venga a la sala. */}
       <DondeEstamos locale={locale} />
       {/* Enlaza a las landings de campaña, que solo existen en castellano. */}

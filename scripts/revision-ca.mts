@@ -134,7 +134,6 @@ partes.push(
   bloque("Secciones", {
     tIntro: inicio.tIntro,
     tParaTi: inicio.tParaTi,
-    tExperiencia: inicio.tExperiencia,
     tModalidades: inicio.tModalidades,
     tComunidad: inicio.tComunidad,
     tProfesores: inicio.tProfesores,

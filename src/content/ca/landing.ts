@@ -30,17 +30,17 @@ export const experienceCa: typeof ExperienceEs = [
   {
     title: "Avances sense pressió",
     text: "Grups per nivell real. Avances quan estàs a punt, no quan toca.",
-    accent: "bg-neon",
+    icon: "progreso",
   },
   {
     title: "Una comunitat de veritat",
     text: "Arribes sol i surts amb plans. El cap de setmana comença aquí, a la pista.",
-    accent: "bg-neon-mint",
+    icon: "comunidad",
   },
   {
     title: "Surts sentint-te capaç",
     text: "Cada classe et torna una mica de confiança. I això també es nota fora de la pista.",
-    accent: "bg-neon-lime",
+    icon: "confianza",
   },
 ];
 

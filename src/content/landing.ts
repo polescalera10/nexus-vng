@@ -39,17 +39,17 @@ export const experience = [
   {
     title: "Progresas sin agobio",
     text: "Grupos por nivel real. Avanzas cuando estás listo, no cuando toca.",
-    accent: "bg-neon",
+    icon: "progreso" as const,
   },
   {
     title: "Una comunidad de verdad",
     text: "Llegas solo y sales con planes. El finde empieza aquí, en la pista.",
-    accent: "bg-neon-mint",
+    icon: "comunidad" as const,
   },
   {
     title: "Sales sintiéndote capaz",
     text: "Cada clase te devuelve un poco de confianza. Y eso se nota también fuera de la pista.",
-    accent: "bg-neon-lime",
+    icon: "confianza" as const,
   },
 ];
 

@@ -26,7 +26,11 @@ export function Modalidades({ modalidades, locale = "es" }: { modalidades: Modal
           {t.kicker}
         </Reveal>
 
-        <div className="mt-[26px] grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-[18px]">
+        {/* En móvil, dos columnas de tarjetas bajas y sin descripción: a una
+            columna, las ocho disciplinas medían ~3.000 px, casi cuatro pantallas
+            de scroll antes de llegar a precios (auditoría 09-10-2026). La
+            descripción sigue en la ficha de cada clase. */}
+        <div className="mt-[26px] grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] sm:gap-[18px]">
           {conFoto.map((m, i) => {
             const portada = portadaModalidad(m.slug);
             const destino = `/clases/${m.slug}`;
@@ -37,7 +41,7 @@ export function Modalidades({ modalidades, locale = "es" }: { modalidades: Modal
                 <Link
                   href={enlace(destino, locale)}
                   hrefLang={soloEs ? "es" : undefined}
-                  className="group relative flex min-h-[340px] flex-col justify-end overflow-hidden rounded-xl border border-white/6 bg-bg-elevated bg-[repeating-linear-gradient(135deg,rgba(48,228,236,.10)_0_14px,rgba(48,228,236,.03)_14px_28px)] text-white no-underline transition-[border-color,box-shadow] duration-300 hover:border-neon/35 hover:shadow-neon"
+                  className="group relative flex min-h-[210px] flex-col sm:min-h-[340px] justify-end overflow-hidden rounded-xl border border-white/6 bg-bg-elevated bg-[repeating-linear-gradient(135deg,rgba(48,228,236,.10)_0_14px,rgba(48,228,236,.03)_14px_28px)] text-white no-underline transition-[border-color,box-shadow] duration-300 hover:border-neon/35 hover:shadow-neon"
                 >
                   {portada && (
                     <Image
@@ -45,7 +49,7 @@ export function Modalidades({ modalidades, locale = "es" }: { modalidades: Modal
                       alt={altEn(portada.src, portada.alt, locale)}
                       width={portada.ancho}
                       height={portada.alto}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1100px) 50vw, 33vw"
                       /* La tarjeta es casi cuadrada y la foto es 3:4, así que
                          `object-cover` se queda con una banda del vertical. Sin
                          `object-position` esa banda cae a la altura de la
@@ -62,15 +66,15 @@ export function Modalidades({ modalidades, locale = "es" }: { modalidades: Modal
                         : "bg-[linear-gradient(180deg,rgba(10,10,10,.05)_30%,rgba(10,10,10,.88)_100%)]"
                     }`}
                   />
-                  <div className="relative z-[1] p-7">
-                    <span className="font-body text-[11px] font-bold uppercase tracking-[0.16em] text-neon-mint">
+                  <div className="relative z-[1] p-4 sm:p-7">
+                    <span className="hidden font-body text-[11px] font-bold uppercase tracking-[0.16em] text-neon-mint sm:inline">
                       {t.etiqueta}
                       {soloEs && <span className="ml-2 normal-case tracking-normal text-white/60">{tIdioma[locale].soloEs}</span>}
                     </span>
-                    <h3 className="my-2 font-display text-[clamp(34px,4.5vw,52px)] leading-[0.95]">
+                    <h3 className="font-display text-[clamp(24px,4.5vw,52px)] leading-[0.95] sm:my-2">
                       {nombreModalidad(m.nombre, locale)}
                     </h3>
-                    <p className="max-w-[36ch] font-body text-[15px] leading-snug text-white/80">
+                    <p className="hidden max-w-[36ch] font-body text-[15px] leading-snug text-white/80 sm:block">
                       {descripcionModalidad(m, locale)}
                     </p>
                   </div>

@@ -50,13 +50,6 @@ export function Reveal({
       return;
     }
 
-    /**
-     * Framer usaba `amount: 0.2` (un 20% del elemento visible). Con un bloque
-     * más alto que la pantalla ese 20% puede no alcanzarse nunca y el
-     * contenido se quedaría oculto, así que en ese caso basta con que asome.
-     */
-    const tall = el.getBoundingClientRect().height > window.innerHeight * 0.6;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
@@ -64,7 +57,10 @@ export function Reveal({
           observer.disconnect();
         }
       },
-      { threshold: tall ? 0 : 0.2, rootMargin: "0px 0px -7% 0px" },
+      /* Se dispara en cuanto el elemento asoma (antes: 20 % visible y 7 %
+         por encima del borde). Al bajar rápido en móvil se veían franjas
+         negras de secciones enteras que aún no habían arrancado. */
+      { threshold: 0, rootMargin: "0px" },
     );
 
     observer.observe(el);
