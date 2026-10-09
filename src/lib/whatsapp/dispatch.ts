@@ -1,4 +1,4 @@
-import { postToN8n } from "@/lib/n8n/client";
+import { n8nConfigurado, postToN8n } from "@/lib/n8n/client";
 import type { createClient } from "@/lib/supabase/server";
 import type { Json, WhatsappEventType } from "@/types/database";
 
@@ -53,13 +53,15 @@ export async function dispatchWhatsappEvent(
     }
 
     try {
-      await postToN8n({
+      const entregado = await postToN8n({
         event_id: event.id,
         type,
         student_id: studentId,
         payload,
         created_at: event.created_at,
       });
+      // Sin webhook el evento se queda `pendiente`: es lo que es.
+      if (!entregado) return;
       await supabase
         .from("whatsapp_events")
         .update({ status: "enviado", sent_at: new Date().toISOString() })
@@ -105,17 +107,20 @@ export async function flushPendingWhatsappEvents(
     return 0;
   }
   if (!pending || pending.length === 0) return 0;
+  // Sin webhook no hay a quién entregar: se deja la cola como está.
+  if (!n8nConfigurado()) return 0;
 
   let sent = 0;
   for (const event of pending) {
     try {
-      await postToN8n({
+      const entregado = await postToN8n({
         event_id: event.id,
         type: event.type,
         student_id: event.student_id,
         payload: event.payload,
         created_at: event.created_at,
       });
+      if (!entregado) break;
       await supabase
         .from("whatsapp_events")
         .update({ status: "enviado", sent_at: new Date().toISOString() })

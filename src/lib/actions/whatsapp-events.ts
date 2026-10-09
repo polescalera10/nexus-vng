@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isAdminSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { n8nConfigurado } from "@/lib/n8n/client";
 import { dispatchWhatsappEvent } from "@/lib/whatsapp/dispatch";
 
 /**
@@ -240,6 +241,13 @@ export async function sendBroadcast(
   });
 
   revalidatePath(WHATSAPP_PATH);
+  if (!n8nConfigurado()) {
+    return {
+      status: "error",
+      message:
+        "Guardado como pendiente, pero NO se ha enviado: n8n no está configurado (falta N8N_WEBHOOK_URL en Vercel).",
+    };
+  }
   return {
     status: "success",
     message: `Mensaje encolado para ${recipients.length} ${

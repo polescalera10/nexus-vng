@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cronRequestIsAuthorized } from "@/lib/cron-auth";
+import { n8nConfigurado } from "@/lib/n8n/client";
 import { createServiceClient } from "@/lib/supabase/server";
 import { todayInMadrid } from "@/lib/format";
 import {
@@ -34,6 +35,13 @@ export async function GET(request: Request) {
   }
   if (!cronRequestIsAuthorized(request, secret)) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+  }
+
+  /* Sin n8n no sale ningún WhatsApp. Antes se creaba el evento igual y se
+     quedaba en la cola: el día que se configurase n8n, el vaciado de la cola
+     mandaría felicitaciones de cumpleaños con semanas de retraso. */
+  if (!n8nConfigurado()) {
+    return NextResponse.json({ omitido: "N8N_WEBHOOK_URL sin configurar" });
   }
 
   const supabase = createServiceClient();

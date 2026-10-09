@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
+import { n8nConfigurado } from "@/lib/n8n/client";
 import {
   getBroadcastAudiences,
   getWhatsappEvents,
@@ -85,6 +86,17 @@ export default async function WhatsappPage({
           </p>
         </div>
       </div>
+
+      {!n8nConfigurado() && (
+        <div
+          role="status"
+          className="border-warning/40 bg-warning/10 font-body text-text-strong mt-6 rounded-lg border p-4 text-sm"
+        >
+          <strong>Ahora mismo no sale ningún WhatsApp.</strong> Falta configurar n8n
+          (<code>N8N_WEBHOOK_URL</code> en Vercel). Los avisos se guardan como
+          «Pendiente» y no se envían; los cumpleaños no se felicitan.
+        </div>
+      )}
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         <Card title="Enviar mensaje a un grupo">
