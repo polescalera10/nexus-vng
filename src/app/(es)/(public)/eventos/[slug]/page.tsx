@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SupportPage } from "@/components/layout/SupportPage";
@@ -121,12 +122,14 @@ export default async function EventoDetailPage({ params }: Params) {
       */}
       {portada && (
         <figure className="mb-10">
-          <img
+          <Image
             src={portada}
             alt={`Cartel de ${e.titulo}`}
             width={1080}
             height={1350}
-            className="mx-auto w-full max-w-[420px] rounded-lg border border-white/8 shadow-card"
+            sizes="(max-width: 460px) 100vw, 420px"
+            priority
+            className="mx-auto h-auto w-full max-w-[420px] rounded-lg border border-white/8 shadow-card"
           />
         </figure>
       )}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SupportPage } from "@/components/layout/SupportPage";
@@ -89,10 +90,12 @@ export default async function EventosPage() {
                 */}
                 <div className="relative aspect-[4/5] overflow-hidden bg-bg-elevated">
                   {cover ? (
-                    <img
+                    <Image
                       src={cover}
                       alt={e.titulo}
-                      className="h-full w-full object-contain transition-opacity duration-300 group-hover:opacity-90"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                      className="object-contain transition-opacity duration-300 group-hover:opacity-90"
                     />
                   ) : (
                     <PhotoPlaceholder

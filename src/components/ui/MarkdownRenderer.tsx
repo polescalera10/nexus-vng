@@ -197,6 +197,9 @@ export function MarkdownRenderer({ content }: { content: string }) {
       if (!src) continue;
       renderedElements.push(
         <div key={elementKey++} className="my-8 overflow-hidden rounded-lg border border-text-strong/8 bg-bg-panel shadow-soft">
+          {/* <img> a propósito: el markdown no trae dimensiones y `next/image`
+              las exige (o un contenedor con alto fijo, que recortaría). */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={alt || "Imagen del evento"}

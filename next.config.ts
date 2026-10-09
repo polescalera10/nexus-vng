@@ -99,8 +99,12 @@ const nextConfig: NextConfig = {
   // No anunciar el framework a los escáneres automáticos (cabecera X-Powered-By).
   poweredByHeader: false,
   images: {
-    // PLACEHOLDER: añade aquí el host de Supabase Storage cuando subas imágenes reales.
-    // remotePatterns: [{ protocol: "https", hostname: "<project-ref>.supabase.co" }],
+    // Portadas de evento (`safeImageSrc`, lib/images.ts): rutas propias o
+    // Supabase Storage público. Mismos orígenes que admite esa lista blanca.
+    remotePatterns: [
+      { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
+      { protocol: "https", hostname: "nexusvng.es" },
+    ],
     formats: ["image/avif", "image/webp"],
   },
   experimental: {
