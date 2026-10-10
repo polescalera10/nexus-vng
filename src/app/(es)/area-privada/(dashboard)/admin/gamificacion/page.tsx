@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import {
+  getHistorialPuntos,
   getLeaderboard,
   getPointMilestones,
   getRedemptions,
 } from "@/lib/queries/gamificacion";
-import { formatDateTime, formatPoints } from "@/lib/format";
+import { formatDate, formatDateTime, formatPoints } from "@/lib/format";
+import Link from "next/link";
 import { RankingLista } from "./RankingLista";
 import { RedemptionActions } from "./RedemptionActions";
 
@@ -23,10 +25,11 @@ export const dynamic = "force-dynamic";
 export default async function GamificacionPage() {
   await requireRole("admin");
 
-  const [ranking, pendientes, hitos] = await Promise.all([
+  const [ranking, pendientes, hitos, { filas: movimientos }] = await Promise.all([
     getLeaderboard(),
     getRedemptions("solicitado"),
     getPointMilestones(),
+    getHistorialPuntos({ pagina: 1, porPagina: 15 }),
   ]);
 
   return (
@@ -106,6 +109,56 @@ export default async function GamificacionPage() {
           )}
         </Card>
       </div>
+
+      <Card
+        title="Últimos movimientos"
+        className="mt-4"
+        action={
+          <Link
+            href="/area-privada/admin/gamificacion/historial"
+            className="inline-flex min-h-11 items-center font-body text-[13px] font-semibold text-accent hover:underline sm:min-h-0"
+          >
+            Ver historial →
+          </Link>
+        }
+      >
+        {movimientos.length === 0 ? (
+          <p className="font-body text-sm text-text-muted">
+            Todavía no se han dado ni canjeado puntos.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {movimientos.map((m) => (
+              <li
+                key={m.id}
+                className="flex items-start justify-between gap-3 border-b border-text-strong/8 pb-3 last:border-0 last:pb-0"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={`/area-privada/admin/alumnos/${m.student_id}`}
+                    className="block truncate font-body text-sm font-bold text-text-strong hover:text-accent"
+                  >
+                    {m.studentName ?? "Alumno eliminado"}
+                  </Link>
+                  <p className="font-body text-[13px] text-text-body">{m.concept}</p>
+                  <p className="font-body text-xs text-text-muted">
+                    {formatDate(m.occurred_on)}
+                    {m.source === "canje" && " · Canje"}
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 font-body text-[15px] font-bold tabular-nums ${
+                    m.points > 0 ? "text-accent" : "text-text-muted"
+                  }`}
+                >
+                  {m.points > 0 ? "+" : "−"}
+                  {formatPoints(Math.abs(m.points))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       <Card title="Hitos que avisan por WhatsApp" className="mt-4">
         {hitos.length === 0 ? (

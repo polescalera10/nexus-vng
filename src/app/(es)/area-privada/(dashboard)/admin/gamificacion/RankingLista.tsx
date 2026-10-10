@@ -2,10 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { formatPoints } from "@/lib/format";
 
-type Fila = { studentId: string; fullName: string; balance: number };
+type Fila = {
+  studentId: string;
+  fullName: string;
+  balance: number;
+  avatarUrl: string | null;
+};
 
 const VISIBLES = 10;
 
@@ -27,6 +33,12 @@ export function RankingLista({ filas }: { filas: Fila[] }) {
           >
             <span className="flex min-w-0 items-center gap-2">
               <span className="w-6 shrink-0 text-text-muted">{i + 1}.</span>
+              <Avatar
+                name={row.fullName}
+                seed={row.studentId}
+                src={row.avatarUrl}
+                size="sm"
+              />
               <Link
                 href={`/area-privada/admin/alumnos/${row.studentId}`}
                 className="truncate font-semibold text-text-strong hover:text-accent"

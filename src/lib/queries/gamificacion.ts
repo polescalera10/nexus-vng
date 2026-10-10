@@ -1,3 +1,4 @@
+import { signAvatarUrls } from "@/lib/avatars";
 import { createClient } from "@/lib/supabase/server";
 import type {
   PointEvent,
@@ -27,6 +28,8 @@ export type LeaderboardRow = {
   studentId: string;
   fullName: string;
   balance: number;
+  /** URL firmada (caduca en 1 h) o null: sin foto se pintan las iniciales. */
+  avatarUrl: string | null;
 };
 
 export type RedemptionListItem = RewardRedemption & {
@@ -185,7 +188,7 @@ export async function getLeaderboard(limit?: number): Promise<LeaderboardRow[]> 
 
   const { data: students, error } = await supabase
     .from("students")
-    .select("id, full_name")
+    .select("id, full_name, avatar_path")
     .eq("active", true);
 
   if (error || !students || students.length === 0) {
@@ -195,15 +198,23 @@ export async function getLeaderboard(limit?: number): Promise<LeaderboardRow[]> 
 
   const balances = await getBalancesByStudent(students.map((s) => s.id));
 
-  return students
+  const conSaldo = students
     .map((s) => ({
       studentId: s.id,
       fullName: s.full_name,
       balance: balances.get(s.id) ?? 0,
+      avatarPath: s.avatar_path,
     }))
     .filter((r) => r.balance > 0)
     .sort((a, b) => b.balance - a.balance || a.fullName.localeCompare(b.fullName, "es"))
     .slice(0, limit);
+
+  // Solo se firman las fotos de quien sale en la lista.
+  const urls = await signAvatarUrls(conSaldo.map((r) => r.avatarPath));
+  return conSaldo.map(({ avatarPath, ...r }) => ({
+    ...r,
+    avatarUrl: avatarPath ? (urls.get(avatarPath) ?? null) : null,
+  }));
 }
 
 /** Canjes, opcionalmente filtrados por estado. */
@@ -290,6 +301,8 @@ export type HistorialFiltros = {
   mes?: string;
   /** Desde 1. */
   pagina: number;
+  /** Filas por página; por defecto `HISTORIAL_POR_PAGINA`. */
+  porPagina?: number;
 };
 
 export type HistorialFila = PointEvent & {
@@ -318,14 +331,15 @@ export async function getHistorialPuntos(
   f: HistorialFiltros,
 ): Promise<{ filas: HistorialFila[]; total: number }> {
   const supabase = await createClient();
-  const desde = (f.pagina - 1) * HISTORIAL_POR_PAGINA;
+  const porPagina = f.porPagina ?? HISTORIAL_POR_PAGINA;
+  const desde = (f.pagina - 1) * porPagina;
 
   let query = supabase
     .from("point_events")
     .select("*", { count: "exact" })
     .order("occurred_on", { ascending: false })
     .order("created_at", { ascending: false })
-    .range(desde, desde + HISTORIAL_POR_PAGINA - 1);
+    .range(desde, desde + porPagina - 1);
 
   if (f.studentId) query = query.eq("student_id", f.studentId);
   if (f.regla === "canje") query = query.eq("source", "canje");
