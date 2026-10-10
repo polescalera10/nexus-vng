@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
+import { signAvatarUrl } from "@/lib/avatars";
 import {
   DANCE_ROLE_LABELS,
   ENROLLMENT_STATUS_LABELS,
@@ -12,6 +13,7 @@ import {
 import { readConversionNotice } from "@/lib/leads/conversion-notice";
 import { getStudentDetail } from "@/lib/queries/students";
 import { getPointRules, getStudentPoints } from "@/lib/queries/gamificacion";
+import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -21,6 +23,9 @@ import { PaymentToggle } from "../PaymentToggle";
 import { CuotaWhatsAppButton } from "./CuotaWhatsAppButton";
 import { GrantAccessButton } from "../../_components/GrantAccessButton";
 import { PuntosPanel } from "./PuntosPanel";
+
+// La foto va por URL firmada de 1 h (lib/avatars.ts): la página no puede cachearse.
+export const dynamic = "force-dynamic";
 
 const ENROLLMENT_BADGE: Record<
   InscripcionEstado,
@@ -58,10 +63,11 @@ export default async function AlumnoPage({
   // verdad y qué se quedó fuera.
   const notice = readConversionNotice(query);
 
-  const [puntos, reglas] = await Promise.all([
+  const [puntos, reglas, avatarUrl] = await Promise.all([
     // 50 para que el contador de stories y reels del mes (PuntosPanel) los vea todos.
     getStudentPoints(id, 50),
     getPointRules(true),
+    signAvatarUrl(detail.student.avatar_path),
   ]);
 
   const { student, nivel, partner, enrollments, attendance } = detail;
@@ -78,9 +84,12 @@ export default async function AlumnoPage({
           >
             ← Alumnos
           </Link>
-          <h1 className="mt-3 font-display text-[clamp(30px,4.5vw,44px)] text-text-strong">
-            {student.full_name}
-          </h1>
+          <div className="mt-3 flex items-center gap-4">
+            <Avatar name={student.full_name} seed={student.id} src={avatarUrl} size="lg" />
+            <h1 className="font-display text-[clamp(30px,4.5vw,44px)] text-text-strong">
+              {student.full_name}
+            </h1>
+          </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant={student.payment_status === "al_dia" ? "success" : "warning"}>
               Cuota: {PAYMENT_STATUS_LABELS[student.payment_status]}
