@@ -172,8 +172,24 @@ function TextoResena({
  *   · mientras avanza solo, los lectores de pantalla no anuncian cada cambio.
  * Texto literal de cada autor y el criterio de selección a la vista (Ómnibus).
  */
-export function ResenasGoogle({ datos, locale = "es" }: { datos: Datos; locale?: Locale }) {
+export function ResenasGoogle({
+  datos,
+  locale = "es",
+  compacto = false,
+  aviso,
+}: {
+  datos: Datos;
+  locale?: Locale;
+  /**
+   * Para la columna estrecha de la ficha de una clase: título h2 como el resto
+   * de secciones, sin margen superior y como mucho dos tarjetas por fila.
+   */
+  compacto?: boolean;
+  /** Sustituye el aviso estándar cuando la selección es distinta (ficha de clase). */
+  aviso?: string;
+}) {
   const t = tResenas[locale];
+  const Titulo = compacto ? "h2" : "h3";
   const bloque = useRef<HTMLElement>(null);
   const lista = useRef<HTMLUListElement>(null);
   const [extremos, setExtremos] = useState({ inicio: true, fin: false });
@@ -259,7 +275,7 @@ export function ResenasGoogle({ datos, locale = "es" }: { datos: Datos; locale?:
       ref={bloque}
       aria-roledescription={t.carrusel}
       aria-labelledby="resenas-google-titulo"
-      className="mt-[clamp(40px,6vw,64px)] space-y-6"
+      className={`space-y-6 ${compacto ? "" : "mt-[clamp(40px,6vw,64px)]"}`}
       onMouseEnter={() => setEncima(true)}
       onMouseLeave={() => setEncima(false)}
       onFocus={(e) => {
@@ -279,9 +295,12 @@ export function ResenasGoogle({ datos, locale = "es" }: { datos: Datos; locale?:
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h3 id="resenas-google-titulo" className="font-display text-[clamp(28px,4vw,40px)] leading-none text-text-strong">
+          <Titulo
+            id="resenas-google-titulo"
+            className={`font-display leading-none text-text-strong ${compacto ? "text-3xl" : "text-[clamp(28px,4vw,40px)]"}`}
+          >
             {t.titulo}
-          </h3>
+          </Titulo>
           {datos.nota !== null && (
             <p className="mt-3 flex flex-wrap items-center gap-3 font-body text-sm text-text-muted">
               <span className="font-display text-3xl leading-none text-text-strong">{formatNota(datos.nota, locale)}</span>
@@ -332,7 +351,9 @@ export function ResenasGoogle({ datos, locale = "es" }: { datos: Datos; locale?:
               key={`${r.autor}-${i}`}
               aria-roledescription={t.diapositiva}
               aria-label={t.posicion(i + 1, datos.resenas.length)}
-              className="flex shrink-0 basis-[85%] snap-start flex-col rounded-lg border border-white/8 bg-bg-panel p-5 shadow-soft sm:basis-[calc(50%-8px)] lg:basis-[calc((100%-32px)/3)]"
+              className={`flex shrink-0 basis-[85%] snap-start flex-col rounded-lg border border-white/8 bg-bg-panel p-5 shadow-soft sm:basis-[calc(50%-8px)] ${
+                compacto ? "" : "lg:basis-[calc((100%-32px)/3)]"
+              }`}
             >
               <div className="flex items-center gap-3">
                 {r.avatar ? (
@@ -361,7 +382,7 @@ export function ResenasGoogle({ datos, locale = "es" }: { datos: Datos; locale?:
       </ul>
 
       <p className="max-w-[70ch] font-body text-[13px] leading-relaxed text-text-muted">
-        {t.aviso(MAX_RESENAS)}
+        {aviso ?? t.aviso(MAX_RESENAS)}
       </p>
     </section>
   );

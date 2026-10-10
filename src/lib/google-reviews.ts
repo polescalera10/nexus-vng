@@ -157,8 +157,13 @@ export function parseFeaturable(json: unknown, max = MAX_RESENAS): ResenasGoogle
   };
 }
 
-/** Pide las reseñas a Featurable. Sin widget o con error, `null`. */
-export async function getResenasGoogle(): Promise<ResenasGoogle | null> {
+/**
+ * Pide las reseñas a Featurable. Sin widget o con error, `null`. `max` es
+ * cuántas devuelve: la home usa las 6 más recientes; la ficha de cada clase
+ * pide todas las que llegan para elegir entre ellas (`lib/resenas-por-clase.ts`).
+ * La petición es la misma URL, así que Next la cachea una sola vez.
+ */
+export async function getResenasGoogle(max = MAX_RESENAS): Promise<ResenasGoogle | null> {
   const key = process.env.FEATURABLE_API_KEY;
   const widgetId = site.google.featurableWidgetId;
   if (!widgetId) return null;
@@ -175,7 +180,7 @@ export async function getResenasGoogle(): Promise<ResenasGoogle | null> {
       console.warn(`[google-reviews] Featurable respondió ${res.status}`);
       return null;
     }
-    return parseFeaturable(await res.json());
+    return parseFeaturable(await res.json(), max);
   } catch (e) {
     console.warn("[google-reviews] sin respuesta de Featurable", e);
     return null;

@@ -217,6 +217,8 @@ export const tResenas = pares(
     leerMenos: "Leer menos",
     aviso: (max: number) =>
       `Reseñas publicadas por alumnos en nuestra ficha de Google, con el texto tal como lo escribieron. Mostramos hasta ${max} de las más recientes que llevan comentario, sin filtrar por puntuación.`,
+    avisoClase: (nombre: string) =>
+      `Reseñas publicadas por alumnos en nuestra ficha de Google, con el texto tal como lo escribieron. Mostramos las más recientes que hablan de las clases en general o de ${nombre}, sin filtrar por puntuación. La nota y el total son los de toda la escuela.`,
   },
   {
     titulo: "El que diuen a Google",
@@ -236,6 +238,8 @@ export const tResenas = pares(
     leerMenos: "Llegeix-ne menys",
     aviso: (max: number) =>
       `Ressenyes publicades per alumnes a la nostra fitxa de Google, amb el text tal com el van escriure, en l'idioma original. En mostrem fins a ${max} de les més recents que porten comentari, sense filtrar per puntuació.`,
+    avisoClase: (nombre: string) =>
+      `Ressenyes publicades per alumnes a la nostra fitxa de Google, amb el text tal com el van escriure, en l'idioma original. Mostrem les més recents que parlen de les classes en general o de ${nombre}, sense filtrar per puntuació. La nota i el total són els de tota l'escola.`,
   },
 );
 

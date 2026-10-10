@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SupportPage } from "@/components/layout/SupportPage";
+import { ResenasGoogle } from "@/components/landing/ResenasGoogle";
 import { Galeria } from "@/components/ui/Galeria";
 import { Negritas } from "@/components/ui/Negritas";
 import { Reveal } from "@/components/ui/Reveal";
@@ -20,9 +21,11 @@ import { profesoresDe } from "@/content/profesores";
 import { founding } from "@/content/landing";
 import { altEn, claimProfesor, contenidoModalidad, nombreModalidad } from "@/content/por-idioma";
 import { site } from "@/lib/site";
+import { MAX_RESENAS, getResenasGoogle } from "@/lib/google-reviews";
+import { fichaParaClase } from "@/lib/resenas-por-clase";
 import { enlace, tieneVersion } from "@/i18n/rutas";
 import type { Locale } from "@/i18n/locales";
-import { tDias, tEstilo, tIdioma, tMigas, tNiveles } from "@/i18n/textos/comun";
+import { tDias, tEstilo, tIdioma, tMigas, tNiveles, tResenas } from "@/i18n/textos/comun";
 import { tModalidad } from "@/i18n/textos/paginas";
 
 /** "Salsa 1" → "Salsa": el nombre de disciplina sin el número de nivel. */
@@ -48,7 +51,10 @@ export async function Modalidad({ slug, locale }: { slug: string; locale: Locale
   // Contenido editorial largo (content/modalidades.ts). Puede no existir si la
   // modalidad se creó en la BD sin redactar aún su página.
   const contenido = contenidoModalidad(m.slug, locale);
-  const todas = await getModalidades();
+  // Reseñas de Google que hablan de esta clase o de las clases en general,
+  // nunca de otra disciplina (lib/resenas-por-clase.ts). Sin ninguna, no hay bloque.
+  const [todas, google] = await Promise.all([getModalidades(), getResenasGoogle(Number.POSITIVE_INFINITY)]);
+  const resenas = fichaParaClase(google, m.slug, MAX_RESENAS);
   const otras = todas.filter((o) => o.slug !== m.slug);
   const nombrePorSlug = new Map(todas.map((o) => [o.slug, nombreModalidad(o.nombre, locale)]));
 
@@ -232,6 +238,19 @@ export async function Modalidad({ slug, locale }: { slug: string; locale: Locale
                   ))}
                 </div>
               </Reveal>
+
+              {/* Lo que dicen los alumnos, justo antes del cierre con CTA: es una
+                  landing de anuncios y la prueba social va antes de pedir el paso. */}
+              {resenas && (
+                <Reveal as="div">
+                  <ResenasGoogle
+                    datos={resenas}
+                    locale={locale}
+                    compacto
+                    aviso={tResenas[locale].avisoClase(nombre.toLocaleLowerCase(locale))}
+                  />
+                </Reveal>
+              )}
 
               {/* ¿Es para ti? — cierre persuasivo */}
               <Reveal as="section" className="relative overflow-hidden rounded-lg border border-neon/20 bg-bg-panel p-[clamp(24px,4vw,40px)] text-white">
