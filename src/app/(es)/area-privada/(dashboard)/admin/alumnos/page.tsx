@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
+import { signAvatarUrls } from "@/lib/avatars";
 import { DANCE_ROLE_LABELS, formatPoints } from "@/lib/format";
 import {
   countStudentsSinAcceso,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/queries/students";
 import { getBalancesByStudent } from "@/lib/queries/gamificacion";
 import { danceRoles, paymentStatuses } from "@/lib/validation/student";
+import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -22,6 +24,9 @@ import { StudentFilters } from "./StudentFilters";
 // "Dar acceso a todos" crea una cuenta por alumno desde esta página: con medio
 // centenar de altas el límite por defecto se queda corto.
 export const maxDuration = 60;
+
+// Las fotos van por URL firmada de 1 h (lib/avatars.ts): nada de caché.
+export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -67,7 +72,10 @@ export default async function AlumnosPage({
   // Los saldos van en una segunda consulta y no en `listStudents`: la
   // gamificación es un módulo aparte y meterla en la query de alumnos ataría
   // el listado a una tabla que puede no interesar en otras pantallas.
-  const balances = await getBalancesByStudent(students.map((s) => s.id));
+  const [balances, avatarUrls] = await Promise.all([
+    getBalancesByStudent(students.map((s) => s.id)),
+    signAvatarUrls(students.map((s) => s.avatar_path)),
+  ]);
 
   const hasFilters = Boolean(q || nivel || curso || rol || cuota || estado !== "activos");
 
@@ -130,17 +138,27 @@ export default async function AlumnosPage({
             {students.map((s) => (
               <Tr key={s.id} className={s.active ? "" : "opacity-60"}>
                 <Td>
-                  <Link
-                    href={`/area-privada/admin/alumnos/${s.id}`}
-                    className="font-semibold text-text-strong transition-colors hover:text-accent"
-                  >
-                    {s.full_name}
-                  </Link>
-                  {s.is_founding_member && (
-                    <Badge variant="warning" className="ml-2">
-                      Founding
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      name={s.full_name}
+                      seed={s.id}
+                      src={s.avatar_path ? (avatarUrls.get(s.avatar_path) ?? null) : null}
+                      size="sm"
+                    />
+                    <span>
+                      <Link
+                        href={`/area-privada/admin/alumnos/${s.id}`}
+                        className="font-semibold text-text-strong transition-colors hover:text-accent"
+                      >
+                        {s.full_name}
+                      </Link>
+                      {s.is_founding_member && (
+                        <Badge variant="warning" className="ml-2">
+                          Founding
+                        </Badge>
+                      )}
+                    </span>
+                  </div>
                 </Td>
                 <Td>{s.nivel?.nombre ?? "—"}</Td>
                 <Td>{DANCE_ROLE_LABELS[s.dance_role]}</Td>
