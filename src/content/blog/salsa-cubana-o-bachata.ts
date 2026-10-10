@@ -14,7 +14,7 @@ export const salsaCubanaOBachata: Articulo = {
   resumen:
     "La bachata suele costar menos las primeras semanas y la salsa cubana engancha por el grupo. Cómo elegir, qué pasa en clase y si puedes hacer las dos.",
   publicado: "2026-09-16",
-  actualizado: "2026-09-29",
+  actualizado: "2026-10-10",
   autor: { nombre: "Pol", profesorSlug: "pol" },
   disciplinas: ["salsa-cubana", "bachata"],
   imagen: {
@@ -72,7 +72,7 @@ Así funcionan los grupos de iniciación en nuestra sala:
 - **No necesitas pareja.** Puedes venir solo o sola.
 - **La rotación es voluntaria, pero la recomendamos.** Nadie te obliga a cambiar de pareja. Aun así, rotar ayuda mucho a aprender. Cada persona baila con una energía distinta, y eso te obliga a entender el paso en vez de memorizar a una sola pareja.
 
-Esta temporada los dos grupos de iniciación van seguidos, los jueves, con Martina y Pol: Salsa 0 a las 20:30 y Bachata 0 a las 21:30. Bachata 0 tiene un segundo grupo los lunes a las 18:30, con Martina y Davide. Todas las franjas están en [el horario de la temporada](/horarios).
+Esta temporada los dos grupos de iniciación van seguidos, los jueves, con Martina y Pol: Salsa 0 a las 20:30 y Bachata 0 a las 21:30. Cada uno tiene un segundo grupo: Bachata 0 los lunes a las 18:30, con Martina y Davide, y Salsa 0 los viernes a las 18:30, con Ana Aylén y Pol. Todas las franjas están en [el horario de la temporada](/horarios).
 
 ## Puedes hacer las dos
 

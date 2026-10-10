@@ -29,9 +29,9 @@ export const TARIFA_HORA: Record<string, number> = {
  * Tarifas de pareja: hay quien cobra menos por hora en las clases que da
  * acompañado que en las que da solo.
  *
- * Van por **id de curso, no por nombre de clase**: hay dos "Bachata 0" en el
- * horario (lunes 18:30 y jueves 21:30) y casar por nombre elegiría una al
- * azar.
+ * Van por **id de curso, no por nombre de clase**: hay dos "Bachata 0" y dos
+ * "Salsa 0" en el horario (Bachata 0: lunes 18:30 y jueves 21:30; Salsa 0:
+ * jueves 20:30 y viernes 18:30) y casar por nombre elegiría una al azar.
  */
 export const TARIFA_HORA_PAREJA: Record<string, { importe: number; cursos: string[] }> = {
   "2b0b3d96-eecf-4104-baec-73747ffc5b3d": {
@@ -40,6 +40,7 @@ export const TARIFA_HORA_PAREJA: Record<string, { importe: number; cursos: strin
       "2cb671cb-6a79-46ae-b2bd-93cf32f6abeb", // Salsa 1 · Miércoles 20:30
       "7ea623f1-95f2-4f7c-a2a0-b578e67193c6", // Bachata 1 · Miércoles 21:30
       "6cdf8d32-6df0-42d2-9235-ebcf6b0d4a42", // Salsa 2 · Viernes 20:30
+      "291a21b5-2d4b-4bbe-ada3-d9e74ddd0225", // Salsa 0 · Viernes 18:30
     ],
   },
 };

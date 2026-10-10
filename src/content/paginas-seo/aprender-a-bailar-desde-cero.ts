@@ -4,7 +4,8 @@ import type { PaginaSeo } from "@/content/paginas-seo";
   Consulta de NIVEL, no de estilo: "no he bailado nunca". La respuesta útil no
   es una disciplina, es el jueves del cartel, que es donde están los dos grupos
   0 seguidos (Salsa 0 a las 20:30 y Bachata 0 a las 21:30). Desde el 29-09-2026
-  la Bachata 0 se repite el lunes a las 18:30 (antes era Bachata 1).
+  la Bachata 0 se repite el lunes a las 18:30 (antes era Bachata 1), y desde el
+  10-10-2026 la Salsa 0 se repite el viernes a las 18:30.
 
   Ese dato sale de `content/horario-regular.ts`, no se escribe a mano en el
   cuerpo más que como referencia: el horario real lo pinta `estilosHorario`.
@@ -33,8 +34,8 @@ export const desdeCero: PaginaSeo = {
     ancho: 1200,
     alto: 900,
   },
-  actualizado: "2026-09-29",
-  cuerpo: `Hay dos grupos pensados para quien no ha bailado nunca: **Salsa 0** y **Bachata 0**. Los jueves van seguidos, así que se puede probar uno o encadenar los dos y decidir después. Bachata 0 tiene además un segundo grupo los lunes a las 18:30, por si el jueves no te encaja.
+  actualizado: "2026-10-10",
+  cuerpo: `Hay dos grupos pensados para quien no ha bailado nunca: **Salsa 0** y **Bachata 0**. Los jueves van seguidos, así que se puede probar uno o encadenar los dos y decidir después. Los dos tienen además un segundo grupo, por si el jueves no te encaja: Bachata 0 los lunes a las 18:30 y Salsa 0 los viernes a las 18:30.
 
 No se da nada por sabido. Ni el paso base, ni el tiempo musical, ni saber distinguir dónde empieza una canción. Eso se enseña en clase.
 

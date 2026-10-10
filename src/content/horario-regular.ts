@@ -59,7 +59,7 @@ export const horarioRegular: FranjaHoraria[] = [
       null,
       { estilo: "Reggaetón", profes: "Ana Aylén", familia: "urbano" },
       null,
-      null,
+      { estilo: "Salsa 0", profes: "Ana Aylén y Pol", familia: "salsa" },
     ],
   },
   {
