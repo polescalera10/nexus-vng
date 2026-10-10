@@ -179,8 +179,8 @@ export async function getBalancesByStudent(
   return new Map((data ?? []).map((r) => [r.student_id, r.balance]));
 }
 
-/** Ranking de alumnos activos por saldo. */
-export async function getLeaderboard(limit = 10): Promise<LeaderboardRow[]> {
+/** Ranking de alumnos activos con saldo > 0, por saldo. Sin `limit`, todos. */
+export async function getLeaderboard(limit?: number): Promise<LeaderboardRow[]> {
   const supabase = await createClient();
 
   const { data: students, error } = await supabase

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +9,7 @@ import {
   getRedemptions,
 } from "@/lib/queries/gamificacion";
 import { formatDateTime, formatPoints } from "@/lib/format";
+import { RankingLista } from "./RankingLista";
 import { RedemptionActions } from "./RedemptionActions";
 
 export const metadata = { title: "Gamificación · NEXUS VNG" };
@@ -24,7 +24,7 @@ export default async function GamificacionPage() {
   await requireRole("admin");
 
   const [ranking, pendientes, hitos] = await Promise.all([
-    getLeaderboard(10),
+    getLeaderboard(),
     getRedemptions("solicitado"),
     getPointMilestones(),
   ]);
@@ -102,27 +102,7 @@ export default async function GamificacionPage() {
               description="Da puntos desde la ficha de cada alumno y el ranking se llena solo."
             />
           ) : (
-            <ol className="flex flex-col gap-2">
-              {ranking.map((row, i) => (
-                <li
-                  key={row.studentId}
-                  className="flex items-center justify-between gap-3 font-body text-sm"
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span className="w-5 shrink-0 text-text-muted">{i + 1}.</span>
-                    <Link
-                      href={`/area-privada/admin/alumnos/${row.studentId}`}
-                      className="truncate font-semibold text-text-strong hover:text-accent"
-                    >
-                      {row.fullName}
-                    </Link>
-                  </span>
-                  <span className="shrink-0 font-bold text-accent">
-                    {formatPoints(row.balance)}
-                  </span>
-                </li>
-              ))}
-            </ol>
+            <RankingLista filas={ranking} />
           )}
         </Card>
       </div>
